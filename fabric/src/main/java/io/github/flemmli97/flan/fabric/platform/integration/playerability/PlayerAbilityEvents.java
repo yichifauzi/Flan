@@ -1,7 +1,7 @@
 package io.github.flemmli97.flan.fabric.platform.integration.playerability;
 
 import io.github.flemmli97.flan.api.data.IPermissionContainer;
-import io.github.flemmli97.flan.api.permission.PermissionRegistry;
+import io.github.flemmli97.flan.api.permission.BuiltinPermission;
 import io.github.flemmli97.flan.claim.ClaimStorage;
 import io.github.ladysnake.pal.AbilitySource;
 import io.github.ladysnake.pal.PlayerAbility;
@@ -23,6 +23,6 @@ public class PlayerAbilityEvents {
         BlockPos pos = player.blockPosition();
         ClaimStorage storage = ClaimStorage.get((ServerLevel) player.level);
         IPermissionContainer claim = storage.getForPermissionCheck(pos);
-        return claim.canInteract((ServerPlayer) player, PermissionRegistry.FLIGHT, pos, true);
+        return claim.canInteract((ServerPlayer) player, BuiltinPermission.FLIGHT, pos, true);
     }
 }

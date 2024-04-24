@@ -1,0 +1,11 @@
+{
+  "guiItem": {
+    "id": "minecraft:beacon"
+  },
+  "defaultVal": false,
+  "global": false,
+  "order": 10,
+  "defaultDescription": [
+    "Permission to use beacons"
+  ]
+}

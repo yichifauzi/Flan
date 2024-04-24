@@ -1,0 +1,11 @@
+{
+  "guiItem": {
+    "id": "minecraft:item_frame"
+  },
+  "defaultVal": false,
+  "global": false,
+  "order": 21,
+  "defaultDescription": [
+    "Permission to rotate items in item frames"
+  ]
+}

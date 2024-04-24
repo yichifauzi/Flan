@@ -1,0 +1,11 @@
+{
+  "guiItem": {
+    "id": "minecraft:cooked_beef"
+  },
+  "defaultVal": false,
+  "global": false,
+  "order": 46,
+  "defaultDescription": [
+    "Disable hunger"
+  ]
+}

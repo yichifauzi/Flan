@@ -6,8 +6,9 @@ import com.mojang.brigadier.exceptions.CommandSyntaxException;
 import com.mojang.brigadier.exceptions.SimpleCommandExceptionType;
 import com.mojang.brigadier.suggestion.Suggestions;
 import com.mojang.brigadier.suggestion.SuggestionsBuilder;
+import io.github.flemmli97.flan.api.permission.BuiltinPermission;
 import io.github.flemmli97.flan.api.permission.ClaimPermission;
-import io.github.flemmli97.flan.api.permission.PermissionRegistry;
+import io.github.flemmli97.flan.api.permission.PermissionManager;
 import io.github.flemmli97.flan.claim.Claim;
 import io.github.flemmli97.flan.claim.ClaimStorage;
 import io.github.flemmli97.flan.config.ConfigHandler;
@@ -50,12 +51,12 @@ public class CommandHelpers {
         Claim claim = ClaimStorage.get(world).getClaimAt(new BlockPos(context.getSource().getPosition()));
         boolean admin = claim != null && claim.isAdminClaim();
         List<String> allowedPerms = new ArrayList<>();
-        for (ClaimPermission perm : PermissionRegistry.getPerms()) {
-            if (!admin && ConfigHandler.config.globallyDefined(world, perm)) {
+        for (ClaimPermission perm : PermissionManager.INSTANCE.getAll()) {
+            if (!admin && ConfigHandler.config.globallyDefined(world, perm.getId())) {
                 continue;
             }
-            if (!group || !PermissionRegistry.globalPerms().contains(perm))
-                allowedPerms.add(perm.id);
+            if (!group || !perm.global)
+                allowedPerms.add(perm.getId().toString());
         }
         return SharedSuggestionProvider.suggest(allowedPerms, build);
     }
@@ -65,7 +66,7 @@ public class CommandHelpers {
         List<String> list = new ArrayList<>();
         ClaimStorage storage = ClaimStorage.get(player.getLevel());
         Claim claim = storage.getClaimAt(player.blockPosition());
-        if (claim != null && claim.canInteract(player, PermissionRegistry.EDITPERMS, player.blockPosition())) {
+        if (claim != null && claim.canInteract(player, BuiltinPermission.EDITPERMS, player.blockPosition())) {
             list = claim.groups();
         }
         for (int i = 0; i < list.size(); i++) {

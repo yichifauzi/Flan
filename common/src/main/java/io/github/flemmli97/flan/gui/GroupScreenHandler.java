@@ -1,6 +1,6 @@
 package io.github.flemmli97.flan.gui;
 
-import io.github.flemmli97.flan.api.permission.PermissionRegistry;
+import io.github.flemmli97.flan.api.permission.BuiltinPermission;
 import io.github.flemmli97.flan.claim.Claim;
 import io.github.flemmli97.flan.claim.PermHelper;
 import io.github.flemmli97.flan.config.ConfigHandler;
@@ -91,7 +91,7 @@ public class GroupScreenHandler extends ServerOnlyScreenHandler<Claim> {
         if (index == 3) {
             player.closeContainer();
             player.getServer().execute(() -> StringResultScreenHandler.createNewStringResult(player, (s) -> {
-                this.claim.editPerms(player, s, PermissionRegistry.EDITPERMS, -1);
+                this.claim.editPerms(player, s, BuiltinPermission.EDITPERMS, -1);
                 player.closeContainer();
                 player.getServer().execute(() -> GroupScreenHandler.openGroupMenu(player, this.claim));
                 ServerScreenHelper.playSongToPlayer(player, SoundEvents.ANVIL_USE, 1, 1f);

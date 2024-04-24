@@ -1,0 +1,11 @@
+{
+  "guiItem": {
+    "id": "minecraft:birch_sign"
+  },
+  "defaultVal": false,
+  "global": false,
+  "order": 7,
+  "defaultDescription": [
+    "Permission to edit signs (e.g. dyeing them)"
+  ]
+}

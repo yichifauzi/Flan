@@ -1,9 +1,8 @@
 package io.github.flemmli97.flan.event;
 
 import io.github.flemmli97.flan.api.data.IPermissionContainer;
-import io.github.flemmli97.flan.api.permission.ClaimPermission;
+import io.github.flemmli97.flan.api.permission.BuiltinPermission;
 import io.github.flemmli97.flan.api.permission.ObjectToPermissionMap;
-import io.github.flemmli97.flan.api.permission.PermissionRegistry;
 import io.github.flemmli97.flan.claim.Claim;
 import io.github.flemmli97.flan.claim.ClaimStorage;
 import io.github.flemmli97.flan.config.ConfigHandler;
@@ -38,7 +37,6 @@ import net.minecraft.world.entity.item.ItemEntity;
 import net.minecraft.world.entity.monster.EnderMan;
 import net.minecraft.world.entity.monster.Enemy;
 import net.minecraft.world.entity.npc.AbstractVillager;
-import net.minecraft.world.entity.npc.Villager;
 import net.minecraft.world.entity.player.Player;
 import net.minecraft.world.entity.projectile.AbstractArrow;
 import net.minecraft.world.entity.projectile.Projectile;
@@ -75,16 +73,16 @@ public class EntityInteractEvents {
         BlockPos pos = entity.blockPosition();
         IPermissionContainer claim = storage.getForPermissionCheck(pos);
         if (claim != null) {
-            ClaimPermission perm = ObjectToPermissionMap.getFromEntity(entity.getType());
+            ResourceLocation perm = ObjectToPermissionMap.getFromEntity(entity.getType());
             if (perm != null) {
                 return claim.canInteract(serverPlayer, perm, pos, true) ? InteractionResult.PASS : InteractionResult.FAIL;
             }
             if (entity instanceof ArmorStand) {
-                if (!claim.canInteract(serverPlayer, PermissionRegistry.ARMORSTAND, pos, true))
+                if (!claim.canInteract(serverPlayer, BuiltinPermission.ARMORSTAND, pos, true))
                     return InteractionResult.FAIL;
             }
             if (entity instanceof Mob)
-                return claim.canInteract(serverPlayer, PermissionRegistry.ANIMALINTERACT, pos, true) ? InteractionResult.PASS : InteractionResult.FAIL;
+                return claim.canInteract(serverPlayer, BuiltinPermission.ANIMALINTERACT, pos, true) ? InteractionResult.PASS : InteractionResult.FAIL;
         }
         return InteractionResult.PASS;
     }
@@ -98,26 +96,26 @@ public class EntityInteractEvents {
         BlockPos pos = entity.blockPosition();
         IPermissionContainer claim = storage.getForPermissionCheck(pos);
         if (claim != null) {
-            ClaimPermission perm = ObjectToPermissionMap.getFromEntity(entity.getType());
+            ResourceLocation perm = ObjectToPermissionMap.getFromEntity(entity.getType());
             if (perm != null) {
                 return claim.canInteract(player, perm, pos, true) ? InteractionResult.PASS : InteractionResult.FAIL;
             }
             if (entity instanceof Boat)
-                return claim.canInteract(player, PermissionRegistry.BOAT, pos, true) ? InteractionResult.PASS : InteractionResult.FAIL;
+                return claim.canInteract(player, BuiltinPermission.BOAT, pos, true) ? InteractionResult.PASS : InteractionResult.FAIL;
             if (entity instanceof AbstractMinecart) {
                 if (entity instanceof AbstractMinecartContainer)
-                    return claim.canInteract(player, PermissionRegistry.OPENCONTAINER, pos, true) ? InteractionResult.PASS : InteractionResult.FAIL;
-                return claim.canInteract(player, PermissionRegistry.MINECART, pos, true) ? InteractionResult.PASS : InteractionResult.FAIL;
+                    return claim.canInteract(player, BuiltinPermission.OPENCONTAINER, pos, true) ? InteractionResult.PASS : InteractionResult.FAIL;
+                return claim.canInteract(player, BuiltinPermission.MINECART, pos, true) ? InteractionResult.PASS : InteractionResult.FAIL;
             }
             if (entity instanceof AbstractVillager || CrossPlatformStuff.INSTANCE.registryEntities().getIDFrom(entity.getType()).equals(TATERZEN))
-                return claim.canInteract(player, PermissionRegistry.TRADING, pos, true) ? InteractionResult.PASS : InteractionResult.FAIL;
+                return claim.canInteract(player, BuiltinPermission.TRADING, pos, true) ? InteractionResult.PASS : InteractionResult.FAIL;
             if (entity instanceof ItemFrame)
-                return claim.canInteract(player, PermissionRegistry.ITEMFRAMEROTATE, pos, true) ? InteractionResult.PASS : InteractionResult.FAIL;
+                return claim.canInteract(player, BuiltinPermission.ITEMFRAMEROTATE, pos, true) ? InteractionResult.PASS : InteractionResult.FAIL;
             if (entity instanceof OwnableEntity tame) {
                 if (tame.getOwnerUUID() != null && tame.getOwnerUUID().equals(player.getUUID()))
                     return InteractionResult.PASS;
             }
-            return claim.canInteract(player, PermissionRegistry.ANIMALINTERACT, pos, true) ? InteractionResult.PASS : InteractionResult.FAIL;
+            return claim.canInteract(player, BuiltinPermission.ANIMALINTERACT, pos, true) ? InteractionResult.PASS : InteractionResult.FAIL;
         }
         return InteractionResult.PASS;
     }
@@ -138,14 +136,14 @@ public class EntityInteractEvents {
                 BlockHitResult blockRes = (BlockHitResult) res;
                 BlockPos pos = blockRes.getBlockPos();
                 BlockState state = proj.level.getBlockState(pos);
-                ClaimPermission perm;
+                ResourceLocation perm;
                 if (proj instanceof ThrownEnderpearl)
-                    perm = PermissionRegistry.ENDERPEARL;
+                    perm = BuiltinPermission.ENDERPEARL;
                 else if (proj instanceof ThrownEgg || proj instanceof ThrownPotion)
-                    perm = PermissionRegistry.PROJECTILES;
+                    perm = BuiltinPermission.PROJECTILES;
                 else
                     perm = ObjectToPermissionMap.getFromBlock(state.getBlock());
-                if (perm != PermissionRegistry.ENDERPEARL && perm != PermissionRegistry.TARGETBLOCK && perm != PermissionRegistry.PROJECTILES)
+                if (perm != BuiltinPermission.ENDERPEARL && perm != BuiltinPermission.TARGETBLOCK && perm != BuiltinPermission.PROJECTILES)
                     return false;
                 ClaimStorage storage = ClaimStorage.get((ServerLevel) proj.level);
                 IPermissionContainer claim = storage.getForPermissionCheck(pos);
@@ -178,7 +176,7 @@ public class EntityInteractEvents {
                 if (proj instanceof ThrownEnderpearl) {
                     ClaimStorage storage = ClaimStorage.get((ServerLevel) proj.level);
                     IPermissionContainer claim = storage.getForPermissionCheck(proj.blockPosition());
-                    return claim.canInteract(player, PermissionRegistry.ENDERPEARL, proj.blockPosition(), true);
+                    return claim.canInteract(player, BuiltinPermission.ENDERPEARL, proj.blockPosition(), true);
                 }
                 Entity hit = ((EntityHitResult) res).getEntity();
                 boolean fail = attackSimple(player, hit, true) != InteractionResult.PASS;
@@ -201,7 +199,7 @@ public class EntityInteractEvents {
             return attackSimple((ServerPlayer) source.getEntity(), entity, true) != InteractionResult.PASS;
         else if (source.isExplosion() && !entity.level.isClientSide && !(entity instanceof ServerPlayer || entity instanceof Enemy)) {
             IPermissionContainer claim = ClaimStorage.get((ServerLevel) entity.level).getForPermissionCheck(entity.blockPosition());
-            return claim != null && !claim.canInteract(null, PermissionRegistry.EXPLOSIONS, entity.blockPosition());
+            return claim != null && !claim.canInteract(null, BuiltinPermission.EXPLOSIONS, entity.blockPosition());
         }
         return false;
     }
@@ -216,10 +214,10 @@ public class EntityInteractEvents {
         IPermissionContainer claim = storage.getForPermissionCheck(pos);
         if (claim != null) {
             if (entity instanceof ArmorStand || !(entity instanceof LivingEntity))
-                return claim.canInteract(player, PermissionRegistry.BREAKNONLIVING, pos, message) ? InteractionResult.PASS : InteractionResult.FAIL;
+                return claim.canInteract(player, BuiltinPermission.BREAKNONLIVING, pos, message) ? InteractionResult.PASS : InteractionResult.FAIL;
             if (entity instanceof Player)
-                return claim.canInteract(player, PermissionRegistry.HURTPLAYER, pos, message) ? InteractionResult.PASS : InteractionResult.FAIL;
-            return claim.canInteract(player, PermissionRegistry.HURTANIMAL, pos, message) ? InteractionResult.PASS : InteractionResult.FAIL;
+                return claim.canInteract(player, BuiltinPermission.HURTPLAYER, pos, message) ? InteractionResult.PASS : InteractionResult.FAIL;
+            return claim.canInteract(player, BuiltinPermission.HURTANIMAL, pos, message) ? InteractionResult.PASS : InteractionResult.FAIL;
         }
         return InteractionResult.PASS;
     }
@@ -230,7 +228,7 @@ public class EntityInteractEvents {
             BlockPos pos = player.blockPosition();
             IPermissionContainer claim = storage.getForPermissionCheck(pos);
             if (claim != null)
-                return !claim.canInteract((ServerPlayer) player, PermissionRegistry.XP, pos, false);
+                return !claim.canInteract((ServerPlayer) player, BuiltinPermission.XP, pos, false);
         }
         return false;
     }
@@ -251,7 +249,7 @@ public class EntityInteractEvents {
                 BlockPos pos = sPlayer.blockPosition();
                 IPermissionContainer claim = storage.getForPermissionCheck(pos);
                 if (claim != null)
-                    return claim.canInteract(sPlayer, PermissionRegistry.PICKUP, pos, false);
+                    return claim.canInteract(sPlayer, BuiltinPermission.PICKUP, pos, false);
             }
         }
         return true;
@@ -264,7 +262,7 @@ public class EntityInteractEvents {
             IPermissionContainer claim = storage.getForPermissionCheck(pos);
             boolean allow = true;
             if (claim != null)
-                allow = claim.canInteract((ServerPlayer) player, PermissionRegistry.DROP, pos, false);
+                allow = claim.canInteract((ServerPlayer) player, BuiltinPermission.DROP, pos, false);
             if (!allow) {
                 player.getInventory().add(stack);
                 NonNullList<ItemStack> stacks = NonNullList.create();
@@ -288,7 +286,7 @@ public class EntityInteractEvents {
             for (int z = -1; z <= 1; z++) {
                 pos.setWithOffset(wither.blockPosition(), x, 3, z);
                 IPermissionContainer claim = storage.getForPermissionCheck(pos);
-                if (!claim.canInteract(null, PermissionRegistry.WITHER, pos, false))
+                if (!claim.canInteract(null, BuiltinPermission.WITHER, pos, false))
                     return false;
             }
         return true;
@@ -299,7 +297,7 @@ public class EntityInteractEvents {
             return true;
         ClaimStorage storage = ClaimStorage.get((ServerLevel) enderman.level);
         IPermissionContainer claim = storage.getForPermissionCheck(pos);
-        return claim.canInteract(null, PermissionRegistry.ENDERMAN, pos, false);
+        return claim.canInteract(null, BuiltinPermission.ENDERMAN, pos, false);
     }
 
     public static boolean canSnowGolemInteract(SnowGolem snowgolem) {
@@ -312,7 +310,7 @@ public class EntityInteractEvents {
             z = Mth.floor(snowgolem.getZ() + (l / 2 % 2 * 2 - 1) * 0.25F);
             BlockPos pos = new BlockPos(x, y, z);
             IPermissionContainer claim = ClaimStorage.get((ServerLevel) snowgolem.level).getForPermissionCheck(pos);
-            if (!claim.canInteract(null, PermissionRegistry.SNOWGOLEM, pos, false))
+            if (!claim.canInteract(null, BuiltinPermission.SNOWGOLEM, pos, false))
                 return false;
         }
         return true;
@@ -360,20 +358,20 @@ public class EntityInteractEvents {
                     boolean isSub = currentClaim.parentClaim() != null;
                     Claim mainClaim = isSub ? currentClaim.parentClaim() : currentClaim;
                     Entity passenger = player.getVehicle();
-                    if (!mainClaim.canInteract(player, PermissionRegistry.CANSTAY, bPos, true) || (passenger instanceof Boat && !mainClaim.canInteract(player, PermissionRegistry.BOAT, bPos, true))) {
+                    if (!mainClaim.canInteract(player, BuiltinPermission.CANSTAY, bPos, true) || (passenger instanceof Boat && !mainClaim.canInteract(player, BuiltinPermission.BOAT, bPos, true))) {
                         Claim sub = isSub ? currentClaim : null;
-                        Vec3 tp = TeleportUtils.getTeleportPos(player, pos, storage, sub != null ? sub.getDimensions() : mainClaim.getDimensions(), true, bPos, (claim, nPos) -> claim.canInteract(player, PermissionRegistry.CANSTAY, nPos, false));
+                        Vec3 tp = TeleportUtils.getTeleportPos(player, pos, storage, sub != null ? sub.getDimensions() : mainClaim.getDimensions(), true, bPos, (claim, nPos) -> claim.canInteract(player, BuiltinPermission.CANSTAY, nPos, false));
                         if (passenger != null) {
                             player.stopRiding();
                             passenger.teleportToWithTicket(tp.x(), tp.y(), tp.z());
                         }
                         player.teleportToWithTicket(tp.x(), tp.y(), tp.z());
                     }
-                    if (player.getAbilities().flying && !player.isCreative() && !mainClaim.canInteract(player, PermissionRegistry.FLIGHT, rounded, true)) {
+                    if (player.getAbilities().flying && !player.isCreative() && !mainClaim.canInteract(player, BuiltinPermission.FLIGHT, rounded, true)) {
                         player.getAbilities().flying = false;
                         player.connection.send(new ClientboundPlayerAbilitiesPacket(player.getAbilities()));
                     }
-                    if (player.getFoodData().getSaturationLevel() < 2 && mainClaim.canInteract(player, PermissionRegistry.NOHUNGER, bPos, false)) {
+                    if (player.getFoodData().getSaturationLevel() < 2 && mainClaim.canInteract(player, BuiltinPermission.NOHUNGER, bPos, false)) {
                         ((IHungerAccessor) player.getFoodData()).setSaturation(2);
                     }
                     currentClaim.applyEffects(player);
@@ -393,7 +391,7 @@ public class EntityInteractEvents {
     public static boolean canFrostwalkerFreeze(ServerLevel world, BlockPos pos, LivingEntity entity) {
         if (entity instanceof ServerPlayer) {
             IPermissionContainer claim = ClaimStorage.get(world).getForPermissionCheck(pos);
-            return claim.canInteract((ServerPlayer) entity, PermissionRegistry.FROSTWALKER, pos, false);
+            return claim.canInteract((ServerPlayer) entity, BuiltinPermission.FROSTWALKER, pos, false);
         }
         return true;
     }
@@ -403,6 +401,6 @@ public class EntityInteractEvents {
             return false;
         ClaimStorage storage = ClaimStorage.get((ServerLevel) entity.level);
         IPermissionContainer claim = storage.getForPermissionCheck(entity.blockPosition());
-        return !claim.canInteract(null, PermissionRegistry.LIGHTNING, entity.blockPosition(), false);
+        return !claim.canInteract(null, BuiltinPermission.LIGHTNING, entity.blockPosition(), false);
     }
 }

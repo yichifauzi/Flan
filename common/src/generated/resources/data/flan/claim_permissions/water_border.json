@@ -1,0 +1,11 @@
+{
+  "guiItem": {
+    "id": "minecraft:water_bucket"
+  },
+  "defaultVal": false,
+  "global": true,
+  "order": 54,
+  "defaultDescription": [
+    "Toggle water crossing claim borders"
+  ]
+}

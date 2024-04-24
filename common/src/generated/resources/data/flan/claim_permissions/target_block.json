@@ -1,0 +1,11 @@
+{
+  "guiItem": {
+    "id": "minecraft:target"
+  },
+  "defaultVal": false,
+  "global": false,
+  "order": 24,
+  "defaultDescription": [
+    "Permission to trigger target blocks"
+  ]
+}

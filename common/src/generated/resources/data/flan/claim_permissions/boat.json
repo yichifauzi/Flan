@@ -1,0 +1,11 @@
+{
+  "guiItem": {
+    "id": "minecraft:oak_boat"
+  },
+  "defaultVal": false,
+  "global": false,
+  "order": 30,
+  "defaultDescription": [
+    "Permission to use boats"
+  ]
+}

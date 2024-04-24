@@ -24,6 +24,11 @@ public class CrossPlatformStuffImpl implements CrossPlatformStuff {
     }
 
     @Override
+    public boolean isModLoaded(String mod) {
+        return FabricLoader.getInstance().isModLoaded(mod);
+    }
+
+    @Override
     public SimpleRegistryWrapper<MobEffect> registryStatusEffects() {
         return new FabricRegistryWrapper<>(Registry.MOB_EFFECT);
     }

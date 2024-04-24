@@ -1,0 +1,11 @@
+{
+  "guiItem": {
+    "id": "minecraft:red_bed"
+  },
+  "defaultVal": false,
+  "global": false,
+  "order": 9,
+  "defaultDescription": [
+    "Permission to use beds"
+  ]
+}

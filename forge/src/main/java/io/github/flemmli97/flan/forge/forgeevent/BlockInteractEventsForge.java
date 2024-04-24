@@ -1,9 +1,8 @@
 package io.github.flemmli97.flan.forge.forgeevent;
 
 import io.github.flemmli97.flan.api.data.IPermissionContainer;
-import io.github.flemmli97.flan.api.permission.ClaimPermission;
+import io.github.flemmli97.flan.api.permission.BuiltinPermission;
 import io.github.flemmli97.flan.api.permission.ObjectToPermissionMap;
-import io.github.flemmli97.flan.api.permission.PermissionRegistry;
 import io.github.flemmli97.flan.claim.Claim;
 import io.github.flemmli97.flan.claim.ClaimStorage;
 import io.github.flemmli97.flan.claim.PermHelper;
@@ -15,6 +14,7 @@ import io.github.flemmli97.flan.player.display.EnumDisplayType;
 import net.minecraft.ChatFormatting;
 import net.minecraft.core.BlockPos;
 import net.minecraft.network.protocol.game.ClientboundContainerSetSlotPacket;
+import net.minecraft.resources.ResourceLocation;
 import net.minecraft.server.level.ServerLevel;
 import net.minecraft.server.level.ServerPlayer;
 import net.minecraft.world.InteractionResult;
@@ -80,14 +80,14 @@ public class BlockInteractEventsForge {
             return false;
         if (claim instanceof Claim real && real.canUseItem(new ItemStack(placedBlock.getBlock())))
             return false;
-        ClaimPermission perm = ObjectToPermissionMap.getFromBlock(placedBlock.getBlock());
+        ResourceLocation perm = ObjectToPermissionMap.getFromBlock(placedBlock.getBlock());
         if (perm != null) {
             if (!claim.canInteract(player, perm, placePos, false)) {
                 player.displayClientMessage(PermHelper.simpleColoredText(ConfigHandler.langManager.get("noPermissionSimple"), ChatFormatting.DARK_RED), true);
                 return true;
             }
         }
-        if (!claim.canInteract(player, PermissionRegistry.PLACE, placePos, false)) {
+        if (!claim.canInteract(player, BuiltinPermission.PLACE, placePos, false)) {
             player.displayClientMessage(PermHelper.simpleColoredText(ConfigHandler.langManager.get("noPermissionSimple"), ChatFormatting.DARK_RED), true);
             PlayerClaimData.get(player).addDisplayClaim(claim, EnumDisplayType.MAIN, player.blockPosition().getY());
             player.connection.send(new ClientboundContainerSetSlotPacket(-2, 0, player.getInventory().selected, player.getInventory().getSelected()));

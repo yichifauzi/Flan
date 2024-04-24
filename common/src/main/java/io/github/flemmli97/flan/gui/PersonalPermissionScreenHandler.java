@@ -1,13 +1,14 @@
 package io.github.flemmli97.flan.gui;
 
 import io.github.flemmli97.flan.api.permission.ClaimPermission;
-import io.github.flemmli97.flan.api.permission.PermissionRegistry;
+import io.github.flemmli97.flan.api.permission.PermissionManager;
 import io.github.flemmli97.flan.claim.PermHelper;
 import io.github.flemmli97.flan.config.ConfigHandler;
 import io.github.flemmli97.flan.gui.inv.SeparateInv;
 import io.github.flemmli97.flan.player.PlayerClaimData;
 import net.minecraft.ChatFormatting;
 import net.minecraft.network.chat.Component;
+import net.minecraft.resources.ResourceLocation;
 import net.minecraft.server.level.ServerPlayer;
 import net.minecraft.sounds.SoundEvents;
 import net.minecraft.world.MenuProvider;
@@ -54,9 +55,9 @@ public class PersonalPermissionScreenHandler extends ServerOnlyScreenHandler<Str
     protected void fillInventoryWith(Player player, SeparateInv inv, String group) {
         if (!(player instanceof ServerPlayer))
             return;
-        List<ClaimPermission> perms = new ArrayList<>(PermissionRegistry.getPerms());
-        if (this.group != null)
-            perms.removeAll(PermissionRegistry.globalPerms());
+        List<ClaimPermission> perms = new ArrayList<>(PermissionManager.INSTANCE.getAll());
+        if (group != null)
+            perms.removeIf(p -> p.global);
         for (int i = 0; i < 54; i++) {
             int page = 0;
             if (i == 0) {
@@ -85,9 +86,9 @@ public class PersonalPermissionScreenHandler extends ServerOnlyScreenHandler<Str
     private void flipPage() {
         if (!(this.player instanceof ServerPlayer))
             return;
-        List<ClaimPermission> perms = new ArrayList<>(PermissionRegistry.getPerms());
+        List<ClaimPermission> perms = new ArrayList<>(PermissionManager.INSTANCE.getAll());
         if (this.group != null)
-            perms.removeAll(PermissionRegistry.globalPerms());
+            perms.removeIf(p -> p.global);
         int maxPages = perms.size() / 28;
         for (int i = 0; i < 54; i++) {
             if (i == 0) {
@@ -141,16 +142,17 @@ public class PersonalPermissionScreenHandler extends ServerOnlyScreenHandler<Str
             ServerScreenHelper.playSongToPlayer(player, SoundEvents.UI_BUTTON_CLICK, 1, 1f);
         }
         ItemStack stack = slot.getItem();
-        String name = stack.getHoverName().getContents();
         ClaimPermission perm;
         try {
-            perm = PermissionRegistry.get(name);
+            perm = PermissionManager.INSTANCE.get(new ResourceLocation(stack.getTag().getString(ServerScreenHelper.PERMISSION_KEY)));
+            if (perm == null)
+                return false;
         } catch (NullPointerException e) {
             return false;
         }
         PlayerClaimData data = PlayerClaimData.get(player);
-        Map<ClaimPermission, Boolean> perms = data.playerDefaultGroups().getOrDefault(this.group, new HashMap<>());
-        boolean success = data.editDefaultPerms(this.group, perm, (perms.containsKey(perm) ? perms.get(perm) ? 1 : 0 : -1) + 1);
+        Map<ResourceLocation, Boolean> perms = data.playerDefaultGroups().getOrDefault(this.group, new HashMap<>());
+        boolean success = data.editDefaultPerms(this.group, perm.getId(), (perms.containsKey(perm.getId()) ? perms.get(perm.getId()) ? 1 : 0 : -1) + 1);
         slot.set(ServerScreenHelper.getFromPersonal(player, perm, this.group));
         if (success)
             ServerScreenHelper.playSongToPlayer(player, SoundEvents.NOTE_BLOCK_PLING, 1, 1.2f);

@@ -8,6 +8,13 @@ loom {
     forge {
         mixinConfigs = ["flan.mixins.json", "flan.forge.mixins.json"]
     }
+    runs {
+        data {
+            data()
+            programArgs "--all", "--mod", "flan"
+            programArgs "--output", project(":common").file("src/generated/resources").absolutePath
+        }
+    }
 }
 
 repositories {
@@ -32,8 +39,8 @@ repositories {
 dependencies {
     modCompileOnly dicemcmm
 
-    modRuntimeOnly "dev.ftb.mods:ftb-ranks-forge:${ftb_ranks}"
-    modRuntimeOnly "dev.ftb.mods:ftb-chunks-forge:${ftb_chunks}"
+    //modRuntimeOnly "dev.ftb.mods:ftb-ranks-forge:${ftb_ranks}"
+    //modRuntimeOnly "dev.ftb.mods:ftb-chunks-forge:${ftb_chunks}"
 
     //CompileOnly cause dependencies
     modCompileOnly "com.ldtteam:minecolonies:${minecolonies}"

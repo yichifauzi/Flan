@@ -1,7 +1,7 @@
 package io.github.flemmli97.flan.event;
 
 import io.github.flemmli97.flan.api.data.IPermissionContainer;
-import io.github.flemmli97.flan.api.permission.PermissionRegistry;
+import io.github.flemmli97.flan.api.permission.BuiltinPermission;
 import io.github.flemmli97.flan.claim.ClaimStorage;
 import io.github.flemmli97.flan.config.ConfigHandler;
 import io.github.flemmli97.flan.mixin.StructureManagerAccessor;
@@ -31,7 +31,7 @@ public class WorldEvents {
         explosion.getToBlow().removeIf(pos -> {
             IPermissionContainer claim = storage.getForPermissionCheck(pos);
             if (claim != null)
-                return !claim.canInteract(null, PermissionRegistry.EXPLOSIONS, pos);
+                return !claim.canInteract(null, BuiltinPermission.EXPLOSIONS, pos);
             return false;
         });
     }
@@ -48,9 +48,9 @@ public class WorldEvents {
             BlockPos oppPoos = blockPos.relative(direction.getOpposite());
             IPermissionContainer opp = storage.getForPermissionCheck(oppPoos);
             if (!from.equals(opp))
-                flag = from.canInteract(null, PermissionRegistry.PISTONBORDER, oppPoos);
+                flag = from.canInteract(null, BuiltinPermission.PISTONBORDER, oppPoos);
         } else if (!state.isAir())
-            flag = from.canInteract(null, PermissionRegistry.PISTONBORDER, blockPos) && to.canInteract(null, PermissionRegistry.PISTONBORDER, dirPos);
+            flag = from.canInteract(null, BuiltinPermission.PISTONBORDER, blockPos) && to.canInteract(null, BuiltinPermission.PISTONBORDER, dirPos);
         if (!flag) {
             //Idk enough about piston behaviour to update more blocks when slime is involved.
             //Ghost blocks appear when trying to push slime contraptions across border
@@ -67,24 +67,24 @@ public class WorldEvents {
         ClaimStorage storage = ClaimStorage.get((ServerLevel) world);
         IPermissionContainer from = storage.getForPermissionCheck(blockPos);
         IPermissionContainer to = storage.getForPermissionCheck(blockPos.relative(direction));
-        return from.equals(to) || to.canInteract(null, PermissionRegistry.WATERBORDER, blockPos);
+        return from.equals(to) || to.canInteract(null, BuiltinPermission.WATERBORDER, blockPos);
     }
 
     public static boolean canStartRaid(ServerPlayer player) {
         IPermissionContainer claim = ClaimStorage.get(player.getLevel()).getForPermissionCheck(player.blockPosition());
-        return claim.canInteract(player, PermissionRegistry.RAID, player.blockPosition());
+        return claim.canInteract(player, BuiltinPermission.RAID, player.blockPosition());
     }
 
     public static boolean canFireSpread(ServerLevel world, BlockPos pos) {
         IPermissionContainer claim = ClaimStorage.get(world).getForPermissionCheck(pos);
-        return claim.canInteract(null, PermissionRegistry.FIRESPREAD, pos);
+        return claim.canInteract(null, BuiltinPermission.FIRESPREAD, pos);
     }
 
     public static boolean preventMobSpawn(ServerLevel world, Mob entity) {
         IPermissionContainer claim = ClaimStorage.get(world).getForPermissionCheck(entity.blockPosition());
         if (entity.getType().getCategory() == MobCategory.MONSTER)
-            return claim.canInteract(null, PermissionRegistry.MOBSPAWN, entity.blockPosition());
-        return claim.canInteract(null, PermissionRegistry.ANIMALSPAWN, entity.blockPosition());
+            return claim.canInteract(null, BuiltinPermission.MOBSPAWN, entity.blockPosition());
+        return claim.canInteract(null, BuiltinPermission.ANIMALSPAWN, entity.blockPosition());
     }
 
     public static boolean lightningFire(LightningBolt lightning) {
@@ -95,7 +95,7 @@ public class WorldEvents {
             for (int z = -1; z <= 1; z++) {
                 mutable.set(mutable.getX() + x, mutable.getY(), mutable.getZ() + z);
                 IPermissionContainer claim = ClaimStorage.get(world).getForPermissionCheck(mutable);
-                if (!claim.canInteract(null, PermissionRegistry.LIGHTNING, mutable))
+                if (!claim.canInteract(null, BuiltinPermission.LIGHTNING, mutable))
                     return false;
             }
         return true;

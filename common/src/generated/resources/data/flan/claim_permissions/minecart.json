@@ -1,0 +1,11 @@
+{
+  "guiItem": {
+    "id": "minecraft:minecart"
+  },
+  "defaultVal": false,
+  "global": false,
+  "order": 31,
+  "defaultDescription": [
+    "Permission to sit in minecarts"
+  ]
+}

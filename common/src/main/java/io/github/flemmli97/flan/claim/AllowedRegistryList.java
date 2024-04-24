@@ -82,7 +82,7 @@ public class AllowedRegistryList<T extends ItemLike> {
                 if (this.registry.containsKey(id)) {
                     this.list.add(Either.left(this.registry.get(id)));
                 } else {
-                    Flan.logger.error("No such registry item for " + this.registry.key() + " with id: " + id);
+                    Flan.LOGGER.error("No such registry item for " + this.registry.key() + " with id: " + id);
                 }
             }
         });

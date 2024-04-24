@@ -1,0 +1,11 @@
+{
+  "guiItem": {
+    "id": "minecraft:chorus_fruit"
+  },
+  "defaultVal": false,
+  "global": false,
+  "order": 34,
+  "defaultDescription": [
+    "Permission to eat chorus fruits"
+  ]
+}

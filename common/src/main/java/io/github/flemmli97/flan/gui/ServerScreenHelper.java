@@ -1,5 +1,6 @@
 package io.github.flemmli97.flan.gui;
 
+import io.github.flemmli97.flan.Flan;
 import io.github.flemmli97.flan.api.permission.ClaimPermission;
 import io.github.flemmli97.flan.claim.Claim;
 import io.github.flemmli97.flan.claim.PermHelper;
@@ -7,12 +8,14 @@ import io.github.flemmli97.flan.config.Config;
 import io.github.flemmli97.flan.config.ConfigHandler;
 import io.github.flemmli97.flan.player.PlayerClaimData;
 import net.minecraft.ChatFormatting;
+import net.minecraft.nbt.CompoundTag;
 import net.minecraft.nbt.ListTag;
 import net.minecraft.nbt.StringTag;
 import net.minecraft.network.chat.Component;
 import net.minecraft.network.chat.Style;
 import net.minecraft.network.chat.TextComponent;
 import net.minecraft.network.protocol.game.ClientboundSoundPacket;
+import net.minecraft.resources.ResourceLocation;
 import net.minecraft.server.level.ServerPlayer;
 import net.minecraft.sounds.SoundEvent;
 import net.minecraft.sounds.SoundSource;
@@ -26,6 +29,8 @@ import java.util.Map;
 
 public class ServerScreenHelper {
 
+    public static final String PERMISSION_KEY = Flan.MODID + ".permission";
+
     public static ItemStack emptyFiller() {
         ItemStack stack = new ItemStack(Items.GRAY_STAINED_GLASS_PANE);
         stack.setHoverName(PermHelper.simpleColoredText(""));
@@ -34,13 +39,13 @@ public class ServerScreenHelper {
 
     public static ItemStack fromPermission(Claim claim, ClaimPermission perm, String group) {
         ItemStack stack = perm.getItem();
-        stack.setHoverName(ServerScreenHelper.coloredGuiText(perm.id, ChatFormatting.GOLD));
+        stack.setHoverName(ServerScreenHelper.coloredGuiText(ConfigHandler.langManager.get(perm.translationKey()), ChatFormatting.GOLD));
         List<Component> lore = new ArrayList<>();
-        for (String pdesc : ConfigHandler.langManager.getArray(perm.id + ".desc")) {
+        for (String pdesc : ConfigHandler.langManager.getArray(perm.translationKeyDescription())) {
             Component trans = ServerScreenHelper.coloredGuiText(pdesc, ChatFormatting.YELLOW);
             lore.add(trans);
         }
-        Config.GlobalType global = ConfigHandler.config.getGlobal(claim.getWorld(), perm);
+        Config.GlobalType global = ConfigHandler.config.getGlobal(claim.getWorld(), perm.getId());
         if (!claim.isAdminClaim() && !global.canModify()) {
             Component text = ServerScreenHelper.coloredGuiText(ConfigHandler.langManager.get("screenUneditable"), ChatFormatting.DARK_RED);
             lore.add(text);
@@ -51,16 +56,16 @@ public class ServerScreenHelper {
             String permFlag;
             if (group == null) {
                 if (claim.parentClaim() == null)
-                    permFlag = "" + (claim.permEnabled(perm) == 1);
+                    permFlag = "" + (claim.permEnabled(perm.getId()) == 1);
                 else {
-                    permFlag = switch (claim.permEnabled(perm)) {
+                    permFlag = switch (claim.permEnabled(perm.getId())) {
                         case -1 -> ConfigHandler.langManager.get("screenDefault");
                         case 1 -> ConfigHandler.langManager.get("screenTrue");
                         default -> ConfigHandler.langManager.get("screenFalse");
                     };
                 }
             } else {
-                permFlag = switch (claim.groupHasPerm(group, perm)) {
+                permFlag = switch (claim.groupHasPerm(group, perm.getId())) {
                     case -1 -> ConfigHandler.langManager.get("screenDefault");
                     case 1 -> ConfigHandler.langManager.get("screenTrue");
                     default -> ConfigHandler.langManager.get("screenFalse");
@@ -70,18 +75,20 @@ public class ServerScreenHelper {
             lore.add(text);
         }
         addLore(stack, lore);
+        CompoundTag tag = stack.getTag();
+        tag.putString(PERMISSION_KEY, perm.getId().toString());
         return stack;
     }
 
     public static ItemStack getFromPersonal(ServerPlayer player, ClaimPermission perm, String group) {
         ItemStack stack = perm.getItem();
-        stack.setHoverName(ServerScreenHelper.coloredGuiText(perm.id, ChatFormatting.GOLD));
+        stack.setHoverName(ServerScreenHelper.coloredGuiText(ConfigHandler.langManager.get(perm.translationKey()), ChatFormatting.GOLD));
         ListTag lore = new ListTag();
-        for (String pdesc : ConfigHandler.langManager.getArray(perm.id + ".desc")) {
+        for (String pdesc : ConfigHandler.langManager.getArray(perm.translationKeyDescription())) {
             Component trans = ServerScreenHelper.coloredGuiText(pdesc, ChatFormatting.YELLOW);
             lore.add(StringTag.valueOf(Component.Serializer.toJson(trans)));
         }
-        Config.GlobalType global = ConfigHandler.config.getGlobal(player.getLevel(), perm);
+        Config.GlobalType global = ConfigHandler.config.getGlobal(player.getLevel(), perm.getId());
         if (!global.canModify()) {
             Component text = ServerScreenHelper.coloredGuiText(ConfigHandler.langManager.get("screenUneditable"), ChatFormatting.DARK_RED);
             lore.add(StringTag.valueOf(Component.Serializer.toJson(text)));
@@ -90,15 +97,18 @@ public class ServerScreenHelper {
             lore.add(StringTag.valueOf(Component.Serializer.toJson(text2)));
         } else {
             String permFlag;
-            Map<ClaimPermission, Boolean> map = PlayerClaimData.get(player).playerDefaultGroups().getOrDefault(group, new HashMap<>());
-            if (map.containsKey(perm))
-                permFlag = map.get(perm) ? ConfigHandler.langManager.get("screenTrue") : ConfigHandler.langManager.get("screenFalse");
+            Map<ResourceLocation, Boolean> map = PlayerClaimData.get(player).playerDefaultGroups().getOrDefault(group, new HashMap<>());
+            if (map.containsKey(perm.getId()))
+                permFlag = map.get(perm.getId()) ? ConfigHandler.langManager.get("screenTrue") : ConfigHandler.langManager.get("screenFalse");
             else
                 permFlag = ConfigHandler.langManager.get("screenDefault");
             Component text = ServerScreenHelper.coloredGuiText(String.format(ConfigHandler.langManager.get("screenEnableText"), permFlag), permFlag.equals(ConfigHandler.langManager.get("screenTrue")) ? ChatFormatting.GREEN : ChatFormatting.RED);
             lore.add(StringTag.valueOf(Component.Serializer.toJson(text)));
         }
-        stack.getOrCreateTagElement("display").put("Lore", lore);
+        CompoundTag tag = stack.getOrCreateTag();
+        tag.putString(PERMISSION_KEY, perm.getId().toString());
+        CompoundTag display = tag.contains("display") ? tag.getCompound("display") : new CompoundTag();
+        display.put("Lore", lore);
         return stack;
     }
 

@@ -1,3 +1,13 @@
+Flan 1.10.0
+================
+- Fix wandering trader not being in trade permission
+- Permissions are now done via datapack allowing adding more permissions easier.
+  This can be used in conjunction with e.g. `itemPermission` config.  
+  This is a **breaking change** for mods that depend on flan!!!  
+  Notably `PermissionRegistry` has been renamed to `BuiltinPermission`
+  which now contains ids for all default provided permissions. All permission checks now take a simple `ResourceLocation`  
+  For users/server owners this should not cause problems (hopefully)
+
 Flan 1.9.1
 ================
 - Ignore missing registry entries for allowed items/block list

@@ -1,0 +1,11 @@
+{
+  "guiItem": {
+    "id": "minecraft:pig_spawn_egg"
+  },
+  "defaultVal": false,
+  "global": true,
+  "order": 57,
+  "defaultDescription": [
+    "Prevent other spawn in claim"
+  ]
+}

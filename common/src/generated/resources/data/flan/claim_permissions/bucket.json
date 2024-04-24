@@ -1,0 +1,11 @@
+{
+  "guiItem": {
+    "id": "minecraft:bucket"
+  },
+  "defaultVal": false,
+  "global": false,
+  "order": 32,
+  "defaultDescription": [
+    "Permission to take liquids with buckets"
+  ]
+}

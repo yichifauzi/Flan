@@ -1,10 +1,10 @@
 package io.github.flemmli97.flan.mixin;
 
-import io.github.flemmli97.flan.api.permission.ClaimPermission;
+import io.github.flemmli97.flan.api.permission.BuiltinPermission;
 import io.github.flemmli97.flan.api.permission.ObjectToPermissionMap;
-import io.github.flemmli97.flan.api.permission.PermissionRegistry;
 import io.github.flemmli97.flan.claim.ClaimStorage;
 import net.minecraft.core.BlockPos;
+import net.minecraft.resources.ResourceLocation;
 import net.minecraft.server.level.ServerPlayer;
 import net.minecraft.world.InteractionHand;
 import net.minecraft.world.InteractionResult;
@@ -49,9 +49,9 @@ public abstract class DragonEggBlockMixin {
     @Inject(method = "teleport", at = @At("HEAD"), cancellable = true)
     private void onTeleport(BlockState state, Level level, BlockPos pos, CallbackInfo info) {
         if (this.flanTempPlayer instanceof ServerPlayer player) {
-            ClaimPermission perm = ObjectToPermissionMap.getFromBlock((DragonEggBlock) (Object) this);
+            ResourceLocation perm = ObjectToPermissionMap.getFromBlock((DragonEggBlock) (Object) this);
             if (perm == null)
-                perm = PermissionRegistry.INTERACTBLOCK;
+                perm = BuiltinPermission.INTERACTBLOCK;
             if (!ClaimStorage.get(player.getLevel()).canInteract(pos, 16, player, perm, true))
                 info.cancel();
         }

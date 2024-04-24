@@ -1,9 +1,8 @@
 package io.github.flemmli97.flan.event;
 
 import io.github.flemmli97.flan.api.data.IPermissionContainer;
-import io.github.flemmli97.flan.api.permission.ClaimPermission;
+import io.github.flemmli97.flan.api.permission.BuiltinPermission;
 import io.github.flemmli97.flan.api.permission.ObjectToPermissionMap;
-import io.github.flemmli97.flan.api.permission.PermissionRegistry;
 import io.github.flemmli97.flan.claim.Claim;
 import io.github.flemmli97.flan.claim.ClaimStorage;
 import io.github.flemmli97.flan.config.ConfigHandler;
@@ -78,7 +77,7 @@ public class BlockInteractEvents {
             if (contains(id, world.getBlockEntity(pos), ConfigHandler.config.breakBlockBlacklist, ConfigHandler.config.breakBETagBlacklist))
                 return true;
             if (attempt) {
-                ClaimPermission perm = ObjectToPermissionMap.getForLeftClickBlock(state.getBlock());
+                ResourceLocation perm = ObjectToPermissionMap.getForLeftClickBlock(state.getBlock());
                 if (perm != null) {
                     if (!claim.canInteract(player, perm, pos, true)) {
                         PlayerClaimData.get(player).addDisplayClaim(claim, EnumDisplayType.MAIN, player.blockPosition().getY());
@@ -87,7 +86,7 @@ public class BlockInteractEvents {
                     return true;
                 }
             }
-            if (!claim.canInteract(player, PermissionRegistry.BREAK, pos, true)) {
+            if (!claim.canInteract(player, BuiltinPermission.BREAK, pos, true)) {
                 PlayerClaimData.get(player).addDisplayClaim(claim, EnumDisplayType.MAIN, player.blockPosition().getY());
                 return false;
             }
@@ -118,11 +117,11 @@ public class BlockInteractEvents {
             BlockEntity blockEntity = world.getBlockEntity(hitResult.getBlockPos());
             if (contains(id, blockEntity, ConfigHandler.config.interactBlockBlacklist, ConfigHandler.config.interactBETagBlacklist))
                 return InteractionResult.PASS;
-            ClaimPermission perm = ObjectToPermissionMap.getFromBlock(state.getBlock());
-            if (perm == PermissionRegistry.PROJECTILES)
-                perm = PermissionRegistry.OPENCONTAINER;
+            ResourceLocation perm = ObjectToPermissionMap.getFromBlock(state.getBlock());
+            if (perm != null && perm.equals(BuiltinPermission.PROJECTILES))
+                perm = BuiltinPermission.OPENCONTAINER;
             //Pressureplate handled elsewhere
-            if (perm != null && perm != PermissionRegistry.PRESSUREPLATE) {
+            if (perm != null && !perm.equals(BuiltinPermission.PRESSUREPLATE)) {
                 if (claim.canInteract(player, perm, hitResult.getBlockPos(), true))
                     return InteractionResult.PASS;
                 if (state.getBlock() instanceof DoorBlock) {
@@ -141,26 +140,26 @@ public class BlockInteractEvents {
             }
             if (blockEntity != null && !(player.isSecondaryUseActive() && !stack.isEmpty())) {
                 if (blockEntity instanceof LecternBlockEntity) {
-                    if (claim.canInteract(player, PermissionRegistry.LECTERNTAKE, hitResult.getBlockPos(), false))
+                    if (claim.canInteract(player, BuiltinPermission.LECTERNTAKE, hitResult.getBlockPos(), false))
                         return InteractionResult.PASS;
                     if (state.getValue(LecternBlock.HAS_BOOK))
                         LockedLecternScreenHandler.create(player, (LecternBlockEntity) blockEntity);
                     return InteractionResult.FAIL;
                 }
                 if (blockEntity instanceof SignBlockEntity) {
-                    if (claim.canInteract(player, PermissionRegistry.INTERACTSIGN, hitResult.getBlockPos(), false))
+                    if (claim.canInteract(player, BuiltinPermission.INTERACTSIGN, hitResult.getBlockPos(), false))
                         return InteractionResult.PASS;
                     return InteractionResult.FAIL;
                 }
                 if (!ConfigHandler.config.lenientBlockEntityCheck || CrossPlatformStuff.INSTANCE.isInventoryTile(blockEntity)) {
-                    if (claim.canInteract(player, PermissionRegistry.OPENCONTAINER, hitResult.getBlockPos(), true))
+                    if (claim.canInteract(player, BuiltinPermission.OPENCONTAINER, hitResult.getBlockPos(), true))
                         return InteractionResult.PASS;
                     PlayerClaimData.get(player).addDisplayClaim(claim, EnumDisplayType.MAIN, player.blockPosition().getY());
                     return InteractionResult.FAIL;
                 }
             }
             boolean shift = player.isSecondaryUseActive() || stack.isEmpty();
-            boolean res = claim.canInteract(player, PermissionRegistry.INTERACTBLOCK, hitResult.getBlockPos(), shift);
+            boolean res = claim.canInteract(player, BuiltinPermission.INTERACTBLOCK, hitResult.getBlockPos(), shift);
             if (!res) {
                 if (shift)
                     PlayerClaimData.get(player).addDisplayClaim(claim, EnumDisplayType.MAIN, player.blockPosition().getY());
@@ -204,10 +203,10 @@ public class BlockInteractEvents {
         }
         if (player == null)
             return false;
-        ClaimPermission perm = ObjectToPermissionMap.getFromBlock(state.getBlock());
+        ResourceLocation perm = ObjectToPermissionMap.getFromBlock(state.getBlock());
         if (perm == null)
             return false;
-        if (perm != PermissionRegistry.PRESSUREPLATE && perm != PermissionRegistry.PORTAL)
+        if (!perm.equals(BuiltinPermission.PRESSUREPLATE) && !perm.equals(BuiltinPermission.PORTAL))
             return false;
         ClaimStorage storage = ClaimStorage.get((ServerLevel) world);
         IPermissionContainer claim = storage.getForPermissionCheck(pos);
@@ -220,8 +219,8 @@ public class BlockInteractEvents {
         if (entity.level.isClientSide)
             return false;
         if (entity instanceof ServerPlayer) {
-            ClaimPermission perm = ObjectToPermissionMap.getFromBlock(landedState.getBlock());
-            if (perm != PermissionRegistry.TRAMPLE)
+            ResourceLocation perm = ObjectToPermissionMap.getFromBlock(landedState.getBlock());
+            if (perm == null || !perm.equals(BuiltinPermission.TRAMPLE))
                 return false;
             ClaimStorage storage = ClaimStorage.get((ServerLevel) entity.level);
             IPermissionContainer claim = storage.getForPermissionCheck(landedPosition);
@@ -231,8 +230,8 @@ public class BlockInteractEvents {
         } else if (entity instanceof Projectile) {
             Entity owner = ((Projectile) entity).getOwner();
             if (owner instanceof ServerPlayer) {
-                ClaimPermission perm = ObjectToPermissionMap.getFromBlock(landedState.getBlock());
-                if (perm != PermissionRegistry.TRAMPLE)
+                ResourceLocation perm = ObjectToPermissionMap.getFromBlock(landedState.getBlock());
+                if (perm == null || !perm.equals(BuiltinPermission.TRAMPLE))
                     return false;
                 ClaimStorage storage = ClaimStorage.get((ServerLevel) entity.level);
                 IPermissionContainer claim = storage.getForPermissionCheck(landedPosition);
@@ -251,7 +250,7 @@ public class BlockInteractEvents {
             IPermissionContainer claim = storage.getForPermissionCheck(pos);
             if (claim == null)
                 return false;
-            return !claim.canInteract((ServerPlayer) entity, PermissionRegistry.TRAMPLE, pos, true);
+            return !claim.canInteract((ServerPlayer) entity, BuiltinPermission.TRAMPLE, pos, true);
         } else if (entity instanceof Projectile) {
             Entity owner = ((Projectile) entity).getOwner();
             if (owner instanceof ServerPlayer) {
@@ -259,7 +258,7 @@ public class BlockInteractEvents {
                 IPermissionContainer claim = storage.getForPermissionCheck(pos);
                 if (claim == null)
                     return false;
-                return !claim.canInteract((ServerPlayer) owner, PermissionRegistry.TRAMPLE, pos, true);
+                return !claim.canInteract((ServerPlayer) owner, BuiltinPermission.TRAMPLE, pos, true);
             }
         } else if (entity instanceof ItemEntity) {
             Entity owner = serverWorld.getEntity(((ItemEntity) entity).getThrower());
@@ -268,7 +267,7 @@ public class BlockInteractEvents {
                 IPermissionContainer claim = storage.getForPermissionCheck(pos);
                 if (claim == null)
                     return false;
-                return !claim.canInteract((ServerPlayer) owner, PermissionRegistry.TRAMPLE, pos, true);
+                return !claim.canInteract((ServerPlayer) owner, BuiltinPermission.TRAMPLE, pos, true);
             }
         }
         return false;

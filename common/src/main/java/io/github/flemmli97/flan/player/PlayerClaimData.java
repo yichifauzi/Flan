@@ -7,8 +7,8 @@ import com.google.gson.stream.JsonWriter;
 import io.github.flemmli97.flan.Flan;
 import io.github.flemmli97.flan.api.data.IPermissionContainer;
 import io.github.flemmli97.flan.api.data.IPlayerData;
-import io.github.flemmli97.flan.api.permission.ClaimPermission;
-import io.github.flemmli97.flan.api.permission.PermissionRegistry;
+import io.github.flemmli97.flan.api.permission.BuiltinPermission;
+import io.github.flemmli97.flan.api.permission.PermissionManager;
 import io.github.flemmli97.flan.claim.Claim;
 import io.github.flemmli97.flan.claim.ClaimStorage;
 import io.github.flemmli97.flan.claim.ParticleIndicators;
@@ -34,6 +34,7 @@ import net.minecraft.network.chat.Style;
 import net.minecraft.network.chat.TextComponent;
 import net.minecraft.network.chat.TranslatableComponent;
 import net.minecraft.network.protocol.game.ClientboundLevelParticlesPacket;
+import net.minecraft.resources.ResourceLocation;
 import net.minecraft.server.MinecraftServer;
 import net.minecraft.server.level.ServerLevel;
 import net.minecraft.server.level.ServerPlayer;
@@ -87,7 +88,7 @@ public class PlayerClaimData implements IPlayerData {
 
     private boolean confirmDeleteAll, adminIgnoreClaim, claimBlockMessage;
 
-    private final Map<String, Map<ClaimPermission, Boolean>> defaultGroups = new HashMap<>();
+    private final Map<String, Map<ResourceLocation, Boolean>> defaultGroups = new HashMap<>();
 
     private boolean shouldProtectDrop, calculateShouldDrop = true;
 
@@ -247,17 +248,17 @@ public class PlayerClaimData implements IPlayerData {
         return this.adminIgnoreClaim;
     }
 
-    public Map<String, Map<ClaimPermission, Boolean>> playerDefaultGroups() {
+    public Map<String, Map<ResourceLocation, Boolean>> playerDefaultGroups() {
         return this.defaultGroups;
     }
 
-    public boolean editDefaultPerms(String group, ClaimPermission perm, int mode) {
-        if (PermissionRegistry.globalPerms().contains(perm) || ConfigHandler.config.globallyDefined(this.player.getLevel(), perm))
+    public boolean editDefaultPerms(String group, ResourceLocation perm, int mode) {
+        if (PermissionManager.INSTANCE.isGlobalPermission(perm) || ConfigHandler.config.globallyDefined(this.player.getLevel(), perm))
             return false;
         if (mode > 1)
             mode = -1;
         boolean has = this.defaultGroups.containsKey(group);
-        Map<ClaimPermission, Boolean> perms = has ? this.defaultGroups.get(group) : new HashMap<>();
+        Map<ResourceLocation, Boolean> perms = has ? this.defaultGroups.get(group) : new HashMap<>();
         if (mode == -1)
             perms.remove(perm);
         else
@@ -433,7 +434,7 @@ public class PlayerClaimData implements IPlayerData {
         if (this.calculateShouldDrop) {
             BlockPos rounded = TeleportUtils.roundedBlockPos(this.player.position().add(0, this.player.getStandingEyeHeight(this.player.getPose(), this.player.getDimensions(this.player.getPose())), 0));
             this.shouldProtectDrop = ClaimStorage.get(this.player.getLevel()).getForPermissionCheck(rounded)
-                    .canInteract(this.player, PermissionRegistry.LOCKITEMS, rounded)
+                    .canInteract(this.player, BuiltinPermission.LOCKITEMS, rounded)
                     && !this.player.getServer().getGameRules().getBoolean(GameRules.RULE_KEEPINVENTORY);
             this.calculateShouldDrop = false;
         }
@@ -487,11 +488,11 @@ public class PlayerClaimData implements IPlayerData {
             JsonObject obj = new JsonObject();
             obj.addProperty("ClaimBlocks", this.claimBlocks);
             obj.addProperty("AdditionalBlocks", this.additionalClaimBlocks);
-            obj.addProperty("LastSeen", LocalDateTime.now().format(Flan.onlineTimeFormatter));
+            obj.addProperty("LastSeen", LocalDateTime.now().format(Flan.ONLINE_TIME_FORMATTER));
             JsonObject defPerm = new JsonObject();
             this.defaultGroups.forEach((key, value) -> {
                 JsonObject perm = new JsonObject();
-                value.forEach((key1, value1) -> perm.addProperty(key1.id, value1));
+                value.forEach((key1, value1) -> perm.addProperty(key1.toString(), value1));
                 defPerm.add(key, perm);
             });
             obj.add("DefaultGroups", defPerm);
@@ -524,13 +525,8 @@ public class PlayerClaimData implements IPlayerData {
             JsonObject defP = ConfigHandler.fromJson(obj, "DefaultGroups");
             defP.entrySet().forEach(e -> {
                 if (e.getValue().isJsonObject()) {
-                    e.getValue().getAsJsonObject().entrySet().forEach(p -> {
-                        try {
-                            this.editDefaultPerms(e.getKey(), PermissionRegistry.get(p.getKey()), p.getValue().getAsBoolean() ? 1 : 0);
-                        } catch (NullPointerException ex) {
-                            Flan.logger.error("Error reading Permission {} for personal group {} for player {}. Permission doesnt exist", p.getKey(), e.getKey(), this.player.getName().getContents());
-                        }
-                    });
+                    e.getValue().getAsJsonObject().entrySet().forEach(p ->
+                            this.editDefaultPerms(e.getKey(), BuiltinPermission.tryLegacy(p.getKey()), p.getValue().getAsBoolean() ? 1 : 0));
                 }
             });
             this.fakePlayerNotification = ConfigHandler.fromJson(obj, "FakePlayerNotification", true);

@@ -3,9 +3,8 @@ package io.github.flemmli97.flan.fabric.platform.integration.claiming;
 import com.mojang.authlib.GameProfile;
 import eu.pb4.common.protection.api.CommonProtection;
 import eu.pb4.common.protection.api.ProtectionProvider;
-import io.github.flemmli97.flan.api.permission.ClaimPermission;
+import io.github.flemmli97.flan.api.permission.BuiltinPermission;
 import io.github.flemmli97.flan.api.permission.ObjectToPermissionMap;
-import io.github.flemmli97.flan.api.permission.PermissionRegistry;
 import io.github.flemmli97.flan.claim.Claim;
 import io.github.flemmli97.flan.claim.ClaimStorage;
 import io.github.flemmli97.flan.platform.CrossPlatformStuff;
@@ -69,7 +68,7 @@ public class FlanProtectionProvider implements ProtectionProvider {
 
         ServerPlayer sp = tryResolvePlayer(sl, profile);
 
-        return ClaimStorage.get(sl).getForPermissionCheck(pos).canInteract(sp, PermissionRegistry.BREAK, pos);
+        return ClaimStorage.get(sl).getForPermissionCheck(pos).canInteract(sp, BuiltinPermission.BREAK, pos);
     }
 
     @Override
@@ -78,7 +77,7 @@ public class FlanProtectionProvider implements ProtectionProvider {
 
         ServerPlayer sp = tryResolvePlayer(sl, profile);
 
-        return ClaimStorage.get(sl).getForPermissionCheck(pos).canInteract(sp, PermissionRegistry.EXPLOSIONS, pos);
+        return ClaimStorage.get(sl).getForPermissionCheck(pos).canInteract(sp, BuiltinPermission.EXPLOSIONS, pos);
     }
 
     @Override
@@ -87,7 +86,7 @@ public class FlanProtectionProvider implements ProtectionProvider {
 
         ServerPlayer sp = tryResolvePlayer(sl, profile);
 
-        return ClaimStorage.get(sl).getForPermissionCheck(pos).canInteract(sp, PermissionRegistry.PLACE, pos);
+        return ClaimStorage.get(sl).getForPermissionCheck(pos).canInteract(sp, BuiltinPermission.PLACE, pos);
     }
 
     @Override
@@ -96,16 +95,16 @@ public class FlanProtectionProvider implements ProtectionProvider {
 
         ServerPlayer sp = tryResolvePlayer(sl, profile);
 
-        var perm = ObjectToPermissionMap.getFromBlock(sl.getBlockState(pos).getBlock());
+        ResourceLocation perm = ObjectToPermissionMap.getFromBlock(sl.getBlockState(pos).getBlock());
 
-        if (perm == PermissionRegistry.PROJECTILES)
-            perm = PermissionRegistry.OPENCONTAINER;
+        if (perm != null && perm.equals(BuiltinPermission.PROJECTILES))
+            perm = BuiltinPermission.OPENCONTAINER;
 
         if (perm == null) {
             BlockEntity be = world.getBlockEntity(pos);
             perm = be != null && CrossPlatformStuff.INSTANCE.isInventoryTile(be)
-                    ? PermissionRegistry.OPENCONTAINER
-                    : PermissionRegistry.INTERACTBLOCK;
+                    ? BuiltinPermission.OPENCONTAINER
+                    : BuiltinPermission.INTERACTBLOCK;
         }
 
         return ClaimStorage.get(sl).getForPermissionCheck(pos).canInteract(sp, perm, pos);
@@ -117,12 +116,12 @@ public class FlanProtectionProvider implements ProtectionProvider {
 
         ServerPlayer sp = tryResolvePlayer(sl, profile);
 
-        ClaimPermission permission;
+        ResourceLocation permission;
 
         if (entity instanceof ArmorStand)
-            permission = PermissionRegistry.ARMORSTAND;
+            permission = BuiltinPermission.ARMORSTAND;
         else if (entity instanceof Mob)
-            permission = PermissionRegistry.ANIMALINTERACT;
+            permission = BuiltinPermission.ANIMALINTERACT;
         else
             return true;
 
@@ -135,14 +134,14 @@ public class FlanProtectionProvider implements ProtectionProvider {
 
         ServerPlayer sp = tryResolvePlayer(sl, profile);
 
-        ClaimPermission permission;
+        ResourceLocation permission;
 
         if (entity instanceof ArmorStand || !(entity instanceof LivingEntity))
-            permission = PermissionRegistry.BREAKNONLIVING;
+            permission = BuiltinPermission.BREAKNONLIVING;
         else if (entity instanceof Player)
-            permission = PermissionRegistry.HURTPLAYER;
+            permission = BuiltinPermission.HURTPLAYER;
         else
-            permission = PermissionRegistry.HURTANIMAL;
+            permission = BuiltinPermission.HURTANIMAL;
 
         return ClaimStorage.get(sl).getForPermissionCheck(entity.blockPosition()).canInteract(sp, permission, entity.blockPosition());
     }

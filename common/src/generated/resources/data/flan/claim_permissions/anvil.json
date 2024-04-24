@@ -1,0 +1,11 @@
+{
+  "guiItem": {
+    "id": "minecraft:anvil"
+  },
+  "defaultVal": false,
+  "global": false,
+  "order": 8,
+  "defaultDescription": [
+    "Permission to use anvils"
+  ]
+}

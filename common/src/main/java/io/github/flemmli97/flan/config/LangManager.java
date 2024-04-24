@@ -5,7 +5,7 @@ import com.google.gson.GsonBuilder;
 import com.google.gson.JsonArray;
 import com.google.gson.JsonObject;
 import io.github.flemmli97.flan.api.permission.ClaimPermission;
-import io.github.flemmli97.flan.api.permission.PermissionRegistry;
+import io.github.flemmli97.flan.api.permission.PermissionManager;
 import io.github.flemmli97.flan.gui.CustomInteractListScreenHandler;
 import io.github.flemmli97.flan.platform.CrossPlatformStuff;
 
@@ -27,7 +27,10 @@ import java.nio.file.StandardOpenOption;
 import java.util.Collections;
 import java.util.HashMap;
 import java.util.LinkedHashMap;
+import java.util.Locale;
 import java.util.Map;
+import java.util.stream.Collectors;
+import java.util.stream.Stream;
 
 public class LangManager {
 
@@ -94,6 +97,7 @@ public class LangManager {
         this.defaultTranslation.put("editPerm", "%1$s now set to %2$s");
         this.defaultTranslation.put("editPermGroup", "%1$s for %2$s now set to %3$s");
         this.defaultTranslation.put("editPersonalGroup", "Default permission %1$s for group %2$s now set to %3$s");
+        this.defaultTranslation.put("nonGlobalOnly", "Cannot edit %1$s here since its a global permission");
 
         this.defaultTranslation.put("adminMode", "Adminmode (Ignore Claims) set to: %1$s");
         this.defaultTranslation.put("adminDeleteAll", "Deleted all claims for following players: %1$s");
@@ -214,8 +218,9 @@ public class LangManager {
 
         this.defaultTranslation.put("wiki", "For more info check out the wiki:");
 
-        for (ClaimPermission perm : PermissionRegistry.getPerms()) {
-            this.defaultTranslationArray.put(perm.id + ".desc", perm.desc);
+        for (ClaimPermission perm : PermissionManager.INSTANCE.getAll()) {
+            this.defaultTranslation.put(perm.translationKey(), this.capitalize(perm.getId().getPath()));
+            this.defaultTranslationArray.put(perm.translationKeyDescription(), perm.desc.toArray(String[]::new));
         }
         this.defaultTranslationArray.put("command.help", new String[]{"help <page> | (cmd <command>)", "Shows all available commands or info for the given command."});
         this.defaultTranslationArray.put("command.menu", new String[]{"menu", "When standing in a claim you have permissions for opens the claim menu."});
@@ -247,6 +252,12 @@ public class LangManager {
         this.defaultTranslationArray.put("command.listAdminClaims", new String[]{"listAdminClaim", "Lists all admin claims in the current world."});
         this.defaultTranslationArray.put("command.adminDelete", new String[]{"adminDelete [all <player>]", "Force deletes the current claim or deletes all claims from the specified player."});
         this.defaultTranslationArray.put("command.giveClaimBlocks", new String[]{"giveClaimBlocks <amount>", "Gives a player additional claim blocks."});
+    }
+
+    private String capitalize(String s) {
+        return Stream.of(s.trim().split("_"))
+                .map(word -> word.substring(0, 1).toUpperCase(Locale.ROOT) + word.substring(1))
+                .collect(Collectors.joining(" "));
     }
 
     private final Map<String, String> translation = new HashMap<>();
@@ -288,53 +299,13 @@ public class LangManager {
             }
             File def = configDir.resolve("en_us.json").toFile();
             if (!def.exists()) {
-                File legacy = CrossPlatformStuff.INSTANCE.configPath().resolve("flan").resolve("flan_lang.json").toFile();
-                Map<String, String> translation;
-                Map<String, String[]> translationArr;
-                if (legacy.exists()) {
-                    FileReader reader = new FileReader(legacy);
-                    JsonObject obj = GSON.fromJson(reader, JsonObject.class);
-                    reader.close();
-                    Map<String, String> fromConf = new HashMap<>();
-                    Map<String, String[]> fromConfArr = new HashMap<>();
-                    obj.entrySet().forEach(e -> {
-                        if (e.getKey().equals("commands")) {
-                            JsonObject commands = e.getValue().getAsJsonObject();
-                            commands.entrySet().forEach(c -> fromConfArr.put("command." + c.getKey(), GSON.fromJson(c.getValue(), String[].class)));
-                        } else if (legacyPermissionGetter(e.getKey())) {
-                            if (e.getValue().isJsonArray())
-                                fromConfArr.put(e.getKey(), GSON.fromJson(e.getValue(), String[].class));
-                            else
-                                fromConfArr.put(e.getKey(), new String[]{e.getValue().getAsString()});
-                        } else
-                            fromConf.put(e.getKey(), e.getValue().getAsString());
-                    });
-                    //To preserve order
-                    translation = new LinkedHashMap<>();
-                    translationArr = new LinkedHashMap<>();
-                    this.defaultTranslation.forEach((key, t) -> translation.put(key, fromConf.getOrDefault(key, t)));
-                    this.defaultTranslationArray.forEach((key, t) -> translationArr.put(key, fromConfArr.getOrDefault(key, t)));
-                } else {
-                    translation = this.defaultTranslation;
-                    translationArr = this.defaultTranslationArray;
-                }
                 def.createNewFile();
-                saveTo(def, translation, translationArr);
+                saveTo(def, this.defaultTranslation, this.defaultTranslationArray);
             }
         } catch (IOException | URISyntaxException e) {
             e.printStackTrace();
         }
         this.reload(ConfigHandler.config.lang);
-    }
-
-    private static boolean legacyPermissionGetter(String id) {
-        try {
-            PermissionRegistry.get(id.replace(".desc", ""));
-            return true;
-        } catch (NullPointerException ignored) {
-
-        }
-        return false;
     }
 
     public void reload(String lang) {

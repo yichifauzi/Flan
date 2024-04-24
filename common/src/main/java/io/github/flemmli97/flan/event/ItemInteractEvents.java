@@ -3,9 +3,8 @@ package io.github.flemmli97.flan.event;
 import com.google.common.collect.Sets;
 import com.mojang.authlib.GameProfile;
 import io.github.flemmli97.flan.api.data.IPermissionContainer;
-import io.github.flemmli97.flan.api.permission.ClaimPermission;
+import io.github.flemmli97.flan.api.permission.BuiltinPermission;
 import io.github.flemmli97.flan.api.permission.ObjectToPermissionMap;
-import io.github.flemmli97.flan.api.permission.PermissionRegistry;
 import io.github.flemmli97.flan.claim.Claim;
 import io.github.flemmli97.flan.claim.ClaimStorage;
 import io.github.flemmli97.flan.claim.PermHelper;
@@ -19,6 +18,7 @@ import net.minecraft.core.BlockPos;
 import net.minecraft.network.chat.Component;
 import net.minecraft.network.protocol.game.ClientboundBlockUpdatePacket;
 import net.minecraft.network.protocol.game.ClientboundContainerSetSlotPacket;
+import net.minecraft.resources.ResourceLocation;
 import net.minecraft.server.level.ServerLevel;
 import net.minecraft.server.level.ServerPlayer;
 import net.minecraft.util.Mth;
@@ -75,12 +75,12 @@ public class ItemInteractEvents {
             return InteractionResultHolder.pass(stack);
         if (claim instanceof Claim real && real.canUseItem(stack))
             return InteractionResultHolder.pass(stack);
-        ClaimPermission perm = ObjectToPermissionMap.getFromItem(stack.getItem());
+        ResourceLocation perm = ObjectToPermissionMap.getFromItem(stack.getItem());
         if (perm != null) {
             boolean success = claim.canInteract(player, perm, pos, true);
             if (success)
                 return InteractionResultHolder.pass(stack);
-            if (perm == PermissionRegistry.PLACE) {
+            if (perm.equals(BuiltinPermission.PLACE)) {
                 BlockPos update = pos;
                 if (stack.getItem() == Items.LILY_PAD) {
                     BlockHitResult upResult = hitResult.withPosition(hitResult.getBlockPos().above());
@@ -118,7 +118,7 @@ public class ItemInteractEvents {
         boolean actualInClaim = !(claim instanceof Claim) || placePos.getY() >= ((Claim) claim).getDimensions()[4];
         if (actualInClaim && claim instanceof Claim real && real.canUseItem(stack))
             return InteractionResult.PASS;
-        ClaimPermission perm = ObjectToPermissionMap.getFromItem(stack.getItem());
+        ResourceLocation perm = ObjectToPermissionMap.getFromItem(stack.getItem());
         if (perm != null) {
             if (claim.canInteract(player, perm, placePos, false))
                 return InteractionResult.PASS;
@@ -127,7 +127,7 @@ public class ItemInteractEvents {
                 return InteractionResult.FAIL;
             }
         }
-        if (claim.canInteract(player, PermissionRegistry.PLACE, placePos, false)) {
+        if (claim.canInteract(player, BuiltinPermission.PLACE, placePos, false)) {
             if (!actualInClaim && stack.getItem() instanceof BlockItem) {
                 ((Claim) claim).extendDownwards(placePos);
             }
@@ -190,7 +190,7 @@ public class ItemInteractEvents {
             return;
         data.setClaimActionCooldown();
         if (claim != null) {
-            if (claim.canInteract(player, PermissionRegistry.EDITCLAIM, target)) {
+            if (claim.canInteract(player, BuiltinPermission.EDITCLAIM, target)) {
                 if (data.getEditMode() == EnumEditMode.SUBCLAIM) {
                     Claim subClaim = claim.getSubClaim(target);
                     if (subClaim != null && data.currentEdit() == null) {

@@ -1,6 +1,5 @@
 package io.github.flemmli97.flan.event;
 
-import io.github.flemmli97.flan.api.permission.ClaimPermission;
 import io.github.flemmli97.flan.api.permission.ObjectToPermissionMap;
 import io.github.flemmli97.flan.claim.ClaimStorage;
 import io.github.flemmli97.flan.claim.PermHelper;
@@ -11,6 +10,7 @@ import net.minecraft.ChatFormatting;
 import net.minecraft.core.BlockPos;
 import net.minecraft.data.worldgen.features.CaveFeatures;
 import net.minecraft.data.worldgen.features.NetherFeatures;
+import net.minecraft.resources.ResourceLocation;
 import net.minecraft.server.level.ServerPlayer;
 import net.minecraft.world.entity.player.Player;
 import net.minecraft.world.item.context.UseOnContext;
@@ -43,12 +43,12 @@ public class PlayerEvents {
         if (context.getPlayer() instanceof ServerPlayer serverPlayer) {
             BlockState state = serverPlayer.level.getBlockState(context.getClickedPos());
             BlockPos.MutableBlockPos pos = context.getClickedPos().mutable();
-            ClaimPermission perm = ObjectToPermissionMap.getFromItem(context.getItemInHand().getItem());
+            ResourceLocation perm = ObjectToPermissionMap.getFromItem(context.getItemInHand().getItem());
             /**
              * {@link ItemInteractEvents#onItemUseBlock} handles this case already.
              * Sadly need to check again. In case its used in a claim. Less expensive than aoe check
              */
-            if (!ClaimStorage.get(serverPlayer.getLevel()).getForPermissionCheck(pos).canInteract(serverPlayer, perm, pos, false))
+            if (perm != null && !ClaimStorage.get(serverPlayer.getLevel()).getForPermissionCheck(pos).canInteract(serverPlayer, perm, pos, false))
                 return false;
             int range = 0;
             if (state.getBlock() instanceof MossBlock) {

@@ -1,0 +1,11 @@
+{
+  "guiItem": {
+    "id": "minecraft:oak_trapdoor"
+  },
+  "defaultVal": false,
+  "global": false,
+  "order": 13,
+  "defaultDescription": [
+    "Permission to use trapdoors"
+  ]
+}

@@ -19,6 +19,12 @@ public interface CrossPlatformStuff {
 
     Path configPath();
 
+    default boolean isDataGen() {
+        return false;
+    }
+
+    boolean isModLoaded(String mod);
+
     SimpleRegistryWrapper<MobEffect> registryStatusEffects();
 
     SimpleRegistryWrapper<Block> registryBlocks();

@@ -1,13 +1,14 @@
 package io.github.flemmli97.flan.gui;
 
 import io.github.flemmli97.flan.api.permission.ClaimPermission;
-import io.github.flemmli97.flan.api.permission.PermissionRegistry;
+import io.github.flemmli97.flan.api.permission.PermissionManager;
 import io.github.flemmli97.flan.claim.Claim;
 import io.github.flemmli97.flan.claim.PermHelper;
 import io.github.flemmli97.flan.config.ConfigHandler;
 import io.github.flemmli97.flan.gui.inv.SeparateInv;
 import net.minecraft.ChatFormatting;
 import net.minecraft.network.chat.Component;
+import net.minecraft.resources.ResourceLocation;
 import net.minecraft.server.level.ServerPlayer;
 import net.minecraft.sounds.SoundEvents;
 import net.minecraft.world.MenuProvider;
@@ -61,9 +62,9 @@ public class PermissionScreenHandler extends ServerOnlyScreenHandler<ClaimGroup>
 
     @Override
     protected void fillInventoryWith(Player player, SeparateInv inv, ClaimGroup additionalData) {
-        this.perms = new ArrayList<>(PermissionRegistry.getPerms());
+        this.perms = new ArrayList<>(PermissionManager.INSTANCE.getAll());
         if (additionalData.getGroup() != null)
-            this.perms.removeAll(PermissionRegistry.globalPerms());
+            this.perms.removeIf(p -> p.global);
         this.maxPages = (this.perms.size() - 1) / 28;
         for (int i = 0; i < 54; i++) {
             if (i == 0) {
@@ -143,10 +144,11 @@ public class PermissionScreenHandler extends ServerOnlyScreenHandler<ClaimGroup>
             ServerScreenHelper.playSongToPlayer(player, SoundEvents.UI_BUTTON_CLICK, 1, 1f);
         }
         ItemStack stack = slot.getItem();
-        String name = stack.getHoverName().getContents();
         ClaimPermission perm;
         try {
-            perm = PermissionRegistry.get(name);
+            perm = PermissionManager.INSTANCE.get(new ResourceLocation(stack.getTag().getString(ServerScreenHelper.PERMISSION_KEY)));
+            if (perm == null)
+                return false;
         } catch (NullPointerException e) {
             return false;
         }
@@ -154,12 +156,12 @@ public class PermissionScreenHandler extends ServerOnlyScreenHandler<ClaimGroup>
         if (this.group == null) {
             int mode;
             if (this.claim.parentClaim() == null)
-                mode = this.claim.permEnabled(perm) == 1 ? -1 : 1;
+                mode = this.claim.permEnabled(perm.getId()) == 1 ? -1 : 1;
             else
-                mode = this.claim.permEnabled(perm) + 1;
-            success = this.claim.editGlobalPerms(player, perm, mode);
+                mode = this.claim.permEnabled(perm.getId()) + 1;
+            success = this.claim.editGlobalPerms(player, perm.getId(), mode);
         } else
-            success = this.claim.editPerms(player, this.group, perm, this.claim.groupHasPerm(this.group, perm) + 1);
+            success = this.claim.editPerms(player, this.group, perm.getId(), this.claim.groupHasPerm(this.group, perm.getId()) + 1);
         slot.set(ServerScreenHelper.fromPermission(this.claim, perm, this.group));
         if (success)
             ServerScreenHelper.playSongToPlayer(player, SoundEvents.NOTE_BLOCK_PLING, 1, 1.2f);

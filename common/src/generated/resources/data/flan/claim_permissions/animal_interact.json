@@ -1,0 +1,12 @@
+{
+  "guiItem": {
+    "id": "minecraft:chicken_spawn_egg"
+  },
+  "defaultVal": false,
+  "global": false,
+  "order": 35,
+  "defaultDescription": [
+    "Permission to interact with animals",
+    "(e.g. shearing sheeps)"
+  ]
+}
