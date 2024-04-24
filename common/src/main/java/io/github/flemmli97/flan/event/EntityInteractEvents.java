@@ -38,6 +38,7 @@ import net.minecraft.world.entity.decoration.ItemFrame;
 import net.minecraft.world.entity.item.ItemEntity;
 import net.minecraft.world.entity.monster.EnderMan;
 import net.minecraft.world.entity.monster.Enemy;
+import net.minecraft.world.entity.npc.AbstractVillager;
 import net.minecraft.world.entity.npc.Villager;
 import net.minecraft.world.entity.player.Player;
 import net.minecraft.world.entity.projectile.AbstractArrow;
@@ -109,7 +110,7 @@ public class EntityInteractEvents {
                     return claim.canInteract(player, PermissionRegistry.OPENCONTAINER, pos, true) ? InteractionResult.PASS : InteractionResult.FAIL;
                 return claim.canInteract(player, PermissionRegistry.MINECART, pos, true) ? InteractionResult.PASS : InteractionResult.FAIL;
             }
-            if (entity instanceof Villager || CrossPlatformStuff.INSTANCE.registryEntities().getIDFrom(entity.getType()).equals(TATERZEN))
+            if (entity instanceof AbstractVillager || CrossPlatformStuff.INSTANCE.registryEntities().getIDFrom(entity.getType()).equals(TATERZEN))
                 return claim.canInteract(player, PermissionRegistry.TRADING, pos, true) ? InteractionResult.PASS : InteractionResult.FAIL;
             if (entity instanceof ItemFrame)
                 return claim.canInteract(player, PermissionRegistry.ITEMFRAMEROTATE, pos, true) ? InteractionResult.PASS : InteractionResult.FAIL;
