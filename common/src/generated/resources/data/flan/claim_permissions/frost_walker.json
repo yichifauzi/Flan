@@ -1,0 +1,14 @@
+{
+  "defaultDescription": [
+    "Permission for frostwalker to activate"
+  ],
+  "defaultVal": false,
+  "global": false,
+  "guiItem": {
+    "id": "minecraft:leather_boots",
+    "tag": {
+      "Damage": 0
+    }
+  },
+  "order": 27
+}

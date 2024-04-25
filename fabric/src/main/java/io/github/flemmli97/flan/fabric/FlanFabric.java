@@ -2,6 +2,7 @@ package io.github.flemmli97.flan.fabric;
 
 import io.github.flemmli97.flan.Flan;
 import io.github.flemmli97.flan.api.fabric.ItemUseBlockFlags;
+import io.github.flemmli97.flan.api.permission.PermissionManager;
 import io.github.flemmli97.flan.commands.CommandClaim;
 import io.github.flemmli97.flan.config.ConfigHandler;
 import io.github.flemmli97.flan.event.BlockInteractEvents;
@@ -12,7 +13,6 @@ import io.github.flemmli97.flan.event.WorldEvents;
 import io.github.flemmli97.flan.fabric.integration.HarvestWithEase;
 import io.github.flemmli97.flan.fabric.platform.integration.claiming.FlanProtectionProvider;
 import io.github.flemmli97.flan.fabric.platform.integration.playerability.PlayerAbilityEvents;
-import io.github.flemmli97.flan.platform.integration.create.CreateCompat;
 import io.github.flemmli97.flan.platform.integration.webmap.BluemapIntegration;
 import io.github.flemmli97.flan.platform.integration.webmap.DynmapIntegration;
 import io.github.flemmli97.flan.player.PlayerDataHandler;
@@ -29,17 +29,25 @@ import net.fabricmc.fabric.api.event.player.UseBlockCallback;
 import net.fabricmc.fabric.api.event.player.UseEntityCallback;
 import net.fabricmc.fabric.api.event.player.UseItemCallback;
 import net.fabricmc.fabric.api.networking.v1.ServerPlayConnectionEvents;
+import net.fabricmc.fabric.api.resource.IdentifiableResourceReloadListener;
+import net.fabricmc.fabric.api.resource.ResourceManagerHelper;
 import net.fabricmc.loader.api.FabricLoader;
 import net.minecraft.commands.Commands;
 import net.minecraft.resources.ResourceLocation;
 import net.minecraft.server.MinecraftServer;
 import net.minecraft.server.level.ServerPlayer;
+import net.minecraft.server.packs.PackType;
+import net.minecraft.server.packs.resources.ResourceManager;
+import net.minecraft.util.profiling.ProfilerFiller;
 import net.minecraft.world.InteractionHand;
 import net.minecraft.world.InteractionResult;
 import net.minecraft.world.entity.player.Player;
 import net.minecraft.world.item.context.UseOnContext;
 import net.minecraft.world.level.Level;
 import net.minecraft.world.phys.BlockHitResult;
+
+import java.util.concurrent.CompletableFuture;
+import java.util.concurrent.Executor;
 
 public class FlanFabric implements ModInitializer {
 
@@ -64,6 +72,18 @@ public class FlanFabric implements ModInitializer {
         ServerPlayConnectionEvents.DISCONNECT.register((handler, server) -> PlayerEvents.onLogout(handler.player));
         CommandRegistrationCallback.EVENT.register((dispatcher, reg, env) -> CommandClaim.register(dispatcher, env == Commands.CommandSelection.DEDICATED));
 
+        ResourceManagerHelper.get(PackType.SERVER_DATA).registerReloadListener(new IdentifiableResourceReloadListener() {
+            @Override
+            public CompletableFuture<Void> reload(PreparationBarrier preparationBarrier, ResourceManager resourceManager, ProfilerFiller preparationsProfiler, ProfilerFiller reloadProfiler, Executor backgroundExecutor, Executor gameExecutor) {
+                return PermissionManager.INSTANCE.reload(preparationBarrier, resourceManager, preparationsProfiler, reloadProfiler, backgroundExecutor, gameExecutor);
+            }
+
+            @Override
+            public ResourceLocation getFabricId() {
+                return new ResourceLocation(Flan.MODID, "permission_gen");
+            }
+        });
+
         Flan.permissionAPI = FabricLoader.getInstance().isModLoaded("fabric-permissions-api-v0");
         Flan.playerAbilityLib = FabricLoader.getInstance().isModLoaded("playerabilitylib");
         Flan.ftbRanks = FabricLoader.getInstance().isModLoaded("ftbranks");
@@ -73,7 +93,7 @@ public class FlanFabric implements ModInitializer {
         Flan.gomlServer = FabricLoader.getInstance().isModLoaded("goml");
         Flan.commonProtApi = FabricLoader.getInstance().isModLoaded("common-protection-api");
         Flan.impactor = FabricLoader.getInstance().isModLoaded("impactor");
-
+        Flan.create = FabricLoader.getInstance().isModLoaded("create");
         if (Flan.playerAbilityLib)
             PlayerAbilityEvents.register();
         if (FabricLoader.getInstance().isModLoaded("dynmap"))
@@ -82,13 +102,10 @@ public class FlanFabric implements ModInitializer {
             HarvestWithEase.init();
         if (Flan.commonProtApi)
             FlanProtectionProvider.register();
-        if (FabricLoader.getInstance().isModLoaded("create"))
-            CreateCompat.init();
         ClaimCriterias.init();
     }
 
     public static void serverLoad(MinecraftServer server) {
-        Flan.lockRegistry(server);
         ConfigHandler.serverLoad(server);
         if (FabricLoader.getInstance().isModLoaded("bluemap"))
             BluemapIntegration.reg(server);

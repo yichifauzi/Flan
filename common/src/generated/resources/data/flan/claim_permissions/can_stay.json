@@ -1,0 +1,11 @@
+{
+  "defaultDescription": [
+    "Allow players to enter your claim"
+  ],
+  "defaultVal": true,
+  "global": false,
+  "guiItem": {
+    "id": "minecraft:paper"
+  },
+  "order": 44
+}

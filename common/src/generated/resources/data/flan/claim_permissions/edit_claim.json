@@ -1,0 +1,14 @@
+{
+  "defaultDescription": [
+    "Gives permission to edit (resize, delete...) the claim"
+  ],
+  "defaultVal": false,
+  "global": false,
+  "guiItem": {
+    "id": "minecraft:golden_hoe",
+    "tag": {
+      "Damage": 0
+    }
+  },
+  "order": 0
+}

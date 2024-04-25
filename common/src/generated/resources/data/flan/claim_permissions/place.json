@@ -1,0 +1,11 @@
+{
+  "defaultDescription": [
+    "Permission to place blocks in the claim"
+  ],
+  "defaultVal": false,
+  "global": false,
+  "guiItem": {
+    "id": "minecraft:grass_block"
+  },
+  "order": 4
+}

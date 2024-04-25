@@ -1,0 +1,11 @@
+{
+  "defaultDescription": [
+    "Permission to insert/take music discs"
+  ],
+  "defaultVal": false,
+  "global": false,
+  "guiItem": {
+    "id": "minecraft:jukebox"
+  },
+  "order": 18
+}

@@ -1,7 +1,7 @@
 package io.github.flemmli97.flan.fabric.integration;
 
 import crystalspider.harvestwithease.api.events.HarvestWithEaseEvents;
-import io.github.flemmli97.flan.api.permission.PermissionRegistry;
+import io.github.flemmli97.flan.api.permission.BuiltinPermission;
 import io.github.flemmli97.flan.claim.ClaimStorage;
 import net.minecraft.server.level.ServerPlayer;
 
@@ -12,7 +12,7 @@ public class HarvestWithEase {
             if (player instanceof ServerPlayer serverPlayer) {
                 ClaimStorage storage = ClaimStorage.get(serverPlayer.serverLevel());
                 if (!storage.getForPermissionCheck(blockPos)
-                        .canInteract(serverPlayer, PermissionRegistry.BREAK, blockPos)) {
+                        .canInteract(serverPlayer, BuiltinPermission.BREAK, blockPos)) {
                     harvestCheckEvent.setCanceled(true);
                     return false;
                 }

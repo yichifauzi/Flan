@@ -53,6 +53,10 @@ dependencies {
     modCompileOnly "com.tterrag.registrate_fabric:Registrate:${registrate}"
 }
 
+sourceSets.main.resources {
+    srcDir "src/generated/resources"
+}
+
 shadowJar {
     relocate "org.yaml.snakeyaml", "${rootProject.maven_group}.flan.shadow.org.yaml.snakeyaml"
     configurations = [project.configurations.shadowCommon]

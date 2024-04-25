@@ -1,0 +1,11 @@
+{
+  "defaultDescription": [
+    "Allow player to teleport to your claim home position"
+  ],
+  "defaultVal": false,
+  "global": false,
+  "guiItem": {
+    "id": "minecraft:end_portal_frame"
+  },
+  "order": 45
+}

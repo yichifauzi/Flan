@@ -1,0 +1,11 @@
+{
+  "defaultDescription": [
+    "Permission to use fence gates"
+  ],
+  "defaultVal": false,
+  "global": false,
+  "guiItem": {
+    "id": "minecraft:oak_fence_gate"
+  },
+  "order": 12
+}

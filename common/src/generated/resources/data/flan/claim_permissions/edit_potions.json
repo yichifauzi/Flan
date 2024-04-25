@@ -1,0 +1,11 @@
+{
+  "defaultDescription": [
+    "Gives permission to edit the claims potion effect"
+  ],
+  "defaultVal": false,
+  "global": false,
+  "guiItem": {
+    "id": "minecraft:potion"
+  },
+  "order": 2
+}

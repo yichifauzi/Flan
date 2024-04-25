@@ -1,6 +1,6 @@
 package io.github.flemmli97.flan.mixin;
 
-import io.github.flemmli97.flan.api.permission.PermissionRegistry;
+import io.github.flemmli97.flan.api.permission.BuiltinPermission;
 import io.github.flemmli97.flan.claim.Claim;
 import io.github.flemmli97.flan.claim.ClaimStorage;
 import io.github.flemmli97.flan.utils.IOwnedItem;
@@ -22,7 +22,7 @@ public abstract class AllayMixin {
         Allay allay = (Allay) (Object) this;
         if (AllayAi.getLikedPlayer(allay).map(p -> {
             Claim claim = ClaimStorage.get(p.serverLevel()).getClaimAt(allay.blockPosition());
-            return claim != null && (!claim.canInteract(p, PermissionRegistry.PICKUP, allay.blockPosition(), false));
+            return claim != null && (!claim.canInteract(p, BuiltinPermission.PICKUP, allay.blockPosition(), false));
         }).orElse(false))
             info.setReturnValue(false);
     }
@@ -34,7 +34,7 @@ public abstract class AllayMixin {
             if (p.getUUID().equals(ownedItem.getPlayerOrigin()))
                 return false;
             Claim claim = ClaimStorage.get(p.serverLevel()).getClaimAt(itemEntity.blockPosition());
-            return claim != null && !claim.canInteract(p, PermissionRegistry.PICKUP, itemEntity.blockPosition(), false);
+            return claim != null && !claim.canInteract(p, BuiltinPermission.PICKUP, itemEntity.blockPosition(), false);
         }).orElse(false))
             info.cancel();
     }

@@ -1,0 +1,12 @@
+{
+  "defaultDescription": [
+    "Permission for sculk sensors.",
+    "Shriekers are handled under PLAYERMOBSPAWN"
+  ],
+  "defaultVal": false,
+  "global": true,
+  "guiItem": {
+    "id": "minecraft:sculk_sensor"
+  },
+  "order": 62
+}

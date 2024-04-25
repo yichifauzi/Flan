@@ -1,0 +1,11 @@
+{
+  "defaultDescription": [
+    "Prevent hostile mobspawn in claim"
+  ],
+  "defaultVal": false,
+  "global": true,
+  "guiItem": {
+    "id": "minecraft:zombie_spawn_egg"
+  },
+  "order": 56
+}

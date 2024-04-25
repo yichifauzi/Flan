@@ -1,6 +1,7 @@
 package io.github.flemmli97.flan.api.permission;
 
 import com.mojang.datafixers.util.Pair;
+import io.github.flemmli97.flan.Flan;
 import io.github.flemmli97.flan.config.ConfigHandler;
 import io.github.flemmli97.flan.platform.CrossPlatformStuff;
 import net.minecraft.core.HolderSet;
@@ -57,15 +58,15 @@ import java.util.function.Supplier;
  */
 public class ObjectToPermissionMap {
 
-    private static final Map<Block, ClaimPermission> blockToPermission = new HashMap<>();
-    private static final Map<Predicate<Block>, Supplier<ClaimPermission>> blockPermissionBuilder = new HashMap<>();
+    private static final Map<Block, ResourceLocation> blockToPermission = new HashMap<>();
+    private static final Map<Predicate<Block>, Supplier<ResourceLocation>> blockPermissionBuilder = new HashMap<>();
 
-    private static final Map<Item, ClaimPermission> itemToPermission = new HashMap<>();
-    private static final Map<Predicate<Item>, Supplier<ClaimPermission>> itemPermissionBuilder = new HashMap<>();
+    private static final Map<Item, ResourceLocation> itemToPermission = new HashMap<>();
+    private static final Map<Predicate<Item>, Supplier<ResourceLocation>> itemPermissionBuilder = new HashMap<>();
 
-    private static final Map<EntityType<?>, ClaimPermission> entityToPermission = new HashMap<>();
+    private static final Map<EntityType<?>, ResourceLocation> entityToPermission = new HashMap<>();
 
-    private static final Map<Block, ClaimPermission> leftClickBlockPermission = new HashMap<>();
+    private static final Map<Block, ResourceLocation> leftClickBlockPermission = new HashMap<>();
 
     public static void reload(MinecraftServer server) {
         blockToPermission.clear();
@@ -84,7 +85,7 @@ public class ObjectToPermissionMap {
         process(ConfigHandler.config.leftClickBlockPermission, BuiltInRegistries.BLOCK, leftClickBlockPermission);
     }
 
-    private static <T> void process(List<String> list, Registry<T> registry, Map<T, ClaimPermission> map) {
+    private static <T> void process(List<String> list, Registry<T> registry, Map<T, ResourceLocation> map) {
         for (String s : list) {
             String[] sub = s.split("-");
             boolean remove = sub[1].equals("NONE");
@@ -93,14 +94,24 @@ public class ObjectToPermissionMap {
                 processTag(res, registry, b -> {
                     if (remove)
                         map.remove(b);
-                    else
-                        map.put(b, PermissionRegistry.get(sub[1]));
+                    else {
+                        ResourceLocation id = BuiltinPermission.tryLegacy(sub[1]);
+                        ClaimPermission perm = PermissionManager.INSTANCE.get(id);
+                        if (perm == null)
+                            Flan.error("Configuring custom permission map: No such permission for {}", sub[1]);
+                        map.put(b, id);
+                    }
                 });
             } else {
                 if (remove)
                     map.remove(registry.get(new ResourceLocation(sub[0])));
-                else
-                    map.put(registry.get(new ResourceLocation(sub[0])), PermissionRegistry.get(sub[1]));
+                else {
+                    ResourceLocation id = BuiltinPermission.tryLegacy(sub[1]);
+                    ClaimPermission perm = PermissionManager.INSTANCE.get(id);
+                    if (perm == null)
+                        Flan.error("Configuring custom permission map: No such permission for {} {}", sub[1], id);
+                    map.put(registry.get(new ResourceLocation(sub[0])), id);
+                }
             }
         }
     }
@@ -111,19 +122,19 @@ public class ObjectToPermissionMap {
         t.ifPresent(holders -> holders.forEach(i -> action.accept(i.value())));
     }
 
-    public static ClaimPermission getFromBlock(Block block) {
+    public static ResourceLocation getFromBlock(Block block) {
         return blockToPermission.get(block);
     }
 
-    public static ClaimPermission getFromItem(Item item) {
+    public static ResourceLocation getFromItem(Item item) {
         return itemToPermission.get(item);
     }
 
-    public static ClaimPermission getFromEntity(EntityType<?> entity) {
+    public static ResourceLocation getFromEntity(EntityType<?> entity) {
         return entityToPermission.get(entity);
     }
 
-    public static ClaimPermission getForLeftClickBlock(Block block) {
+    public static ResourceLocation getForLeftClickBlock(Block block) {
         return leftClickBlockPermission.get(block);
     }
 
@@ -134,7 +145,7 @@ public class ObjectToPermissionMap {
      * @param pred Predicate for blocks that should return the given permission
      * @param perm The given permission
      */
-    public static void registerBlockPredicateMap(Predicate<Block> pred, Supplier<ClaimPermission> perm) {
+    public static void registerBlockPredicateMap(Predicate<Block> pred, Supplier<ResourceLocation> perm) {
         blockPermissionBuilder.put(pred, perm);
     }
 
@@ -145,39 +156,39 @@ public class ObjectToPermissionMap {
      * @param pred Predicate for items that should return the given permission
      * @param perm The given permission
      */
-    public static void registerItemPredicateMap(Predicate<Item> pred, Supplier<ClaimPermission> perm) {
+    public static void registerItemPredicateMap(Predicate<Item> pred, Supplier<ResourceLocation> perm) {
         itemPermissionBuilder.put(pred, perm);
     }
 
     static {
-        registerBlockPredicateMap(block -> block instanceof AnvilBlock, () -> PermissionRegistry.ANVIL);
-        registerBlockPredicateMap(block -> block instanceof BedBlock, () -> PermissionRegistry.BED);
-        registerBlockPredicateMap(block -> block instanceof BeaconBlock, () -> PermissionRegistry.BEACON);
-        registerBlockPredicateMap(block -> block instanceof DoorBlock, () -> PermissionRegistry.DOOR);
-        registerBlockPredicateMap(block -> block instanceof FenceGateBlock, () -> PermissionRegistry.FENCEGATE);
-        registerBlockPredicateMap(block -> block instanceof TrapDoorBlock, () -> PermissionRegistry.TRAPDOOR);
-        registerBlockPredicateMap(block -> block instanceof LeverBlock || block instanceof ButtonBlock, () -> PermissionRegistry.BUTTONLEVER);
-        registerBlockPredicateMap(block -> block instanceof NoteBlock, () -> PermissionRegistry.NOTEBLOCK);
-        registerBlockPredicateMap(block -> block instanceof DiodeBlock || block instanceof RedStoneWireBlock || block instanceof DaylightDetectorBlock, () -> PermissionRegistry.REDSTONE);
-        registerBlockPredicateMap(block -> block instanceof JukeboxBlock, () -> PermissionRegistry.JUKEBOX);
-        registerBlockPredicateMap(block -> block instanceof BasePressurePlateBlock, () -> PermissionRegistry.PRESSUREPLATE);
-        registerBlockPredicateMap(block -> block instanceof NetherPortalBlock, () -> PermissionRegistry.PORTAL);
-        registerBlockPredicateMap(block -> block instanceof TurtleEggBlock || block instanceof FarmBlock, () -> PermissionRegistry.TRAMPLE);
-        registerBlockPredicateMap(block -> block instanceof TargetBlock, () -> PermissionRegistry.TARGETBLOCK);
+        registerBlockPredicateMap(block -> block instanceof AnvilBlock, () -> BuiltinPermission.ANVIL);
+        registerBlockPredicateMap(block -> block instanceof BedBlock, () -> BuiltinPermission.BED);
+        registerBlockPredicateMap(block -> block instanceof BeaconBlock, () -> BuiltinPermission.BEACON);
+        registerBlockPredicateMap(block -> block instanceof DoorBlock, () -> BuiltinPermission.DOOR);
+        registerBlockPredicateMap(block -> block instanceof FenceGateBlock, () -> BuiltinPermission.FENCEGATE);
+        registerBlockPredicateMap(block -> block instanceof TrapDoorBlock, () -> BuiltinPermission.TRAPDOOR);
+        registerBlockPredicateMap(block -> block instanceof LeverBlock || block instanceof ButtonBlock, () -> BuiltinPermission.BUTTONLEVER);
+        registerBlockPredicateMap(block -> block instanceof NoteBlock, () -> BuiltinPermission.NOTEBLOCK);
+        registerBlockPredicateMap(block -> block instanceof DiodeBlock || block instanceof RedStoneWireBlock || block instanceof DaylightDetectorBlock, () -> BuiltinPermission.REDSTONE);
+        registerBlockPredicateMap(block -> block instanceof JukeboxBlock, () -> BuiltinPermission.JUKEBOX);
+        registerBlockPredicateMap(block -> block instanceof BasePressurePlateBlock, () -> BuiltinPermission.PRESSUREPLATE);
+        registerBlockPredicateMap(block -> block instanceof NetherPortalBlock, () -> BuiltinPermission.PORTAL);
+        registerBlockPredicateMap(block -> block instanceof TurtleEggBlock || block instanceof FarmBlock, () -> BuiltinPermission.TRAMPLE);
+        registerBlockPredicateMap(block -> block instanceof TargetBlock, () -> BuiltinPermission.TARGETBLOCK);
         registerBlockPredicateMap(block -> block instanceof BellBlock || block instanceof CampfireBlock
-                || block instanceof TntBlock || block instanceof ChorusFlowerBlock, () -> PermissionRegistry.PROJECTILES);
-        registerBlockPredicateMap(block -> block instanceof EnderChestBlock, () -> PermissionRegistry.ENDERCHEST);
-        registerBlockPredicateMap(block -> block instanceof EnchantmentTableBlock, () -> PermissionRegistry.ENCHANTMENTTABLE);
-        registerBlockPredicateMap(block -> block instanceof BrushableBlock, () -> PermissionRegistry.ARCHAEOLOGY);
+                || block instanceof TntBlock || block instanceof ChorusFlowerBlock, () -> BuiltinPermission.PROJECTILES);
+        registerBlockPredicateMap(block -> block instanceof EnderChestBlock, () -> BuiltinPermission.ENDERCHEST);
+        registerBlockPredicateMap(block -> block instanceof EnchantmentTableBlock, () -> BuiltinPermission.ENCHANTMENTTABLE);
+        registerBlockPredicateMap(block -> block instanceof BrushableBlock, () -> BuiltinPermission.ARCHAEOLOGY);
 
-        registerItemPredicateMap(item -> item instanceof EnderpearlItem, () -> PermissionRegistry.ENDERPEARL);
-        registerItemPredicateMap(item -> item instanceof BucketItem, () -> PermissionRegistry.BUCKET);
-        registerItemPredicateMap(item -> item == Items.END_CRYSTAL, () -> PermissionRegistry.ENDCRYSTALPLACE);
-        registerItemPredicateMap(item -> item == Items.CHORUS_FRUIT, () -> PermissionRegistry.CHORUSFRUIT);
-        registerItemPredicateMap(item -> item == Items.LILY_PAD, () -> PermissionRegistry.PLACE);
-        registerItemPredicateMap(item -> item instanceof BoneMealItem, () -> PermissionRegistry.PLACE);
-        registerItemPredicateMap(item -> item instanceof RecordItem, () -> PermissionRegistry.JUKEBOX);
-        registerItemPredicateMap(item -> item instanceof BoatItem, () -> PermissionRegistry.BOAT);
-        registerItemPredicateMap(item -> item instanceof BrushItem, () -> PermissionRegistry.ARCHAEOLOGY);
+        registerItemPredicateMap(item -> item instanceof EnderpearlItem, () -> BuiltinPermission.ENDERPEARL);
+        registerItemPredicateMap(item -> item instanceof BucketItem, () -> BuiltinPermission.BUCKET);
+        registerItemPredicateMap(item -> item == Items.END_CRYSTAL, () -> BuiltinPermission.ENDCRYSTALPLACE);
+        registerItemPredicateMap(item -> item == Items.CHORUS_FRUIT, () -> BuiltinPermission.CHORUSFRUIT);
+        registerItemPredicateMap(item -> item == Items.LILY_PAD, () -> BuiltinPermission.PLACE);
+        registerItemPredicateMap(item -> item instanceof BoneMealItem, () -> BuiltinPermission.PLACE);
+        registerItemPredicateMap(item -> item instanceof RecordItem, () -> BuiltinPermission.JUKEBOX);
+        registerItemPredicateMap(item -> item instanceof BoatItem, () -> BuiltinPermission.BOAT);
+        registerItemPredicateMap(item -> item instanceof BrushItem, () -> BuiltinPermission.ARCHAEOLOGY);
     }
 }

@@ -1,8 +1,6 @@
 package io.github.flemmli97.flan;
 
-import io.github.flemmli97.flan.api.permission.PermissionRegistry;
 import io.github.flemmli97.flan.config.ConfigHandler;
-import net.minecraft.server.MinecraftServer;
 import org.apache.logging.log4j.LogManager;
 import org.apache.logging.log4j.Logger;
 
@@ -13,29 +11,27 @@ import java.util.Arrays;
 
 public class Flan {
 
-    public static final Logger logger = LogManager.getLogger("flan");
+    public static final String MODID = "flan";
+
+    public static final Logger LOGGER = LogManager.getLogger(MODID);
 
     public static boolean permissionAPI, playerAbilityLib, ftbRanks, diceMCMoneySign, octoEconomy,
             diamondCurrency, ftbChunks, gomlServer, mineColonies, commonProtApi, impactor, create;
 
-    public static final DateTimeFormatter onlineTimeFormatter = DateTimeFormatter.ofPattern("yyyy-MM-dd HH:mm");
-
-    public static void lockRegistry(MinecraftServer server) {
-        PermissionRegistry.lock();
-    }
+    public static final DateTimeFormatter ONLINE_TIME_FORMATTER = DateTimeFormatter.ofPattern("yyyy-MM-dd HH:mm");
 
     public static void log(String msg, Object... o) {
         if (ConfigHandler.config.log)
-            Flan.logger.info(msg, o);
+            Flan.LOGGER.info(msg, o);
     }
 
     public static void debug(String msg, Object... o) {
         if (ConfigHandler.config.log)
-            Flan.logger.debug(msg, o);
+            Flan.LOGGER.debug(msg, o);
     }
 
     public static void error(String msg, Object... o) {
-        Flan.logger.error(msg, o);
+        Flan.LOGGER.error(msg, o);
     }
 
     @SuppressWarnings("unchecked")
@@ -52,13 +48,13 @@ public class Flan {
             i++;
         }
         if (clss == null)
-            Flan.logger.fatal("No Implementation of " + abstractClss + " found with given paths " + Arrays.toString(impls));
+            Flan.LOGGER.fatal("No Implementation of " + abstractClss + " found with given paths " + Arrays.toString(impls));
         else if (abstractClss.isAssignableFrom(clss)) {
             try {
                 Constructor<T> constructor = (Constructor<T>) clss.getDeclaredConstructor();
                 return constructor.newInstance();
             } catch (NoSuchMethodException e) {
-                Flan.logger.fatal("Implementation of " + clss + " needs to provide an no arg constructor");
+                Flan.LOGGER.fatal("Implementation of " + clss + " needs to provide an no arg constructor");
             } catch (InstantiationException | IllegalAccessException | InvocationTargetException e) {
                 e.printStackTrace();
             }

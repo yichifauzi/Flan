@@ -1,17 +1,14 @@
 package io.github.flemmli97.flan.platform.integration.create;
 
-import com.simibubi.create.AllBlocks;
 import com.simibubi.create.content.contraptions.AbstractContraptionEntity;
 import io.github.flemmli97.flan.Flan;
-import io.github.flemmli97.flan.api.permission.ClaimPermission;
-import io.github.flemmli97.flan.api.permission.PermissionRegistry;
 import io.github.flemmli97.flan.claim.Claim;
 import io.github.flemmli97.flan.claim.ClaimStorage;
 import net.minecraft.core.BlockPos;
+import net.minecraft.resources.ResourceLocation;
 import net.minecraft.server.level.ServerLevel;
 import net.minecraft.util.Mth;
 import net.minecraft.world.entity.vehicle.AbstractMinecart;
-import net.minecraft.world.item.ItemStack;
 import net.minecraft.world.phys.AABB;
 import net.minecraft.world.phys.Vec3;
 
@@ -19,12 +16,7 @@ import java.util.Set;
 
 public class CreateCompat {
 
-    private static ClaimPermission CREATE;
-
-    public static void init() {
-        Flan.create = true;
-        CREATE = PermissionRegistry.global(new ClaimPermission("CONTRAPTION", () -> new ItemStack(AllBlocks.CART_ASSEMBLER.get()), "Gives permission to allow minecart contraptions to pass through claim border.", "Note if this is disabled and your contraption goes out of the claim it can't go back in!"));
-    }
+    public static final ResourceLocation CREATE = new ResourceLocation(Flan.MODID, "create_contraption");
 
     // Checks if a minecart with a contraption can cross a claims border
     public static boolean canMinecartPass(AbstractMinecart minecart) {

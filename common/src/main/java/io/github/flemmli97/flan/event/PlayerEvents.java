@@ -1,8 +1,7 @@
 package io.github.flemmli97.flan.event;
 
-import io.github.flemmli97.flan.api.permission.ClaimPermission;
+import io.github.flemmli97.flan.api.permission.BuiltinPermission;
 import io.github.flemmli97.flan.api.permission.ObjectToPermissionMap;
-import io.github.flemmli97.flan.api.permission.PermissionRegistry;
 import io.github.flemmli97.flan.claim.ClaimStorage;
 import io.github.flemmli97.flan.claim.PermHelper;
 import io.github.flemmli97.flan.config.ConfigHandler;
@@ -15,6 +14,7 @@ import net.minecraft.core.registries.Registries;
 import net.minecraft.data.worldgen.features.CaveFeatures;
 import net.minecraft.data.worldgen.features.NetherFeatures;
 import net.minecraft.resources.ResourceKey;
+import net.minecraft.resources.ResourceLocation;
 import net.minecraft.server.level.ServerPlayer;
 import net.minecraft.world.entity.Entity;
 import net.minecraft.world.entity.player.Player;
@@ -50,12 +50,12 @@ public class PlayerEvents {
         if (context.getPlayer() instanceof ServerPlayer serverPlayer) {
             BlockState state = serverPlayer.level().getBlockState(context.getClickedPos());
             BlockPos.MutableBlockPos pos = context.getClickedPos().mutable();
-            ClaimPermission perm = ObjectToPermissionMap.getFromItem(context.getItemInHand().getItem());
+            ResourceLocation perm = ObjectToPermissionMap.getFromItem(context.getItemInHand().getItem());
             /**
              * {@link ItemInteractEvents#onItemUseBlock} handles this case already.
              * Sadly need to check again. In case its used in a claim. Less expensive than aoe check
              */
-            if (!ClaimStorage.get(serverPlayer.serverLevel()).getForPermissionCheck(pos).canInteract(serverPlayer, perm, pos, false))
+            if (perm != null && !ClaimStorage.get(serverPlayer.serverLevel()).getForPermissionCheck(pos).canInteract(serverPlayer, perm, pos, false))
                 return false;
             int range = 0;
             Registry<ConfiguredFeature<?, ?>> registry = serverPlayer.level().registryAccess().registryOrThrow(Registries.CONFIGURED_FEATURE);
@@ -98,17 +98,17 @@ public class PlayerEvents {
     public static float canSpawnFromPlayer(Entity entity, float old) {
         BlockPos pos;
         if (entity instanceof ServerPlayer player &&
-                !ClaimStorage.get(player.serverLevel()).getForPermissionCheck(pos = player.blockPosition()).canInteract(player, PermissionRegistry.PLAYERMOBSPAWN, pos, false))
+                !ClaimStorage.get(player.serverLevel()).getForPermissionCheck(pos = player.blockPosition()).canInteract(player, BuiltinPermission.PLAYERMOBSPAWN, pos, false))
             return -1;
         return old;
     }
 
     public static boolean canWardenSpawnTrigger(BlockPos pos, ServerPlayer player) {
-        return ClaimStorage.get(player.serverLevel()).getForPermissionCheck(pos).canInteract(player, PermissionRegistry.PLAYERMOBSPAWN, pos, false);
+        return ClaimStorage.get(player.serverLevel()).getForPermissionCheck(pos).canInteract(player, BuiltinPermission.PLAYERMOBSPAWN, pos, false);
     }
 
     public static boolean canSculkTrigger(BlockPos pos, ServerPlayer player) {
-        return ClaimStorage.get(player.serverLevel()).getForPermissionCheck(pos).canInteract(player, PermissionRegistry.SCULK, pos, false);
+        return ClaimStorage.get(player.serverLevel()).getForPermissionCheck(pos).canInteract(player, BuiltinPermission.SCULK, pos, false);
     }
 
     @SuppressWarnings("unchecked")

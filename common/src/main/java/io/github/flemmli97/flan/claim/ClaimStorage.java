@@ -11,8 +11,8 @@ import io.github.flemmli97.flan.Flan;
 import io.github.flemmli97.flan.api.data.IPermissionContainer;
 import io.github.flemmli97.flan.api.data.IPermissionStorage;
 import io.github.flemmli97.flan.api.data.IPlayerData;
-import io.github.flemmli97.flan.api.permission.ClaimPermission;
-import io.github.flemmli97.flan.api.permission.PermissionRegistry;
+import io.github.flemmli97.flan.api.permission.BuiltinPermission;
+import io.github.flemmli97.flan.api.permission.PermissionManager;
 import io.github.flemmli97.flan.config.ConfigHandler;
 import io.github.flemmli97.flan.platform.integration.claiming.OtherClaimingModCheck;
 import io.github.flemmli97.flan.platform.integration.permissions.PermissionNodeHandler;
@@ -34,6 +34,7 @@ import net.minecraft.network.chat.Component;
 import net.minecraft.network.chat.HoverEvent;
 import net.minecraft.network.chat.MutableComponent;
 import net.minecraft.resources.ResourceKey;
+import net.minecraft.resources.ResourceLocation;
 import net.minecraft.server.MinecraftServer;
 import net.minecraft.server.level.ServerLevel;
 import net.minecraft.server.level.ServerPlayer;
@@ -63,7 +64,7 @@ import java.util.stream.Collectors;
 
 public class ClaimStorage implements IPermissionStorage {
 
-    public static final String adminClaimString = "!AdminClaims";
+    public static final String ADMIN_CLAIMS = "!AdminClaims";
     private final Long2ObjectMap<List<Claim>> claims = new Long2ObjectOpenHashMap<>();
     private final Map<UUID, Claim> claimUUIDMap = new HashMap<>();
     private final Map<UUID, Set<Claim>> playerClaimMap = new HashMap<>();
@@ -275,7 +276,7 @@ public class ClaimStorage implements IPermissionStorage {
         return affected;
     }
 
-    public boolean canInteract(BlockPos pos, int radius, ServerPlayer player, ClaimPermission perm, boolean message) {
+    public boolean canInteract(BlockPos pos, int radius, ServerPlayer player, ResourceLocation perm, boolean message) {
         boolean realPlayer = player != null && player.getClass().equals(ServerPlayer.class);
         message = message && realPlayer;
         Set<Claim> affected = this.getNearbyClaims(pos, radius, radius);
@@ -371,7 +372,7 @@ public class ClaimStorage implements IPermissionStorage {
                     if (!name.endsWith(".json"))
                         continue;
                     String realName = name.replace(".json", "");
-                    UUID uuid = realName.equals(adminClaimString) ? null : UUID.fromString(realName);
+                    UUID uuid = realName.equals(ADMIN_CLAIMS) ? null : UUID.fromString(realName);
                     JsonReader reader = ConfigHandler.GSON.newJsonReader(Files.newBufferedReader(file, StandardCharsets.UTF_8));
                     JsonArray arr = ConfigHandler.GSON.fromJson(reader, JsonArray.class);
                     reader.close();
@@ -396,7 +397,7 @@ public class ClaimStorage implements IPermissionStorage {
         try {
             Files.createDirectories(dir);
             for (Map.Entry<UUID, Set<Claim>> e : this.playerClaimMap.entrySet()) {
-                String owner = e.getKey() == null ? adminClaimString : e.getKey().toString();
+                String owner = e.getKey() == null ? ADMIN_CLAIMS : e.getKey().toString();
                 Path file = dir.resolve(owner + ".json");
                 Flan.debug("Attempting saving claim data for player uuid {}", owner);
                 boolean dirty = false;
@@ -410,7 +411,7 @@ public class ClaimStorage implements IPermissionStorage {
                         Files.delete(file);
                         continue;
                     }
-                    if (this.dirty.remove(owner.equals(adminClaimString) ? null : e.getKey())) {
+                    if (this.dirty.remove(owner.equals(ADMIN_CLAIMS) ? null : e.getKey())) {
                         dirty = true;
                     } else {
                         for (Claim claim : e.getValue())
@@ -444,19 +445,19 @@ public class ClaimStorage implements IPermissionStorage {
         Map<File, List<File>> subClaimMap = new HashMap<>();
         Map<Integer, File> intFileMap = new HashMap<>();
 
-        Set<ClaimPermission> managers = complementOf(PermissionRegistry.EDITCLAIM);
-        Set<ClaimPermission> builders = complementOf(PermissionRegistry.EDITPERMS, PermissionRegistry.EDITCLAIM);
-        Set<ClaimPermission> containers = complementOf(PermissionRegistry.EDITPERMS, PermissionRegistry.EDITCLAIM,
-                PermissionRegistry.BREAK, PermissionRegistry.PLACE, PermissionRegistry.NOTEBLOCK, PermissionRegistry.REDSTONE, PermissionRegistry.JUKEBOX,
-                PermissionRegistry.ITEMFRAMEROTATE, PermissionRegistry.LECTERNTAKE, PermissionRegistry.ENDCRYSTALPLACE, PermissionRegistry.PROJECTILES,
-                PermissionRegistry.TRAMPLE, PermissionRegistry.RAID, PermissionRegistry.BUCKET, PermissionRegistry.ARMORSTAND, PermissionRegistry.BREAKNONLIVING);
-        Set<ClaimPermission> accessors = complementOf(PermissionRegistry.EDITPERMS, PermissionRegistry.EDITCLAIM,
-                PermissionRegistry.BREAK, PermissionRegistry.PLACE, PermissionRegistry.OPENCONTAINER, PermissionRegistry.ANVIL, PermissionRegistry.BEACON,
-                PermissionRegistry.NOTEBLOCK, PermissionRegistry.REDSTONE, PermissionRegistry.JUKEBOX, PermissionRegistry.ITEMFRAMEROTATE,
-                PermissionRegistry.LECTERNTAKE, PermissionRegistry.ENDCRYSTALPLACE, PermissionRegistry.PROJECTILES, PermissionRegistry.TRAMPLE, PermissionRegistry.RAID,
-                PermissionRegistry.BUCKET, PermissionRegistry.ANIMALINTERACT, PermissionRegistry.HURTANIMAL, PermissionRegistry.TRADING, PermissionRegistry.ARMORSTAND,
-                PermissionRegistry.BREAKNONLIVING);
-        Map<String, Set<ClaimPermission>> perms = new HashMap<>();
+        Set<ResourceLocation> managers = complementOf(BuiltinPermission.EDITCLAIM);
+        Set<ResourceLocation> builders = complementOf(BuiltinPermission.EDITPERMS, BuiltinPermission.EDITCLAIM);
+        Set<ResourceLocation> containers = complementOf(BuiltinPermission.EDITPERMS, BuiltinPermission.EDITCLAIM,
+                BuiltinPermission.BREAK, BuiltinPermission.PLACE, BuiltinPermission.NOTEBLOCK, BuiltinPermission.REDSTONE, BuiltinPermission.JUKEBOX,
+                BuiltinPermission.ITEMFRAMEROTATE, BuiltinPermission.LECTERNTAKE, BuiltinPermission.ENDCRYSTALPLACE, BuiltinPermission.PROJECTILES,
+                BuiltinPermission.TRAMPLE, BuiltinPermission.RAID, BuiltinPermission.BUCKET, BuiltinPermission.ARMORSTAND, BuiltinPermission.BREAKNONLIVING);
+        Set<ResourceLocation> accessors = complementOf(BuiltinPermission.EDITPERMS, BuiltinPermission.EDITCLAIM,
+                BuiltinPermission.BREAK, BuiltinPermission.PLACE, BuiltinPermission.OPENCONTAINER, BuiltinPermission.ANVIL, BuiltinPermission.BEACON,
+                BuiltinPermission.NOTEBLOCK, BuiltinPermission.REDSTONE, BuiltinPermission.JUKEBOX, BuiltinPermission.ITEMFRAMEROTATE,
+                BuiltinPermission.LECTERNTAKE, BuiltinPermission.ENDCRYSTALPLACE, BuiltinPermission.PROJECTILES, BuiltinPermission.TRAMPLE, BuiltinPermission.RAID,
+                BuiltinPermission.BUCKET, BuiltinPermission.ANIMALINTERACT, BuiltinPermission.HURTANIMAL, BuiltinPermission.TRADING, BuiltinPermission.ARMORSTAND,
+                BuiltinPermission.BREAKNONLIVING);
+        Map<String, Set<ResourceLocation>> perms = new HashMap<>();
         perms.put("managers", managers);
         perms.put("builders", builders);
         perms.put("containers", containers);
@@ -524,15 +525,15 @@ public class ClaimStorage implements IPermissionStorage {
         return true;
     }
 
-    private static Set<ClaimPermission> complementOf(ClaimPermission... perms) {
-        Set<ClaimPermission> set = Sets.newHashSet(PermissionRegistry.getPerms());
-        for (ClaimPermission perm : perms)
+    private static Set<ResourceLocation> complementOf(ResourceLocation... perms) {
+        Set<ResourceLocation> set = Sets.newHashSet(PermissionManager.INSTANCE.getIds());
+        for (ResourceLocation perm : perms)
             set.remove(perm);
         return set;
     }
 
     private static Tuple<ServerLevel, Claim> parseFromYaml(File file, Yaml yml, MinecraftServer server,
-                                                           Map<String, Set<ClaimPermission>> perms) throws IOException {
+                                                           Map<String, Set<ResourceLocation>> perms) throws IOException {
         FileReader reader = new FileReader(file);
         Map<String, Object> values = yml.load(reader);
         reader.close();
@@ -552,7 +553,7 @@ public class ClaimStorage implements IPermissionStorage {
         if (!builders.isEmpty() && !builders.contains(ownerString)) {
             if (builders.contains("public")) {
                 perms.get("builders").forEach(perm -> {
-                    if (!PermissionRegistry.globalPerms().contains(perm))
+                    if (!PermissionManager.INSTANCE.isGlobalPermission(perm))
                         claim.editGlobalPerms(null, perm, 1);
                 });
             } else {
@@ -563,7 +564,7 @@ public class ClaimStorage implements IPermissionStorage {
         if (!managers.isEmpty() && !managers.contains(ownerString)) {
             if (managers.contains("public")) {
                 perms.get("managers").forEach(perm -> {
-                    if (!PermissionRegistry.globalPerms().contains(perm))
+                    if (!PermissionManager.INSTANCE.isGlobalPermission(perm))
                         claim.editGlobalPerms(null, perm, 1);
                 });
             } else {
@@ -574,7 +575,7 @@ public class ClaimStorage implements IPermissionStorage {
         if (!containers.isEmpty() && !containers.contains(ownerString)) {
             if (containers.contains("public")) {
                 perms.get("containers").forEach(perm -> {
-                    if (!PermissionRegistry.globalPerms().contains(perm))
+                    if (!PermissionManager.INSTANCE.isGlobalPermission(perm))
                         claim.editGlobalPerms(null, perm, 1);
                 });
             } else {
@@ -585,7 +586,7 @@ public class ClaimStorage implements IPermissionStorage {
         if (!accessors.isEmpty() && !accessors.contains(ownerString)) {
             if (accessors.contains("public")) {
                 perms.get("accessors").forEach(perm -> {
-                    if (!PermissionRegistry.globalPerms().contains(perm))
+                    if (!PermissionManager.INSTANCE.isGlobalPermission(perm))
                         claim.editGlobalPerms(null, perm, 1);
                 });
             } else {

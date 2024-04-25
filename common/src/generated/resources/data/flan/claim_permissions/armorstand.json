@@ -1,0 +1,11 @@
+{
+  "defaultDescription": [
+    "Permission to interact with armor stands"
+  ],
+  "defaultVal": false,
+  "global": false,
+  "guiItem": {
+    "id": "minecraft:armor_stand"
+  },
+  "order": 39
+}

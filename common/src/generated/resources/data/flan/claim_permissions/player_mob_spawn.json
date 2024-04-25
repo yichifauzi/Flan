@@ -1,0 +1,12 @@
+{
+  "defaultDescription": [
+    "Permission for affected players to spawn mobs with interactions",
+    "E.g. wardens, or endermites with enderpearls"
+  ],
+  "defaultVal": false,
+  "global": true,
+  "guiItem": {
+    "id": "minecraft:warden_spawn_egg"
+  },
+  "order": 61
+}

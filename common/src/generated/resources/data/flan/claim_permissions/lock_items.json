@@ -1,0 +1,11 @@
+{
+  "defaultDescription": [
+    "If items should be locked on death"
+  ],
+  "defaultVal": true,
+  "global": true,
+  "guiItem": {
+    "id": "minecraft:firework_star"
+  },
+  "order": 59
+}

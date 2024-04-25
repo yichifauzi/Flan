@@ -1,0 +1,11 @@
+{
+  "defaultDescription": [
+    "Allow non creative flight"
+  ],
+  "defaultVal": true,
+  "global": false,
+  "guiItem": {
+    "id": "minecraft:feather"
+  },
+  "order": 43
+}

@@ -1,6 +1,5 @@
 package io.github.flemmli97.flan.forge.forgeevent;
 
-import io.github.flemmli97.flan.Flan;
 import io.github.flemmli97.flan.commands.CommandClaim;
 import io.github.flemmli97.flan.config.ConfigHandler;
 import io.github.flemmli97.flan.event.PlayerEvents;
@@ -18,7 +17,6 @@ import net.minecraftforge.fml.ModList;
 public class ServerEvents {
 
     public static void serverStart(ServerAboutToStartEvent event) {
-        Flan.lockRegistry(event.getServer());
         ConfigHandler.serverLoad(event.getServer());
 
         if (ModList.get().isLoaded("bluemap"))

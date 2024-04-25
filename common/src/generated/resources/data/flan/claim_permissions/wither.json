@@ -1,0 +1,11 @@
+{
+  "defaultDescription": [
+    "Toggle wither breaking blocks in claim"
+  ],
+  "defaultVal": false,
+  "global": true,
+  "guiItem": {
+    "id": "minecraft:wither_skeleton_skull"
+  },
+  "order": 50
+}

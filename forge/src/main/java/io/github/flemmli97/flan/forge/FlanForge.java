@@ -1,15 +1,16 @@
 package io.github.flemmli97.flan.forge;
 
 import io.github.flemmli97.flan.Flan;
+import io.github.flemmli97.flan.api.permission.PermissionManager;
 import io.github.flemmli97.flan.forge.forgeevent.BlockInteractEventsForge;
 import io.github.flemmli97.flan.forge.forgeevent.EntityInteractEventsForge;
 import io.github.flemmli97.flan.forge.forgeevent.ItemInteractEventsForge;
 import io.github.flemmli97.flan.forge.forgeevent.ServerEvents;
 import io.github.flemmli97.flan.forge.forgeevent.WorldEventsForge;
-import io.github.flemmli97.flan.platform.integration.create.CreateCompat;
 import io.github.flemmli97.flan.platform.integration.webmap.DynmapIntegration;
 import io.github.flemmli97.flan.scoreboard.ClaimCriterias;
 import net.minecraftforge.common.MinecraftForge;
+import net.minecraftforge.event.AddReloadListenerEvent;
 import net.minecraftforge.eventbus.api.EventPriority;
 import net.minecraftforge.eventbus.api.IEventBus;
 import net.minecraftforge.fml.IExtensionPoint;
@@ -56,12 +57,16 @@ public class FlanForge {
         forge.addListener(ServerEvents::serverFinishLoad);
         forge.addListener(ServerEvents::disconnect);
         forge.addListener(ServerEvents::serverTick);
+        forge.addListener(this::addReloadListener);
 
         if (ModList.get().isLoaded("dynmap"))
             DynmapIntegration.reg();
-        if (ModList.get().isLoaded("create"))
-            CreateCompat.init();
+        Flan.create = ModList.get().isLoaded("create");
 
         ClaimCriterias.init();
+    }
+
+    public void addReloadListener(AddReloadListenerEvent event) {
+        event.addListener(PermissionManager.INSTANCE);
     }
 }

@@ -49,7 +49,7 @@ public class OfflinePlayerData implements IPlayerData {
                 claim = ConfigHandler.fromJson(obj, "ClaimBlocks", claim);
                 add = ConfigHandler.fromJson(obj, "AdditionalBlocks", add);
                 if (obj.has("LastSeen"))
-                    last = LocalDateTime.parse(obj.get("LastSeen").getAsString(), Flan.onlineTimeFormatter);
+                    last = LocalDateTime.parse(obj.get("LastSeen").getAsString(), Flan.ONLINE_TIME_FORMATTER);
             } catch (IOException e) {
                 e.printStackTrace();
             } catch (RuntimeException e) {
@@ -102,7 +102,7 @@ public class OfflinePlayerData implements IPlayerData {
                 obj = new JsonObject();
                 obj.addProperty("ClaimBlocks", this.claimBlocks);
                 obj.addProperty("AdditionalBlocks", this.additionalClaimBlocks);
-                obj.addProperty("LastSeen", this.lastOnline.format(Flan.onlineTimeFormatter));
+                obj.addProperty("LastSeen", this.lastOnline.format(Flan.ONLINE_TIME_FORMATTER));
                 JsonObject defPerm = new JsonObject();
                 obj.add("DefaultGroups", defPerm);
             } else

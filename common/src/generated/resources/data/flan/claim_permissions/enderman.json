@@ -1,0 +1,11 @@
+{
+  "defaultDescription": [
+    "Allow enderman picking and placing blocks"
+  ],
+  "defaultVal": true,
+  "global": true,
+  "guiItem": {
+    "id": "minecraft:ender_eye"
+  },
+  "order": 51
+}

@@ -4,6 +4,13 @@ loom {
     forge {
         mixinConfigs = ["flan.mixins.json", "flan.forge.mixins.json"]
     }
+    runs {
+        data {
+            data()
+            programArgs "--all", "--mod", "flan"
+            programArgs "--output", project(":common").file("src/generated/resources").absolutePath
+        }
+    }
 }
 
 repositories {

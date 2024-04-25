@@ -12,6 +12,8 @@ import net.minecraft.world.item.Item;
 import net.minecraft.world.level.block.Block;
 import net.minecraft.world.level.block.entity.BlockEntity;
 import net.minecraftforge.common.capabilities.ForgeCapabilities;
+import net.minecraftforge.data.loading.DatagenModLoader;
+import net.minecraftforge.fml.ModList;
 import net.minecraftforge.fml.loading.FMLPaths;
 import net.minecraftforge.registries.ForgeRegistries;
 
@@ -22,6 +24,16 @@ public class CrossPlatformStuffImpl implements CrossPlatformStuff {
     @Override
     public Path configPath() {
         return FMLPaths.CONFIGDIR.get();
+    }
+
+    @Override
+    public boolean isDataGen() {
+        return DatagenModLoader.isRunningDataGen();
+    }
+
+    @Override
+    public boolean isModLoaded(String mod) {
+        return ModList.get().isLoaded(mod);
     }
 
     @Override

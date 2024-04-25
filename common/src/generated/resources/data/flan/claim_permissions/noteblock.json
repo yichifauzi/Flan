@@ -1,0 +1,11 @@
+{
+  "defaultDescription": [
+    "Permission to change noteblocks"
+  ],
+  "defaultVal": false,
+  "global": false,
+  "guiItem": {
+    "id": "minecraft:note_block"
+  },
+  "order": 16
+}

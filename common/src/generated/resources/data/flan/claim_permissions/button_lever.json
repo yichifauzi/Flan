@@ -1,0 +1,11 @@
+{
+  "defaultDescription": [
+    "Permission to trigger levers and buttons"
+  ],
+  "defaultVal": false,
+  "global": false,
+  "guiItem": {
+    "id": "minecraft:lever"
+  },
+  "order": 14
+}

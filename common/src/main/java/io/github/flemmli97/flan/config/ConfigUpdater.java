@@ -2,7 +2,7 @@ package io.github.flemmli97.flan.config;
 
 import com.google.gson.JsonObject;
 import io.github.flemmli97.flan.Flan;
-import io.github.flemmli97.flan.api.permission.PermissionRegistry;
+import io.github.flemmli97.flan.api.permission.BuiltinPermission;
 
 import java.util.Map;
 
@@ -13,9 +13,9 @@ public class ConfigUpdater {
             Flan.debug("Updating config to version 2");
             ConfigHandler.config.globalDefaultPerms.compute("*", (k, v) -> {
                 if (v == null) {
-                    return Config.createHashMap(map1 -> map1.put(PermissionRegistry.LOCKITEMS, Config.GlobalType.ALLTRUE));
+                    return Config.createHashMap(map1 -> map1.put(BuiltinPermission.LOCKITEMS, Config.GlobalType.ALLTRUE));
                 } else {
-                    v.put(PermissionRegistry.LOCKITEMS, Config.GlobalType.ALLTRUE);
+                    v.put(BuiltinPermission.LOCKITEMS, Config.GlobalType.ALLTRUE);
                     return v;
                 }
             });

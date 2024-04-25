@@ -1,0 +1,11 @@
+{
+  "defaultDescription": [
+    "Allow the pickup of items"
+  ],
+  "defaultVal": true,
+  "global": false,
+  "guiItem": {
+    "id": "minecraft:brick"
+  },
+  "order": 42
+}
