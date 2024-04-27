@@ -2,22 +2,29 @@ package io.github.flemmli97.flan.api.permission;
 
 import io.github.flemmli97.flan.Flan;
 import io.github.flemmli97.flan.platform.CrossPlatformStuff;
+import net.minecraft.core.HolderLookup;
+import net.minecraft.core.registries.Registries;
 import net.minecraft.resources.ResourceLocation;
 import net.minecraft.world.entity.raid.Raid;
 import net.minecraft.world.item.ItemStack;
 import net.minecraft.world.item.Items;
 
 import java.util.HashMap;
+import java.util.LinkedHashMap;
 import java.util.List;
 import java.util.Locale;
 import java.util.Map;
+import java.util.function.Function;
 
+/**
+ * IDs of all permissions provided by default
+ */
 public class BuiltinPermission {
 
     /**
      * For datagen
      */
-    public static final Map<ResourceLocation, ClaimPermission.Builder> DATAGEN_DATA = new HashMap<>();
+    public static final Map<ResourceLocation, Function<HolderLookup.Provider, ClaimPermission.Builder>> DATAGEN_DATA = new LinkedHashMap<>();
     private static final HashMap<String, ResourceLocation> LEGACY_MIGRATION = new HashMap<>();
     public static int order = 0;
 
@@ -50,7 +57,7 @@ public class BuiltinPermission {
     public static ResourceLocation TRAMPLE = register("trample", new ItemStack(Items.FARMLAND), "Permission to enable block trampling", "(farmland, turtle eggs)");
     public static ResourceLocation FROSTWALKER = register("frost_walker", new ItemStack(Items.LEATHER_BOOTS), "Permission for frostwalker to activate");
     public static ResourceLocation PORTAL = register("portal", new ItemStack(Items.OBSIDIAN), true, "Permission to use nether portals");
-    public static ResourceLocation RAID = register("raid", Raid.getLeaderBannerInstance(), "Permission to trigger raids in claim.", "Wont prevent raids (just) outside");
+    public static ResourceLocation RAID = register("raid", holder -> Raid.getLeaderBannerInstance(holder.lookupOrThrow(Registries.BANNER_PATTERN)), false, false, "Permission to trigger raids in claim.", "Wont prevent raids (just) outside");
     public static ResourceLocation BOAT = register("boat", new ItemStack(Items.OAK_BOAT), "Permission to use boats");
     public static ResourceLocation MINECART = register("minecart", new ItemStack(Items.MINECART), "Permission to sit in minecarts");
     public static ResourceLocation BUCKET = register("bucket", new ItemStack(Items.BUCKET), "Permission to take liquids with buckets");
@@ -87,7 +94,6 @@ public class BuiltinPermission {
     public static ResourceLocation SCULK = register("sculk", new ItemStack(Items.SCULK_SENSOR), false, true, "Permission for sculk sensors.", "Shriekers are handled under PLAYERMOBSPAWN");
     public static ResourceLocation ARCHAEOLOGY = register("archeology", new ItemStack(Items.BRUSH), false, true, "Allow players to brush blocks in this claim");
 
-
     private static ResourceLocation register(String id, ItemStack item, String... description) {
         return register(id, item, false, description);
     }
@@ -97,9 +103,13 @@ public class BuiltinPermission {
     }
 
     private static ResourceLocation register(String key, ItemStack item, boolean defaultVal, boolean global, String... description) {
+        return register(key, h -> item, defaultVal, global, description);
+    }
+
+    private static ResourceLocation register(String key, Function<HolderLookup.Provider, ItemStack> item, boolean defaultVal, boolean global, String... description) {
         ResourceLocation id = new ResourceLocation(Flan.MODID, key);
         if (CrossPlatformStuff.INSTANCE.isDataGen()) {
-            DATAGEN_DATA.put(id, new ClaimPermission.Builder(item, defaultVal, global, order++, List.of(description)));
+            DATAGEN_DATA.put(id, holder -> new ClaimPermission.Builder(item.apply(holder), defaultVal, global, order++, List.of(description)));
         }
         LEGACY_MIGRATION.put(key.replace("_", "").toUpperCase(Locale.ROOT), id);
         return id;

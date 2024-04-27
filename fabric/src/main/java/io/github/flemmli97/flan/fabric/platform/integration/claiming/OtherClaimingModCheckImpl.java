@@ -13,11 +13,12 @@ import java.util.Set;
 
 public class OtherClaimingModCheckImpl implements OtherClaimingModCheck {
 
+    @Override
     public void findConflicts(Claim claim, Set<DisplayBox> set) {
         FTBChunks.findConflicts(claim, set);
         if (Flan.gomlServer && ConfigHandler.config.gomlReservedCheck) {
             int[] dim = claim.getDimensions();
-            ClaimUtils.getClaimsInBox(claim.getWorld(), ClaimUtils.createBox(dim[0] - 1, dim[4], dim[2] - 1, dim[1] + 1, claim.getWorld().getMaxBuildHeight(), dim[3] + 1))
+            ClaimUtils.getClaimsInBox(claim.getLevel(), ClaimUtils.createBox(dim[0] - 1, dim[4], dim[2] - 1, dim[1] + 1, claim.getLevel().getMaxBuildHeight(), dim[3] + 1))
                     .forEach(e -> {
                         if (!e.getValue().hasPermission(claim.getOwner()))
                             set.add(convertBox(e.getValue()));

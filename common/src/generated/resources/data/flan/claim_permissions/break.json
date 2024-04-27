@@ -5,10 +5,7 @@
   "defaultVal": false,
   "global": false,
   "guiItem": {
-    "id": "minecraft:diamond_pickaxe",
-    "tag": {
-      "Damage": 0
-    }
+    "id": "minecraft:diamond_pickaxe"
   },
   "order": 3
 }

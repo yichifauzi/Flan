@@ -1,5 +1,6 @@
 Flan 1.10.0
 ================
+- Port to 1.20.5
 - Fix wandering trader not being in trade permission
 - Permissions are now done via datapack allowing adding more permissions easier.
   This can be used in conjunction with e.g. `itemPermission` config.  

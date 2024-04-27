@@ -9,10 +9,8 @@ import io.github.flemmli97.flan.config.ConfigHandler;
 import io.github.flemmli97.flan.player.PlayerClaimData;
 import net.minecraft.ChatFormatting;
 import net.minecraft.core.Holder;
+import net.minecraft.core.component.DataComponents;
 import net.minecraft.core.registries.BuiltInRegistries;
-import net.minecraft.nbt.CompoundTag;
-import net.minecraft.nbt.ListTag;
-import net.minecraft.nbt.StringTag;
 import net.minecraft.network.chat.Component;
 import net.minecraft.network.chat.Style;
 import net.minecraft.network.protocol.game.ClientboundSoundPacket;
@@ -22,6 +20,8 @@ import net.minecraft.sounds.SoundEvent;
 import net.minecraft.sounds.SoundSource;
 import net.minecraft.world.item.ItemStack;
 import net.minecraft.world.item.Items;
+import net.minecraft.world.item.component.CustomData;
+import net.minecraft.world.item.component.ItemLore;
 
 import java.util.ArrayList;
 import java.util.HashMap;
@@ -34,19 +34,19 @@ public class ServerScreenHelper {
 
     public static ItemStack emptyFiller() {
         ItemStack stack = new ItemStack(Items.GRAY_STAINED_GLASS_PANE);
-        stack.setHoverName(PermHelper.simpleColoredText(""));
+        stack.set(DataComponents.CUSTOM_NAME, PermHelper.simpleColoredText(""));
         return stack;
     }
 
     public static ItemStack fromPermission(Claim claim, ClaimPermission perm, String group) {
         ItemStack stack = perm.getItem();
-        stack.setHoverName(ServerScreenHelper.coloredGuiText(ConfigHandler.langManager.get(perm.translationKey()), ChatFormatting.GOLD));
+        stack.set(DataComponents.CUSTOM_NAME, ServerScreenHelper.coloredGuiText(ConfigHandler.langManager.get(perm.translationKey()), ChatFormatting.GOLD));
         List<Component> lore = new ArrayList<>();
         for (String pdesc : ConfigHandler.langManager.getArray(perm.translationKeyDescription())) {
             Component trans = ServerScreenHelper.coloredGuiText(pdesc, ChatFormatting.YELLOW);
             lore.add(trans);
         }
-        Config.GlobalType global = ConfigHandler.config.getGlobal(claim.getWorld(), perm.getId());
+        Config.GlobalType global = ConfigHandler.config.getGlobal(claim.getLevel(), perm.getId());
         if (!claim.isAdminClaim() && !global.canModify()) {
             Component text = ServerScreenHelper.coloredGuiText(ConfigHandler.langManager.get("screenUneditable"), ChatFormatting.DARK_RED);
             lore.add(text);
@@ -76,26 +76,25 @@ public class ServerScreenHelper {
             lore.add(text);
         }
         addLore(stack, lore);
-        CompoundTag tag = stack.getTag();
-        tag.putString(PERMISSION_KEY, perm.getId().toString());
+        CustomData.update(DataComponents.CUSTOM_DATA, stack, tag -> tag.putString(PERMISSION_KEY, perm.getId().toString()));
         return stack;
     }
 
     public static ItemStack getFromPersonal(ServerPlayer player, ClaimPermission perm, String group) {
         ItemStack stack = perm.getItem();
-        stack.setHoverName(ServerScreenHelper.coloredGuiText(ConfigHandler.langManager.get(perm.translationKey()), ChatFormatting.GOLD));
-        ListTag lore = new ListTag();
+        stack.set(DataComponents.CUSTOM_NAME, ServerScreenHelper.coloredGuiText(ConfigHandler.langManager.get(perm.translationKey()), ChatFormatting.GOLD));
+        List<Component> lore = new ArrayList<>();
         for (String pdesc : ConfigHandler.langManager.getArray(perm.translationKeyDescription())) {
             Component trans = ServerScreenHelper.coloredGuiText(pdesc, ChatFormatting.YELLOW);
-            lore.add(StringTag.valueOf(Component.Serializer.toJson(trans)));
+            lore.add(trans);
         }
         Config.GlobalType global = ConfigHandler.config.getGlobal(player.serverLevel(), perm.getId());
         if (!global.canModify()) {
             Component text = ServerScreenHelper.coloredGuiText(ConfigHandler.langManager.get("screenUneditable"), ChatFormatting.DARK_RED);
-            lore.add(StringTag.valueOf(Component.Serializer.toJson(text)));
+            lore.add(text);
             String permFlag = String.valueOf(global.getValue());
             Component text2 = ServerScreenHelper.coloredGuiText(String.format(ConfigHandler.langManager.get("screenEnableText"), permFlag), permFlag.equals(ConfigHandler.langManager.get("screenTrue")) ? ChatFormatting.GREEN : ChatFormatting.RED);
-            lore.add(StringTag.valueOf(Component.Serializer.toJson(text2)));
+            lore.add(text2);
         } else {
             String permFlag;
             Map<ResourceLocation, Boolean> map = PlayerClaimData.get(player).playerDefaultGroups().getOrDefault(group, new HashMap<>());
@@ -104,12 +103,10 @@ public class ServerScreenHelper {
             else
                 permFlag = ConfigHandler.langManager.get("screenDefault");
             Component text = ServerScreenHelper.coloredGuiText(String.format(ConfigHandler.langManager.get("screenEnableText"), permFlag), permFlag.equals(ConfigHandler.langManager.get("screenTrue")) ? ChatFormatting.GREEN : ChatFormatting.RED);
-            lore.add(StringTag.valueOf(Component.Serializer.toJson(text)));
+            lore.add(text);
         }
-        CompoundTag tag = stack.getOrCreateTag();
-        tag.putString(PERMISSION_KEY, perm.getId().toString());
-        CompoundTag display = tag.contains("display") ? tag.getCompound("display") : new CompoundTag();
-        display.put("Lore", lore);
+        CustomData.update(DataComponents.CUSTOM_DATA, stack, tag -> tag.putString(PERMISSION_KEY, perm.getId().toString()));
+        stack.set(DataComponents.LORE, new ItemLore(lore));
         return stack;
     }
 
@@ -128,14 +125,10 @@ public class ServerScreenHelper {
     }
 
     public static void addLore(ItemStack stack, Component text) {
-        ListTag lore = new ListTag();
-        lore.add(StringTag.valueOf(Component.Serializer.toJson(text)));
-        stack.getOrCreateTagElement("display").put("Lore", lore);
+        stack.set(DataComponents.LORE, new ItemLore(List.of(text)));
     }
 
     public static void addLore(ItemStack stack, List<Component> texts) {
-        ListTag lore = new ListTag();
-        texts.forEach(text -> lore.add(StringTag.valueOf(Component.Serializer.toJson(text))));
-        stack.getOrCreateTagElement("display").put("Lore", lore);
+        stack.set(DataComponents.LORE, new ItemLore(texts));
     }
 }

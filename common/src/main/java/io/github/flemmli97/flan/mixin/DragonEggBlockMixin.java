@@ -6,7 +6,6 @@ import io.github.flemmli97.flan.claim.ClaimStorage;
 import net.minecraft.core.BlockPos;
 import net.minecraft.resources.ResourceLocation;
 import net.minecraft.server.level.ServerPlayer;
-import net.minecraft.world.InteractionHand;
 import net.minecraft.world.InteractionResult;
 import net.minecraft.world.entity.player.Player;
 import net.minecraft.world.level.Level;
@@ -26,13 +25,13 @@ public abstract class DragonEggBlockMixin {
     @Unique
     private Player flanTempPlayer;
 
-    @Inject(method = "use", at = @At("HEAD"))
-    private void onUse(BlockState state, Level level, BlockPos pos, Player player, InteractionHand hand, BlockHitResult hit, CallbackInfoReturnable<InteractionResult> info) {
+    @Inject(method = "useWithoutItem", at = @At("HEAD"))
+    private void onUse(BlockState state, Level level, BlockPos pos, Player player, BlockHitResult hit, CallbackInfoReturnable<InteractionResult> info) {
         this.flanTempPlayer = player;
     }
 
-    @Inject(method = "use", at = @At("RETURN"))
-    private void onUseReturn(BlockState state, Level level, BlockPos pos, Player player, InteractionHand hand, BlockHitResult hit, CallbackInfoReturnable<InteractionResult> info) {
+    @Inject(method = "useWithoutItem", at = @At("RETURN"))
+    private void onUseReturn(BlockState state, Level level, BlockPos pos, Player player, BlockHitResult hit, CallbackInfoReturnable<InteractionResult> info) {
         this.flanTempPlayer = null;
     }
 

@@ -1,6 +1,7 @@
 package io.github.flemmli97.flan.mixin;
 
 import io.github.flemmli97.flan.event.WorldEvents;
+import net.minecraft.core.BlockPos;
 import net.minecraft.server.level.ServerPlayer;
 import net.minecraft.world.entity.raid.Raid;
 import net.minecraft.world.entity.raid.Raids;
@@ -13,8 +14,8 @@ import org.spongepowered.asm.mixin.injection.callback.CallbackInfoReturnable;
 public abstract class RaidManagerMixin {
 
     @Inject(method = "createOrExtendRaid", at = @At(value = "HEAD"), cancellable = true)
-    private void checkRaid(ServerPlayer player, CallbackInfoReturnable<Raid> info) {
-        if (!WorldEvents.canStartRaid(player)) {
+    private void checkRaid(ServerPlayer player, BlockPos blockPos, CallbackInfoReturnable<Raid> info) {
+        if (!WorldEvents.canStartRaid(player, blockPos)) {
             info.setReturnValue(null);
             info.cancel();
         }

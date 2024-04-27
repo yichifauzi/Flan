@@ -3,8 +3,8 @@ package io.github.flemmli97.flan.api.permission;
 import com.mojang.serialization.Codec;
 import com.mojang.serialization.codecs.RecordCodecBuilder;
 import io.github.flemmli97.flan.platform.CrossPlatformStuff;
+import net.minecraft.core.component.DataComponentPatch;
 import net.minecraft.core.registries.BuiltInRegistries;
-import net.minecraft.nbt.CompoundTag;
 import net.minecraft.resources.ResourceLocation;
 import net.minecraft.world.item.ItemStack;
 import org.jetbrains.annotations.NotNull;
@@ -22,7 +22,7 @@ public class ClaimPermission implements Comparable<ClaimPermission> {
      */
     private final ItemStack guiItem;
     public final List<String> desc;
-    private final ResourceLocation id;
+    private ResourceLocation id;
     public final boolean defaultVal;
     /**
      * Whether this permission is a global permission or not.
@@ -136,25 +136,25 @@ public class ClaimPermission implements Comparable<ClaimPermission> {
             return new ClaimPermission(id, this.guiItem.toStack(), this.defaultVal, this.global, this.order, this.desc);
         }
 
-        public record ItemStackHolder(ResourceLocation item, int count, CompoundTag tag) {
+        public record ItemStackHolder(ResourceLocation item, int count, DataComponentPatch components) {
 
             public static final Codec<ItemStackHolder> CODEC = RecordCodecBuilder.create((instance) ->
                     instance.group(ResourceLocation.CODEC.fieldOf("id").forGetter(ItemStackHolder::item),
                             Codec.INT.optionalFieldOf("Count").forGetter(stack -> stack.count() == 1 ? Optional.empty() : Optional.of(stack.count())),
-                            CompoundTag.CODEC.optionalFieldOf("tag").forGetter((stack) -> Optional.ofNullable(stack.tag()))
-                    ).apply(instance, (item, count, tag) -> new ItemStackHolder(item, count.orElse(1), tag.orElse(null))));
+                            DataComponentPatch.CODEC.optionalFieldOf("components", DataComponentPatch.EMPTY).forGetter(stack -> stack.components)
+                    ).apply(instance, (item, count, tag) -> new ItemStackHolder(item, count.orElse(1), tag)));
 
             public ItemStackHolder(ResourceLocation item) {
-                this(item, 1, null);
+                this(item, 1, DataComponentPatch.EMPTY);
             }
 
             public ItemStackHolder(ItemStack item) {
-                this(BuiltInRegistries.ITEM.getKey(item.getItem()), item.getCount(), item.getTag());
+                this(BuiltInRegistries.ITEM.getKey(item.getItem()), item.getCount(), item.getComponentsPatch());
             }
 
             private ItemStack toStack() {
                 ItemStack stack = new ItemStack(BuiltInRegistries.ITEM.get(this.item), this.count);
-                stack.setTag(this.tag);
+                stack.applyComponents(this.components);
                 return stack;
             }
         }

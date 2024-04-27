@@ -32,7 +32,7 @@ public class DynmapIntegration {
         if (markerSet == null)
             return;
         int[] dim = claim.getDimensions();
-        AreaMarker marker = markerSet.createAreaMarker(claim.getClaimID().toString(), claimLabel(claim), true, getWorldName(claim.getWorld()), new double[]{dim[0], dim[1]}, new double[]{dim[2], dim[3]}, false);
+        AreaMarker marker = markerSet.createAreaMarker(claim.getClaimID().toString(), claimLabel(claim), true, getWorldName(claim.getLevel()), new double[]{dim[0], dim[1]}, new double[]{dim[2], dim[3]}, false);
         marker.setLineStyle(3, 0.8, lineColor(claim.isAdminClaim()));
         marker.setFillStyle(0.2, fillColor(claim.isAdminClaim()));
         marker.setRangeY(dim[4], claim.getMaxY());
@@ -86,7 +86,7 @@ public class DynmapIntegration {
         if (name == null || name.isEmpty()) {
             if (claim.isAdminClaim())
                 return "Admin Claim";
-            Optional<GameProfile> prof = claim.getWorld().getServer().getProfileCache().get(claim.getOwner());
+            Optional<GameProfile> prof = claim.getLevel().getServer().getProfileCache().get(claim.getOwner());
             return prof.map(GameProfile::getName).orElse("UNKOWN") + "'s Claim";
         }
         return name;

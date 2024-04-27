@@ -5,10 +5,7 @@
   "defaultVal": false,
   "global": false,
   "guiItem": {
-    "id": "minecraft:golden_hoe",
-    "tag": {
-      "Damage": 0
-    }
+    "id": "minecraft:golden_hoe"
   },
   "order": 0
 }

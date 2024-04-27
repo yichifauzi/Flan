@@ -13,6 +13,7 @@ import io.github.flemmli97.flan.player.display.EnumDisplayType;
 import io.github.flemmli97.flan.utils.BlockBreakAttemptHandler;
 import net.minecraft.core.BlockPos;
 import net.minecraft.core.Direction;
+import net.minecraft.core.registries.BuiltInRegistries;
 import net.minecraft.nbt.CompoundTag;
 import net.minecraft.network.protocol.Packet;
 import net.minecraft.network.protocol.game.ClientGamePacketListener;
@@ -73,7 +74,7 @@ public class BlockInteractEvents {
         if (claim != null) {
             if (claim instanceof Claim real && real.canBreakBlockItem(state))
                 return true;
-            ResourceLocation id = CrossPlatformStuff.INSTANCE.registryBlocks().getIDFrom(state.getBlock());
+            ResourceLocation id = BuiltInRegistries.BLOCK.getKey(state.getBlock());
             if (contains(id, world.getBlockEntity(pos), ConfigHandler.config.breakBlockBlacklist, ConfigHandler.config.breakBETagBlacklist))
                 return true;
             if (attempt) {
@@ -113,7 +114,7 @@ public class BlockInteractEvents {
             BlockState state = world.getBlockState(hitResult.getBlockPos());
             if (claim instanceof Claim real && real.canUseBlockItem(state))
                 return InteractionResult.PASS;
-            ResourceLocation id = CrossPlatformStuff.INSTANCE.registryBlocks().getIDFrom(state.getBlock());
+            ResourceLocation id = BuiltInRegistries.BLOCK.getKey(state.getBlock());
             BlockEntity blockEntity = world.getBlockEntity(hitResult.getBlockPos());
             if (contains(id, blockEntity, ConfigHandler.config.interactBlockBlacklist, ConfigHandler.config.interactBETagBlacklist))
                 return InteractionResult.PASS;
@@ -180,7 +181,7 @@ public class BlockInteractEvents {
                 || idList.contains(id.toString()))
             return true;
         if (blockEntity != null && !tagList.isEmpty()) {
-            CompoundTag nbt = blockEntity.saveWithoutMetadata();
+            CompoundTag nbt = blockEntity.saveWithoutMetadata(blockEntity.getLevel().registryAccess());
             return tagList.stream().anyMatch(tag -> CrossPlatformStuff.INSTANCE.blockDataContains(nbt, tag));
         }
         return false;

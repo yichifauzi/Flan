@@ -70,9 +70,9 @@ public class WorldEvents {
         return from.equals(to) || to.canInteract(null, BuiltinPermission.WATERBORDER, blockPos);
     }
 
-    public static boolean canStartRaid(ServerPlayer player) {
-        IPermissionContainer claim = ClaimStorage.get(player.serverLevel()).getForPermissionCheck(player.blockPosition());
-        return claim.canInteract(player, BuiltinPermission.RAID, player.blockPosition());
+    public static boolean canStartRaid(ServerPlayer player, BlockPos pos) {
+        IPermissionContainer claim = ClaimStorage.get(player.serverLevel()).getForPermissionCheck(pos);
+        return claim.canInteract(player, BuiltinPermission.RAID, pos);
     }
 
     public static boolean canFireSpread(ServerLevel world, BlockPos pos) {

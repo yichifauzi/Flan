@@ -7,10 +7,7 @@
   "defaultVal": false,
   "global": true,
   "guiItem": {
-    "id": "minecraft:carrot_on_a_stick",
-    "tag": {
-      "Damage": 0
-    }
+    "id": "minecraft:carrot_on_a_stick"
   },
   "order": 60
 }

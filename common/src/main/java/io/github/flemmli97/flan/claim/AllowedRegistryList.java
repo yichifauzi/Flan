@@ -8,6 +8,7 @@ import io.github.flemmli97.flan.config.ConfigHandler;
 import io.github.flemmli97.flan.gui.ServerScreenHelper;
 import net.minecraft.ChatFormatting;
 import net.minecraft.core.Registry;
+import net.minecraft.core.component.DataComponents;
 import net.minecraft.resources.ResourceLocation;
 import net.minecraft.tags.TagKey;
 import net.minecraft.world.item.ItemStack;
@@ -34,7 +35,7 @@ public class AllowedRegistryList<T extends ItemLike> {
                 e.map(ItemStack::new, tag -> {
                     ItemStack any = this.registry.getTag(tag).map(f ->
                             f.stream().map(h -> new ItemStack(h.value())).findFirst().orElse(this.empty())).orElse(this.empty());
-                    any.setHoverName(ServerScreenHelper.coloredGuiText(String.format("#%s", tag.location()), ChatFormatting.GOLD));
+                    any.set(DataComponents.CUSTOM_NAME, ServerScreenHelper.coloredGuiText(String.format("#%s", tag.location()), ChatFormatting.GOLD));
                     return any;
                 })
         ).toList();
@@ -82,7 +83,7 @@ public class AllowedRegistryList<T extends ItemLike> {
                 if (this.registry.containsKey(id)) {
                     this.list.add(Either.left(this.registry.get(id)));
                 } else {
-                    Flan.LOGGER.error("No such registry item for " + this.registry.key() + " with id: " + id);
+                    Flan.LOGGER.error("No such registry item for {} with id: {}", this.registry.key(), id);
                 }
             }
         });

@@ -5,10 +5,7 @@
   "defaultVal": false,
   "global": true,
   "guiItem": {
-    "id": "minecraft:brush",
-    "tag": {
-      "Damage": 0
-    }
+    "id": "minecraft:brush"
   },
   "order": 63
 }

@@ -12,7 +12,6 @@ import io.github.flemmli97.flan.api.permission.PermissionManager;
 import io.github.flemmli97.flan.config.Config;
 import io.github.flemmli97.flan.config.ConfigHandler;
 import io.github.flemmli97.flan.platform.ClaimPermissionCheck;
-import io.github.flemmli97.flan.platform.CrossPlatformStuff;
 import io.github.flemmli97.flan.platform.integration.webmap.WebmapCalls;
 import io.github.flemmli97.flan.player.LogoutTracker;
 import io.github.flemmli97.flan.player.PlayerClaimData;
@@ -20,6 +19,7 @@ import io.github.flemmli97.flan.player.display.ClaimDisplayBox;
 import io.github.flemmli97.flan.player.display.DisplayBox;
 import net.minecraft.ChatFormatting;
 import net.minecraft.core.BlockPos;
+import net.minecraft.core.Holder;
 import net.minecraft.core.registries.BuiltInRegistries;
 import net.minecraft.network.chat.Component;
 import net.minecraft.network.chat.MutableComponent;
@@ -80,9 +80,9 @@ public class Claim implements IPermissionContainer {
      */
     private boolean removed;
 
-    private final ServerLevel world;
+    private final ServerLevel level;
 
-    private final Map<MobEffect, Integer> potions = new HashMap<>();
+    private final Map<Holder<MobEffect>, Integer> potions = new HashMap<>();
 
     public final AllowedRegistryList<Item> allowedItems = new AllowedRegistryList<>(BuiltInRegistries.ITEM, this);
     public final AllowedRegistryList<Block> allowedUseBlocks = new AllowedRegistryList<>(BuiltInRegistries.BLOCK, this);
@@ -90,8 +90,8 @@ public class Claim implements IPermissionContainer {
 
     public Component enterTitle, enterSubtitle, leaveTitle, leaveSubtitle;
 
-    private Claim(ServerLevel world) {
-        this.world = world;
+    private Claim(ServerLevel level) {
+        this.level = level;
     }
 
     //New claim
@@ -131,7 +131,7 @@ public class Claim implements IPermissionContainer {
         this.maxZ = Math.max(z1, z2);
         this.minY = Math.max(world.getMinBuildHeight(), minY);
         this.owner = creator;
-        this.world = world;
+        this.level = world;
         this.homePos = this.getInitCenterPos();
         this.setDirty(true);
         PermissionManager.INSTANCE.getAll().stream().filter(perm -> perm.defaultVal).forEach(perm -> this.globalPerm.put(perm.getId(), true));
@@ -149,7 +149,7 @@ public class Claim implements IPermissionContainer {
 
     private BlockPos getInitCenterPos() {
         BlockPos center = BlockPos.containing(this.minX + (this.maxX - this.minX) * 0.5, 0, this.minZ + (this.maxZ - this.minZ) * 0.5);
-        int y = !this.world.hasChunk(center.getX() >> 4, center.getZ() >> 4) ? this.minY + 1 : this.world.getChunk(center.getX() >> 4, center.getZ() >> 4).getHeight(Heightmap.Types.MOTION_BLOCKING, center.getX() & 15, center.getZ() & 15);
+        int y = !this.level.hasChunk(center.getX() >> 4, center.getZ() >> 4) ? this.minY + 1 : this.level.getChunk(center.getX() >> 4, center.getZ() >> 4).getHeight(Heightmap.Types.MOTION_BLOCKING, center.getX() & 15, center.getZ() & 15);
         return new BlockPos(center.getX(), y + 1, center.getZ());
     }
 
@@ -189,19 +189,19 @@ public class Claim implements IPermissionContainer {
 
     public Optional<ServerPlayer> getOwnerPlayer() {
         if (this.getOwner() != null)
-            return Optional.ofNullable(this.world.getServer().getPlayerList().getPlayer(this.getOwner()));
+            return Optional.ofNullable(this.level.getServer().getPlayerList().getPlayer(this.getOwner()));
         return Optional.empty();
     }
 
-    public ServerLevel getWorld() {
-        return this.world;
+    public ServerLevel getLevel() {
+        return this.level;
     }
 
     public Claim parentClaim() {
         if (this.parent == null)
             return null;
         if (this.parentClaim == null) {
-            ClaimStorage storage = ClaimStorage.get(this.world);
+            ClaimStorage storage = ClaimStorage.get(this.level);
             this.parentClaim = storage.getFromUUID(this.parent);
         }
         return this.parentClaim;
@@ -249,7 +249,7 @@ public class Claim implements IPermissionContainer {
     }
 
     public int getMaxY() {
-        return this.getWorld().getMaxBuildHeight();
+        return this.getLevel().getMaxBuildHeight();
     }
 
     public boolean insideClaim(BlockPos pos) {
@@ -295,7 +295,7 @@ public class Claim implements IPermissionContainer {
         if (res != InteractionResult.PASS)
             return res != InteractionResult.FAIL;
         if (!this.isAdminClaim()) {
-            Config.GlobalType global = ConfigHandler.config.getGlobal(this.world, perm);
+            Config.GlobalType global = ConfigHandler.config.getGlobal(this.level, perm);
             if (!global.canModify()) {
                 if (global.getValue() || (player != null && this.isAdminIgnore(player)))
                     return true;
@@ -305,7 +305,7 @@ public class Claim implements IPermissionContainer {
                     this.getOwnerPlayer().ifPresent(p -> PlayerClaimData.get(p).notifyFakePlayerInteraction(player, pos, this));
                 return false;
             }
-            if (ConfigHandler.config.offlineProtectActivation != -1 && (LogoutTracker.getInstance(this.world.getServer()).justLoggedOut(this.getOwner()) || this.getOwnerPlayer().isPresent())) {
+            if (ConfigHandler.config.offlineProtectActivation != -1 && (LogoutTracker.getInstance(this.level.getServer()).justLoggedOut(this.getOwner()) || this.getOwnerPlayer().isPresent())) {
                 return global == Config.GlobalType.NONE || global.getValue();
             }
         }
@@ -384,7 +384,7 @@ public class Claim implements IPermissionContainer {
         //No sub sub claims
         if (this.parentClaim() != null)
             return Set.of(this.parentClaim());
-        Claim sub = new Claim(pos1, new BlockPos(pos2.getX(), 0, pos2.getZ()), this.owner, this.world);
+        Claim sub = new Claim(pos1, new BlockPos(pos2.getX(), 0, pos2.getZ()), this.owner, this.level);
         sub.setClaimID(this.generateUUID());
         Set<Claim> conflicts = new HashSet<>();
         for (Claim other : this.subClaims)
@@ -435,7 +435,7 @@ public class Claim implements IPermissionContainer {
     public Set<Claim> resizeSubclaim(Claim claim, BlockPos from, BlockPos to) {
         int[] dims = claim.getDimensions();
         BlockPos opposite = new BlockPos(dims[0] == from.getX() ? dims[1] : dims[0], dims[4], dims[2] == from.getZ() ? dims[3] : dims[2]);
-        Claim newClaim = new Claim(opposite, to, claim.claimID, this.world);
+        Claim newClaim = new Claim(opposite, to, claim.claimID, this.level);
         Set<Claim> conflicts = new HashSet<>();
         for (Claim other : this.subClaims)
             if (!claim.equals(other) && newClaim.intersects(other))
@@ -486,7 +486,7 @@ public class Claim implements IPermissionContainer {
     }
 
     public boolean editGlobalPerms(ServerPlayer player, ResourceLocation toggle, int mode) {
-        if ((player != null && !this.canInteract(player, BuiltinPermission.EDITPERMS, player.blockPosition())) || (!this.isAdminClaim() && ConfigHandler.config.globallyDefined(this.world, toggle)))
+        if ((player != null && !this.canInteract(player, BuiltinPermission.EDITPERMS, player.blockPosition())) || (!this.isAdminClaim() && ConfigHandler.config.globallyDefined(this.level, toggle)))
             return false;
         if (mode > 1)
             mode = -1;
@@ -509,7 +509,7 @@ public class Claim implements IPermissionContainer {
      * @return If editing was successful or not
      */
     public boolean editPerms(ServerPlayer player, String group, ResourceLocation perm, int mode, boolean alwaysCan) {
-        if (PermissionManager.INSTANCE.isGlobalPermission(perm) || (!this.isAdminClaim() && ConfigHandler.config.globallyDefined(this.world, perm)))
+        if (PermissionManager.INSTANCE.isGlobalPermission(perm) || (!this.isAdminClaim() && ConfigHandler.config.globallyDefined(this.level, perm)))
             return false;
         if (alwaysCan || this.canInteract(player, BuiltinPermission.EDITPERMS, player.blockPosition())) {
             if (mode > 1)
@@ -564,17 +564,17 @@ public class Claim implements IPermissionContainer {
         return false;
     }
 
-    public void addPotion(MobEffect effect, int amplifier) {
+    public void addPotion(Holder<MobEffect> effect, int amplifier) {
         this.potions.put(effect, amplifier);
         this.setDirty(true);
     }
 
-    public void removePotion(MobEffect effect) {
+    public void removePotion(Holder<MobEffect> effect) {
         this.potions.remove(effect);
         this.setDirty(true);
     }
 
-    public Map<MobEffect, Integer> getPotions() {
+    public Map<Holder<MobEffect>, Integer> getPotions() {
         return this.potions;
     }
 
@@ -676,26 +676,28 @@ public class Claim implements IPermissionContainer {
             }
             String message = ConfigHandler.fromJson(obj, "EnterTitle", "");
             if (!message.isEmpty())
-                this.enterTitle = Component.Serializer.fromJson(message);
+                this.enterTitle = Component.Serializer.fromJson(message, this.level.registryAccess());
             else
                 this.enterTitle = null;
             message = ConfigHandler.fromJson(obj, "EnterSubtitle", "");
             if (!message.isEmpty())
-                this.enterSubtitle = Component.Serializer.fromJson(message);
+                this.enterSubtitle = Component.Serializer.fromJson(message, this.level.registryAccess());
             else
                 this.enterSubtitle = null;
             message = ConfigHandler.fromJson(obj, "LeaveTitle", "");
             if (!message.isEmpty())
-                this.leaveTitle = Component.Serializer.fromJson(message);
+                this.leaveTitle = Component.Serializer.fromJson(message, this.level.registryAccess());
             else
                 this.leaveTitle = null;
             message = ConfigHandler.fromJson(obj, "LeaveSubtitle", "");
             if (!message.isEmpty())
-                this.leaveSubtitle = Component.Serializer.fromJson(message);
+                this.leaveSubtitle = Component.Serializer.fromJson(message, this.level.registryAccess());
             else
                 this.leaveSubtitle = null;
             JsonObject potion = ConfigHandler.fromJson(obj, "Potions");
-            potion.entrySet().forEach(e -> this.potions.put(CrossPlatformStuff.INSTANCE.registryStatusEffects().getFromId(new ResourceLocation(e.getKey())), e.getValue().getAsInt()));
+            potion.entrySet().forEach(e ->
+                    BuiltInRegistries.MOB_EFFECT.getHolder(new ResourceLocation(e.getKey()))
+                            .ifPresent(effect -> this.potions.put(effect, e.getValue().getAsInt())));
             if (ConfigHandler.fromJson(obj, "AdminClaim", false))
                 this.owner = null;
             else
@@ -727,7 +729,7 @@ public class Claim implements IPermissionContainer {
             ConfigHandler.fromJson(obj, "PlayerPerms").entrySet()
                     .forEach(key -> this.playersGroups.put(UUID.fromString(key.getKey()), key.getValue().getAsString()));
             ConfigHandler.arryFromJson(obj, "SubClaims")
-                    .forEach(sub -> this.subClaims.add(Claim.fromJson(sub.getAsJsonObject(), this.owner, this.world)));
+                    .forEach(sub -> this.subClaims.add(Claim.fromJson(sub.getAsJsonObject(), this.owner, this.level)));
             ConfigHandler.arryFromJson(obj, "FakePlayers")
                     .forEach(e -> {
                         try {
@@ -755,12 +757,12 @@ public class Claim implements IPermissionContainer {
         home.add(this.homePos.getY());
         home.add(this.homePos.getZ());
         obj.add("Home", home);
-        obj.addProperty("EnterTitle", this.enterTitle == null ? "" : Component.Serializer.toJson(this.enterTitle));
-        obj.addProperty("EnterSubtitle", this.enterSubtitle == null ? "" : Component.Serializer.toJson(this.enterSubtitle));
-        obj.addProperty("LeaveTitle", this.leaveTitle == null ? "" : Component.Serializer.toJson(this.leaveTitle));
-        obj.addProperty("LeaveSubtitle", this.leaveSubtitle == null ? "" : Component.Serializer.toJson(this.leaveSubtitle));
+        obj.addProperty("EnterTitle", this.enterTitle == null ? "" : Component.Serializer.toJson(this.enterTitle, this.level.registryAccess()));
+        obj.addProperty("EnterSubtitle", this.enterSubtitle == null ? "" : Component.Serializer.toJson(this.enterSubtitle, this.level.registryAccess()));
+        obj.addProperty("LeaveTitle", this.leaveTitle == null ? "" : Component.Serializer.toJson(this.leaveTitle, this.level.registryAccess()));
+        obj.addProperty("LeaveSubtitle", this.leaveSubtitle == null ? "" : Component.Serializer.toJson(this.leaveSubtitle, this.level.registryAccess()));
         JsonObject potions = new JsonObject();
-        this.potions.forEach((effect, amp) -> potions.addProperty(CrossPlatformStuff.INSTANCE.registryStatusEffects().getIDFrom(effect).toString(), amp));
+        this.potions.forEach((effect, amp) -> potions.addProperty(effect.getRegisteredName(), amp));
         obj.add("Potions", potions);
         if (this.parent != null)
             obj.addProperty("Parent", this.parent.toString());
@@ -900,7 +902,7 @@ public class Claim implements IPermissionContainer {
     }
 
     public DisplayBox display() {
-        return new ClaimDisplayBox(this, () -> new DisplayBox.Box(this.minX, this.minY, this.minZ, this.maxX, this.world.getMaxBuildHeight(), this.maxZ), this::isRemoved);
+        return new ClaimDisplayBox(this, () -> new DisplayBox.Box(this.minX, this.minY, this.minZ, this.maxX, this.level.getMaxBuildHeight(), this.maxZ), this::isRemoved);
     }
 
     public enum InfoType {

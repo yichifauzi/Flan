@@ -3,7 +3,6 @@ package io.github.flemmli97.flan.api.permission;
 import com.mojang.datafixers.util.Pair;
 import io.github.flemmli97.flan.Flan;
 import io.github.flemmli97.flan.config.ConfigHandler;
-import io.github.flemmli97.flan.platform.CrossPlatformStuff;
 import net.minecraft.core.HolderSet;
 import net.minecraft.core.Registry;
 import net.minecraft.core.registries.BuiltInRegistries;
@@ -31,7 +30,7 @@ import net.minecraft.world.level.block.ChorusFlowerBlock;
 import net.minecraft.world.level.block.DaylightDetectorBlock;
 import net.minecraft.world.level.block.DiodeBlock;
 import net.minecraft.world.level.block.DoorBlock;
-import net.minecraft.world.level.block.EnchantmentTableBlock;
+import net.minecraft.world.level.block.EnchantingTableBlock;
 import net.minecraft.world.level.block.EnderChestBlock;
 import net.minecraft.world.level.block.FarmBlock;
 import net.minecraft.world.level.block.FenceGateBlock;
@@ -73,10 +72,10 @@ public class ObjectToPermissionMap {
         itemToPermission.clear();
         entityToPermission.clear();
         leftClickBlockPermission.clear();
-        for (Block block : CrossPlatformStuff.INSTANCE.registryBlocks().getIterator()) {
+        for (Block block : BuiltInRegistries.BLOCK) {
             blockPermissionBuilder.entrySet().stream().filter(e -> e.getKey().test(block)).map(Map.Entry::getValue).findFirst().ifPresent(sub -> blockToPermission.put(block, sub.get()));
         }
-        for (Item item : CrossPlatformStuff.INSTANCE.registryItems().getIterator()) {
+        for (Item item : BuiltInRegistries.ITEM) {
             itemPermissionBuilder.entrySet().stream().filter(e -> e.getKey().test(item)).map(Map.Entry::getValue).findFirst().ifPresent(sub -> itemToPermission.put(item, sub.get()));
         }
         process(ConfigHandler.config.itemPermission, BuiltInRegistries.ITEM, itemToPermission);
@@ -178,7 +177,7 @@ public class ObjectToPermissionMap {
         registerBlockPredicateMap(block -> block instanceof BellBlock || block instanceof CampfireBlock
                 || block instanceof TntBlock || block instanceof ChorusFlowerBlock, () -> BuiltinPermission.PROJECTILES);
         registerBlockPredicateMap(block -> block instanceof EnderChestBlock, () -> BuiltinPermission.ENDERCHEST);
-        registerBlockPredicateMap(block -> block instanceof EnchantmentTableBlock, () -> BuiltinPermission.ENCHANTMENTTABLE);
+        registerBlockPredicateMap(block -> block instanceof EnchantingTableBlock, () -> BuiltinPermission.ENCHANTMENTTABLE);
         registerBlockPredicateMap(block -> block instanceof BrushableBlock, () -> BuiltinPermission.ARCHAEOLOGY);
 
         registerItemPredicateMap(item -> item instanceof EnderpearlItem, () -> BuiltinPermission.ENDERPEARL);

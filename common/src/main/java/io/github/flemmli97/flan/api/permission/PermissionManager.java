@@ -6,6 +6,7 @@ import com.google.gson.GsonBuilder;
 import com.google.gson.JsonElement;
 import com.mojang.serialization.JsonOps;
 import io.github.flemmli97.flan.Flan;
+import net.minecraft.core.HolderLookup;
 import net.minecraft.resources.ResourceLocation;
 import net.minecraft.server.packs.resources.ResourceManager;
 import net.minecraft.server.packs.resources.SimpleJsonResourceReloadListener;
@@ -21,13 +22,16 @@ public class PermissionManager extends SimpleJsonResourceReloadListener {
     public static final String DIRECTORY = "claim_permissions";
     private static final Gson GSON = new GsonBuilder().create();
 
-    public static final PermissionManager INSTANCE = new PermissionManager();
+    public static PermissionManager INSTANCE;
 
     private Map<ResourceLocation, ClaimPermission> permissions = ImmutableMap.of();
     private List<ClaimPermission> sorted = List.of();
 
-    private PermissionManager() {
+    private final HolderLookup.Provider provider;
+
+    public PermissionManager(HolderLookup.Provider provider) {
         super(GSON, DIRECTORY);
+        this.provider = provider;
     }
 
     @Nullable
@@ -53,12 +57,12 @@ public class PermissionManager extends SimpleJsonResourceReloadListener {
         ImmutableMap.Builder<ResourceLocation, ClaimPermission> builder = ImmutableMap.builder();
         data.forEach((res, el) -> {
             try {
-                ClaimPermission.Builder props = ClaimPermission.Builder.CODEC.parse(JsonOps.INSTANCE, el)
-                        .getOrThrow(false, Flan.LOGGER::error);
+                ClaimPermission.Builder props = ClaimPermission.Builder.CODEC.parse(this.provider.createSerializationContext(JsonOps.INSTANCE), el)
+                        .getOrThrow();
                 if (props.verify())
                     builder.put(res, props.build(res));
             } catch (Exception ex) {
-                Flan.LOGGER.error("Couldnt parse claim permission json {} {}", res, ex);
+                Flan.LOGGER.error("Couldn't parse claim permission json {} {}", res, ex);
                 ex.fillInStackTrace();
             }
         });

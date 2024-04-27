@@ -4,6 +4,7 @@ import io.github.flemmli97.flan.claim.PermHelper;
 import io.github.flemmli97.flan.config.ConfigHandler;
 import io.github.flemmli97.flan.gui.inv.SeparateInv;
 import net.minecraft.ChatFormatting;
+import net.minecraft.core.component.DataComponents;
 import net.minecraft.network.chat.Component;
 import net.minecraft.server.level.ServerPlayer;
 import net.minecraft.world.MenuProvider;
@@ -47,12 +48,12 @@ public class ConfirmScreenHandler extends ServerOnlyScreenHandler<Object> {
             switch (i) {
                 case 3 -> {
                     ItemStack yes = new ItemStack(Items.GREEN_WOOL);
-                    yes.setHoverName(ServerScreenHelper.coloredGuiText(ConfigHandler.langManager.get("screenYes"), ChatFormatting.GREEN));
+                    yes.set(DataComponents.CUSTOM_NAME, ServerScreenHelper.coloredGuiText(ConfigHandler.langManager.get("screenYes"), ChatFormatting.GREEN));
                     inv.updateStack(i, yes);
                 }
                 case 5 -> {
                     ItemStack no = new ItemStack(Items.RED_WOOL);
-                    no.setHoverName(ServerScreenHelper.coloredGuiText(ConfigHandler.langManager.get("screenNo"), ChatFormatting.RED));
+                    no.set(DataComponents.CUSTOM_NAME, ServerScreenHelper.coloredGuiText(ConfigHandler.langManager.get("screenNo"), ChatFormatting.RED));
                     inv.updateStack(i, no);
                 }
                 default -> inv.updateStack(i, ServerScreenHelper.emptyFiller());

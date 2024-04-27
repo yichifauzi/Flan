@@ -63,6 +63,8 @@ import java.util.function.Consumer;
 
 public class PlayerClaimData implements IPlayerData {
 
+    public static final UUID MINING_SPEED_MOD = UUID.fromString("f44e0f63-4835-45df-84c5-397a22df2896");
+
     private int claimBlocks, additionalClaimBlocks, confirmTick, actionCooldown;
     //Scoreboard tracking
     private int usedBlocks;
@@ -427,7 +429,7 @@ public class PlayerClaimData implements IPlayerData {
         if (!this.player.isDeadOrDying())
             return false;
         if (this.calculateShouldDrop) {
-            BlockPos rounded = TeleportUtils.roundedBlockPos(this.player.position().add(0, this.player.getStandingEyeHeight(this.player.getPose(), this.player.getDimensions(this.player.getPose())), 0));
+            BlockPos rounded = TeleportUtils.roundedBlockPos(this.player.position().add(0, this.player.getEyeHeight(this.player.getPose()), 0));
             this.shouldProtectDrop = ClaimStorage.get(this.player.serverLevel()).getForPermissionCheck(rounded)
                     .canInteract(this.player, BuiltinPermission.LOCKITEMS, rounded)
                     && !this.player.getServer().getGameRules().getBoolean(GameRules.RULE_KEEPINVENTORY);
@@ -450,7 +452,7 @@ public class PlayerClaimData implements IPlayerData {
         Map<UUID, Long> map = this.fakePlayerNotif.computeIfAbsent(claim.getClaimID(), o -> new HashMap<>());
         Long last = map.get(fakePlayer.getUUID());
         if (last == null || this.player.serverLevel().getGameTime() - 1200 > last) {
-            Component claimMsg = Component.literal(String.format(ConfigHandler.langManager.get("fakePlayerNotification1"), claim.getWorld().dimension().location().toString(), pos)).withStyle(ChatFormatting.DARK_RED);
+            Component claimMsg = Component.literal(String.format(ConfigHandler.langManager.get("fakePlayerNotification1"), claim.getLevel().dimension().location().toString(), pos)).withStyle(ChatFormatting.DARK_RED);
             this.player.sendSystemMessage(claimMsg);
             String cmdStr = String.format("/flan fakePlayer add %s", fakePlayer.getUUID().toString());
             Component cmd = Component.literal(ConfigHandler.langManager.get("clickableComponent"))
@@ -533,7 +535,7 @@ public class PlayerClaimData implements IPlayerData {
     }
 
     public static void updateScoreFor(ServerPlayer player, ObjectiveCriteria criterion, int val) {
-        player.getScoreboard().forAllObjectives(criterion, player.getScoreboardName(), (scoreboardPlayerScore) -> scoreboardPlayerScore.setScore(val));
+        player.getScoreboard().forAllObjectives(criterion, player, (scoreboardPlayerScore) -> scoreboardPlayerScore.set(val));
     }
 
     public static void editForOfflinePlayer(MinecraftServer server, UUID uuid, int additionalClaimBlocks, boolean base) {

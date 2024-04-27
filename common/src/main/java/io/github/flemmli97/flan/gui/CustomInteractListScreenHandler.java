@@ -6,8 +6,8 @@ import io.github.flemmli97.flan.claim.PermHelper;
 import io.github.flemmli97.flan.config.ConfigHandler;
 import io.github.flemmli97.flan.gui.inv.SeparateInv;
 import net.minecraft.ChatFormatting;
+import net.minecraft.core.component.DataComponents;
 import net.minecraft.core.registries.BuiltInRegistries;
-import net.minecraft.nbt.CompoundTag;
 import net.minecraft.network.chat.Component;
 import net.minecraft.resources.ResourceLocation;
 import net.minecraft.server.level.ServerPlayer;
@@ -21,6 +21,7 @@ import net.minecraft.world.inventory.Slot;
 import net.minecraft.world.item.Item;
 import net.minecraft.world.item.ItemStack;
 import net.minecraft.world.item.Items;
+import net.minecraft.world.item.component.CustomData;
 import net.minecraft.world.level.block.Block;
 import net.minecraft.world.level.block.Blocks;
 
@@ -59,15 +60,15 @@ public class CustomInteractListScreenHandler extends ServerOnlyScreenHandler<Cus
         for (int i = 0; i < 54; i++) {
             if (i == 0) {
                 ItemStack stack = new ItemStack(Items.TNT);
-                stack.setHoverName(ServerScreenHelper.coloredGuiText(ConfigHandler.langManager.get("screenBack"), ChatFormatting.DARK_RED));
+                stack.set(DataComponents.CUSTOM_NAME, ServerScreenHelper.coloredGuiText(ConfigHandler.langManager.get("screenBack"), ChatFormatting.DARK_RED));
                 inv.updateStack(i, stack);
             } else if (i == 3) {
                 ItemStack stack = new ItemStack(Items.ANVIL);
-                stack.setHoverName(ServerScreenHelper.coloredGuiText(ConfigHandler.langManager.get("screenAdd"), ChatFormatting.DARK_GREEN));
+                stack.set(DataComponents.CUSTOM_NAME, ServerScreenHelper.coloredGuiText(ConfigHandler.langManager.get("screenAdd"), ChatFormatting.DARK_GREEN));
                 inv.updateStack(i, stack);
             } else if (i == 4) {
                 ItemStack stack = new ItemStack(Items.REDSTONE_BLOCK);
-                stack.setHoverName(ServerScreenHelper.coloredGuiText(String.format(ConfigHandler.langManager.get("screenRemoveMode"), this.removeMode ? ConfigHandler.langManager.get("screenTrue") : ConfigHandler.langManager.get("screenFalse")), ChatFormatting.DARK_RED));
+                stack.set(DataComponents.CUSTOM_NAME, ServerScreenHelper.coloredGuiText(String.format(ConfigHandler.langManager.get("screenRemoveMode"), this.removeMode ? ConfigHandler.langManager.get("screenTrue") : ConfigHandler.langManager.get("screenFalse")), ChatFormatting.DARK_RED));
                 inv.updateStack(i, stack);
             } else if (i < 9 || i > 44 || i % 9 == 0 || i % 9 == 8)
                 inv.updateStack(i, ServerScreenHelper.emptyFiller());
@@ -81,7 +82,7 @@ public class CustomInteractListScreenHandler extends ServerOnlyScreenHandler<Cus
                 int id = (i % 9) + row * 7 - 1;
                 if (id < stacks.size()) {
                     ItemStack stack = stacks.get(id);
-                    stack.getOrCreateTag().putInt("Index", id);
+                    CustomData.update(DataComponents.CUSTOM_DATA, stack, tag -> tag.putInt("Index", id));
                     inv.updateStack(i, stack);
                 }
             }
@@ -147,15 +148,15 @@ public class CustomInteractListScreenHandler extends ServerOnlyScreenHandler<Cus
         if (index == 4) {
             this.removeMode = !this.removeMode;
             ItemStack stack = new ItemStack(Items.REDSTONE_BLOCK);
-            stack.setHoverName(ServerScreenHelper.coloredGuiText(String.format(ConfigHandler.langManager.get("screenRemoveMode"), this.removeMode ? ConfigHandler.langManager.get("screenTrue") : ConfigHandler.langManager.get("screenFalse")), ChatFormatting.DARK_RED));
+            stack.set(DataComponents.CUSTOM_NAME, ServerScreenHelper.coloredGuiText(String.format(ConfigHandler.langManager.get("screenRemoveMode"), this.removeMode ? ConfigHandler.langManager.get("screenTrue") : ConfigHandler.langManager.get("screenFalse")), ChatFormatting.DARK_RED));
             slot.set(stack);
             ServerScreenHelper.playSongToPlayer(player, SoundEvents.UI_BUTTON_CLICK, 1, 1f);
             return true;
         }
         ItemStack stack = slot.getItem();
         if (!stack.isEmpty()) {
-            CompoundTag nbt = stack.getTag();
-            int idx = nbt != null ? nbt.getInt("Index") : 0;
+            CustomData nbt = stack.get(DataComponents.CUSTOM_DATA);
+            int idx = nbt != null ? nbt.copyTag().getInt("Index") : 0;
             if (this.removeMode) {
                 switch (this.type) {
                     case ITEM -> this.claim.allowedItems.removeAllowedItem(idx);

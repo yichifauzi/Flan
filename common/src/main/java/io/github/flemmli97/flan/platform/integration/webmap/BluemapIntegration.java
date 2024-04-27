@@ -45,7 +45,7 @@ public class BluemapIntegration {
     }
 
     public static void addClaimMarker(Claim claim) {
-        BlueMapAPI.getInstance().flatMap(api -> api.getWorld(claim.getWorld())).ifPresent(world -> {
+        BlueMapAPI.getInstance().flatMap(api -> api.getWorld(claim.getLevel())).ifPresent(world -> {
             for (BlueMapMap map : world.getMaps()) {
                 MarkerSet markerSet = map.getMarkerSets().get(markerID);
                 int[] dim = claim.getDimensions();
@@ -63,7 +63,7 @@ public class BluemapIntegration {
     }
 
     public static void removeMarker(Claim claim) {
-        BlueMapAPI.getInstance().flatMap(api -> api.getWorld(claim.getWorld())).ifPresent(world -> {
+        BlueMapAPI.getInstance().flatMap(api -> api.getWorld(claim.getLevel())).ifPresent(world -> {
             for (BlueMapMap map : world.getMaps()) {
                 MarkerSet markerSet = map.getMarkerSets().get(markerID);
                 markerSet.remove(claim.getClaimID().toString());
@@ -72,7 +72,7 @@ public class BluemapIntegration {
     }
 
     public static void changeClaimName(Claim claim) {
-        BlueMapAPI.getInstance().flatMap(api -> api.getWorld(claim.getWorld())).ifPresent(world -> {
+        BlueMapAPI.getInstance().flatMap(api -> api.getWorld(claim.getLevel())).ifPresent(world -> {
             for (BlueMapMap map : world.getMaps()) {
                 MarkerSet markerSet = map.getMarkerSets().get(markerID);
                 Marker marker = markerSet.get(claim.getClaimID().toString());
@@ -82,7 +82,7 @@ public class BluemapIntegration {
     }
 
     public static void changeClaimOwner(Claim claim) {
-        BlueMapAPI.getInstance().flatMap(api -> api.getWorld(claim.getWorld())).ifPresent(world -> {
+        BlueMapAPI.getInstance().flatMap(api -> api.getWorld(claim.getLevel())).ifPresent(world -> {
             for (BlueMapMap map : world.getMaps()) {
                 MarkerSet markerSet = map.getMarkerSets().get(markerID);
                 Marker marker = markerSet.get(claim.getClaimID().toString());
@@ -108,7 +108,7 @@ public class BluemapIntegration {
                 return name + " - " + "Admin Claim";
             }
         }
-        Optional<GameProfile> prof = claim.getWorld().getServer().getProfileCache().get(claim.getOwner());
+        Optional<GameProfile> prof = claim.getLevel().getServer().getProfileCache().get(claim.getOwner());
         if (name == null || name.isEmpty()) {
             return prof.map(GameProfile::getName).orElse("UNKNOWN") + "'s Claim";
         } else {

@@ -8,14 +8,13 @@ import net.minecraft.world.entity.boss.enderdragon.EndCrystal;
 import net.minecraft.world.entity.decoration.ArmorStand;
 import net.minecraft.world.entity.decoration.HangingEntity;
 import net.minecraft.world.entity.item.ItemEntity;
-import net.minecraft.world.entity.vehicle.AbstractMinecart;
-import net.minecraft.world.entity.vehicle.Boat;
+import net.minecraft.world.entity.vehicle.VehicleEntity;
 import org.spongepowered.asm.mixin.Mixin;
 import org.spongepowered.asm.mixin.injection.At;
 import org.spongepowered.asm.mixin.injection.Inject;
 import org.spongepowered.asm.mixin.injection.callback.CallbackInfoReturnable;
 
-@Mixin({LivingEntity.class, Entity.class, HangingEntity.class, AbstractMinecart.class, ArmorStand.class, Boat.class
+@Mixin({LivingEntity.class, Entity.class, HangingEntity.class, VehicleEntity.class, ArmorStand.class
         , EndCrystal.class, ItemEntity.class})
 public abstract class EntityDamageMixin {
 

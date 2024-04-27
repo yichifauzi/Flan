@@ -1,0 +1,61 @@
+apply from: "https://raw.githubusercontent.com/Flemmli97/GradleScripts/mc-architectury-fabric-neoforge/neoforge.gradle"
+
+loom {
+    runs {
+        data {
+            data()
+            programArgs "--all", "--mod", "flan"
+            programArgs "--output", project(":common").file("src/generated/resources").absolutePath
+        }
+    }
+}
+
+repositories {
+    mavenCentral()
+    maven {
+        name = "FTB"
+        url = "https://maven.saps.dev/minecraft"
+    }
+    maven {
+        name = "CurseMaven"
+        url "https://www.cursemaven.com"
+    }
+    maven {
+        name = "minecolonies"
+        url "https://ldtteam.jfrog.io/ldtteam/modding/"
+    }
+}
+
+dependencies {
+    modCompileOnly dicemcmm
+
+    //modRuntimeOnly "dev.ftb.mods:ftb-ranks-forge:${ftb_ranks}"
+    //modRuntimeOnly "dev.ftb.mods:ftb-chunks-forge:${ftb_chunks}"
+
+    //CompileOnly cause dependencies
+    modCompileOnly "com.ldtteam:minecolonies:${minecolonies}"
+}
+
+task apiJar(type: Jar, dependsOn: classes) {
+    archiveClassifier.set "forge-api-source"
+    from project(":common").sourceSets.main.output + sourceSets.main.output
+    include "io/github/flemmli97/flan/api/**"
+}
+
+task remapApiJar(type: net.fabricmc.loom.task.RemapJarTask) {
+    archiveClassifier.set "forge-api"
+    input.set apiJar.archiveFile
+    addNestedDependencies = false
+    dependsOn apiJar
+}
+
+publishing {
+    publications {
+        mavenJava(MavenPublication) {
+            artifact(remapApiJar) {
+                classifier "api"
+                builtBy remapApiJar
+            }
+        }
+    }
+}

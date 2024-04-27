@@ -70,7 +70,7 @@ public class FlanFabric implements ModInitializer {
         ServerLifecycleEvents.SERVER_STARTED.register(FlanFabric::serverFinishLoad);
         ServerTickEvents.START_SERVER_TICK.register(WorldEvents::serverTick);
         ServerPlayConnectionEvents.DISCONNECT.register((handler, server) -> PlayerEvents.onLogout(handler.player));
-        CommandRegistrationCallback.EVENT.register((dispatcher, reg, env) -> CommandClaim.register(dispatcher, env == Commands.CommandSelection.DEDICATED));
+        CommandRegistrationCallback.EVENT.register((dispatcher, reg, env) -> CommandClaim.register(dispatcher, reg, env == Commands.CommandSelection.DEDICATED));
 
         ResourceManagerHelper.get(PackType.SERVER_DATA).registerReloadListener(new IdentifiableResourceReloadListener() {
             @Override

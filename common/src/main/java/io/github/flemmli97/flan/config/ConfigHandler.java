@@ -5,10 +5,12 @@ import com.google.gson.GsonBuilder;
 import com.google.gson.JsonArray;
 import com.google.gson.JsonObject;
 import io.github.flemmli97.flan.api.permission.ObjectToPermissionMap;
+import net.minecraft.core.component.DataComponents;
 import net.minecraft.nbt.CompoundTag;
 import net.minecraft.resources.ResourceKey;
 import net.minecraft.server.MinecraftServer;
 import net.minecraft.world.item.ItemStack;
+import net.minecraft.world.item.component.CustomData;
 import net.minecraft.world.level.Level;
 import net.minecraft.world.level.dimension.DimensionType;
 import net.minecraft.world.level.storage.LevelResource;
@@ -50,17 +52,19 @@ public class ConfigHandler {
     }
 
     public static boolean isClaimingTool(ItemStack stack) {
-        return stack.getItem() == ConfigHandler.config.claimingItem && partialyMatchNBT(ConfigHandler.config.claimingNBT, stack.getTag());
+        return stack.getItem() == ConfigHandler.config.claimingItem && partialyMatchNBT(ConfigHandler.config.claimingNBT, stack);
     }
 
     public static boolean isInspectionTool(ItemStack stack) {
-        return stack.getItem() == ConfigHandler.config.inspectionItem && partialyMatchNBT(ConfigHandler.config.inspectionNBT, stack.getTag());
+
+        return stack.getItem() == ConfigHandler.config.inspectionItem && partialyMatchNBT(ConfigHandler.config.inspectionNBT, stack);
     }
 
-    private static boolean partialyMatchNBT(CompoundTag config, CompoundTag second) {
+    private static boolean partialyMatchNBT(CompoundTag config, ItemStack stack) {
         if (config == null)
             return true;
-        if (second == null)
+        CompoundTag second = stack.getOrDefault(DataComponents.CUSTOM_DATA, CustomData.EMPTY).copyTag();
+        if (second.isEmpty())
             return config.isEmpty();
         return config.getAllKeys().stream().allMatch(key -> Objects.equals(config.get(key), second.get(key)));
     }

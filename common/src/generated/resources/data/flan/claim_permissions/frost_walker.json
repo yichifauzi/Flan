@@ -5,10 +5,7 @@
   "defaultVal": false,
   "global": false,
   "guiItem": {
-    "id": "minecraft:leather_boots",
-    "tag": {
-      "Damage": 0
-    }
+    "id": "minecraft:leather_boots"
   },
   "order": 27
 }

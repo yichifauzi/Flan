@@ -1,48 +1,47 @@
 package io.github.flemmli97.flan.api.permission;
 
-import com.google.gson.Gson;
-import com.google.gson.GsonBuilder;
 import com.google.gson.JsonElement;
 import com.mojang.serialization.JsonOps;
-import io.github.flemmli97.flan.Flan;
+import net.minecraft.core.HolderLookup;
 import net.minecraft.data.CachedOutput;
 import net.minecraft.data.DataProvider;
 import net.minecraft.data.PackOutput;
 import net.minecraft.resources.ResourceLocation;
-import org.apache.logging.log4j.LogManager;
-import org.apache.logging.log4j.Logger;
 
 import java.nio.file.Path;
 import java.util.HashMap;
 import java.util.Map;
 import java.util.concurrent.CompletableFuture;
 
+/**
+ * Provider for datagen to generate claim permissions
+ */
 public abstract class ClaimPermissionProvider implements DataProvider {
-
-    private static final Logger LOGGER = LogManager.getLogger();
-
-    private static final Gson GSON = new GsonBuilder().enableComplexMapKeySerialization().setPrettyPrinting().disableHtmlEscaping().create();
 
     private final Map<ResourceLocation, ClaimPermission.Builder> data = new HashMap<>();
 
     private final PackOutput output;
+    private final CompletableFuture<HolderLookup.Provider> lookup;
 
-    public ClaimPermissionProvider(PackOutput output) {
+    public ClaimPermissionProvider(PackOutput output, CompletableFuture<HolderLookup.Provider> lookup) {
         this.output = output;
+        this.lookup = lookup;
     }
 
-    protected abstract void add();
+    protected abstract void add(HolderLookup.Provider provider);
 
     @Override
     public CompletableFuture<?> run(CachedOutput cache) {
-        this.add();
-        return CompletableFuture.allOf(this.data.entrySet().stream().map(entry -> {
+        return this.lookup.thenApply(provider -> {
+            this.add(provider);
+            return provider;
+        }).thenCompose(provider -> CompletableFuture.allOf(this.data.entrySet().stream().map(entry -> {
             ResourceLocation res = entry.getKey();
             Path path = this.output.getOutputFolder(PackOutput.Target.DATA_PACK).resolve(res.getNamespace() + "/" + PermissionManager.DIRECTORY + "/" + res.getPath() + ".json");
-            JsonElement obj = ClaimPermission.Builder.CODEC.encodeStart(JsonOps.INSTANCE, entry.getValue())
-                    .getOrThrow(false, Flan::error);
+            JsonElement obj = ClaimPermission.Builder.CODEC.encodeStart(provider.createSerializationContext(JsonOps.INSTANCE), entry.getValue())
+                    .getOrThrow();
             return DataProvider.saveStable(cache, obj, path);
-        }).toArray(CompletableFuture<?>[]::new));
+        }).toArray(CompletableFuture<?>[]::new)));
     }
 
     @Override

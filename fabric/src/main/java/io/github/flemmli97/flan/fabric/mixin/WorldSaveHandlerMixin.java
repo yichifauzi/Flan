@@ -10,6 +10,8 @@ import org.spongepowered.asm.mixin.injection.Inject;
 import org.spongepowered.asm.mixin.injection.callback.CallbackInfo;
 import org.spongepowered.asm.mixin.injection.callback.CallbackInfoReturnable;
 
+import java.util.Optional;
+
 @Mixin(PlayerDataStorage.class)
 public abstract class WorldSaveHandlerMixin {
 
@@ -18,8 +20,8 @@ public abstract class WorldSaveHandlerMixin {
         PlayerEvents.saveClaimData(player);
     }
 
-    @Inject(method = "load", at = @At(value = "RETURN"))
-    private void load(Player player, CallbackInfoReturnable<CompoundTag> info) {
+    @Inject(method = "load(Lnet/minecraft/world/entity/player/Player;)Ljava/util/Optional;", at = @At(value = "RETURN"))
+    private void load(Player player, CallbackInfoReturnable<Optional<CompoundTag>> info) {
         PlayerEvents.readClaimData(player);
     }
 }

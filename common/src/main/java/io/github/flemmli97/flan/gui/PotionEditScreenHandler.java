@@ -5,8 +5,10 @@ import io.github.flemmli97.flan.claim.Claim;
 import io.github.flemmli97.flan.claim.PermHelper;
 import io.github.flemmli97.flan.config.ConfigHandler;
 import io.github.flemmli97.flan.gui.inv.SeparateInv;
-import io.github.flemmli97.flan.platform.CrossPlatformStuff;
 import net.minecraft.ChatFormatting;
+import net.minecraft.core.Holder;
+import net.minecraft.core.component.DataComponents;
+import net.minecraft.core.registries.BuiltInRegistries;
 import net.minecraft.network.chat.Component;
 import net.minecraft.network.chat.MutableComponent;
 import net.minecraft.resources.ResourceLocation;
@@ -22,13 +24,15 @@ import net.minecraft.world.inventory.AbstractContainerMenu;
 import net.minecraft.world.inventory.Slot;
 import net.minecraft.world.item.ItemStack;
 import net.minecraft.world.item.Items;
-import net.minecraft.world.item.alchemy.PotionUtils;
+import net.minecraft.world.item.alchemy.PotionContents;
+import net.minecraft.world.item.component.CustomData;
 
 import java.util.Collection;
 import java.util.Collections;
 import java.util.Comparator;
 import java.util.List;
 import java.util.Map;
+import java.util.Optional;
 
 public class PotionEditScreenHandler extends ServerOnlyScreenHandler<Claim> {
 
@@ -58,21 +62,21 @@ public class PotionEditScreenHandler extends ServerOnlyScreenHandler<Claim> {
 
     @Override
     protected void fillInventoryWith(Player player, SeparateInv inv, Claim claim) {
-        Map<MobEffect, Integer> potions = claim.getPotions();
-        List<MobEffect> key = Lists.newArrayList(potions.keySet());
-        key.sort(Comparator.comparing(eff -> CrossPlatformStuff.INSTANCE.registryStatusEffects().getIDFrom(eff).toString()));
+        Map<Holder<MobEffect>, Integer> potions = claim.getPotions();
+        List<Holder<MobEffect>> key = Lists.newArrayList(potions.keySet());
+        key.sort(Comparator.comparing(Holder::getRegisteredName));
         for (int i = 0; i < 54; i++) {
             if (i == 0) {
                 ItemStack close = new ItemStack(Items.TNT);
-                close.setHoverName(ServerScreenHelper.coloredGuiText(ConfigHandler.langManager.get("screenBack"), ChatFormatting.DARK_RED));
+                close.set(DataComponents.CUSTOM_NAME, ServerScreenHelper.coloredGuiText(ConfigHandler.langManager.get("screenBack"), ChatFormatting.DARK_RED));
                 inv.updateStack(i, close);
             } else if (i == 3) {
                 ItemStack stack = new ItemStack(Items.ANVIL);
-                stack.setHoverName(ServerScreenHelper.coloredGuiText(ConfigHandler.langManager.get("screenAdd"), ChatFormatting.DARK_GREEN));
+                stack.set(DataComponents.CUSTOM_NAME, ServerScreenHelper.coloredGuiText(ConfigHandler.langManager.get("screenAdd"), ChatFormatting.DARK_GREEN));
                 inv.updateStack(i, stack);
             } else if (i == 4) {
                 ItemStack stack = new ItemStack(Items.REDSTONE_BLOCK);
-                stack.setHoverName(ServerScreenHelper.coloredGuiText(String.format(ConfigHandler.langManager.get("screenRemoveMode"), this.removeMode ? ConfigHandler.langManager.get("screenTrue") : ConfigHandler.langManager.get("screenFalse")), ChatFormatting.DARK_RED));
+                stack.set(DataComponents.CUSTOM_NAME, ServerScreenHelper.coloredGuiText(String.format(ConfigHandler.langManager.get("screenRemoveMode"), this.removeMode ? ConfigHandler.langManager.get("screenTrue") : ConfigHandler.langManager.get("screenFalse")), ChatFormatting.DARK_RED));
                 inv.updateStack(i, stack);
             } else if (i < 9 || i > 44 || i % 9 == 0 || i % 9 == 8)
                 inv.updateStack(i, ServerScreenHelper.emptyFiller());
@@ -80,15 +84,15 @@ public class PotionEditScreenHandler extends ServerOnlyScreenHandler<Claim> {
                 int row = i / 9 - 1;
                 int id = (i % 9) + row * 7 - 1;
                 if (id < potions.size()) {
-                    MobEffect effect = key.get(id);
+                    Holder<MobEffect> effect = key.get(id);
                     ItemStack effectStack = new ItemStack(Items.POTION);
-                    MutableComponent txt = Component.translatable(effect.getDescriptionId());
+                    MutableComponent txt = Component.translatable(effect.value().getDescriptionId());
                     Collection<MobEffectInstance> inst = Collections.singleton(new MobEffectInstance(effect, 0, potions.get(effect)));
-                    effectStack.getOrCreateTag().putString("FlanEffect", CrossPlatformStuff.INSTANCE.registryStatusEffects().getIDFrom(effect).toString());
-                    effectStack.getTag().putInt("CustomPotionColor", PotionUtils.getColor(inst));
+                    effectStack.set(DataComponents.POTION_CONTENTS, new PotionContents(Optional.empty(), Optional.of(PotionContents.getColor(inst)), List.of()));
+                    CustomData.update(DataComponents.CUSTOM_DATA, effectStack, tag -> tag.putString("FlanEffect", effect.getRegisteredName()));
                     txt.append(Component.literal("-" + potions.get(effect)));
                     Component comp = Component.translatable(ConfigHandler.langManager.get("screenPotionText"), txt).setStyle(txt.getStyle().withItalic(false).applyFormat(ChatFormatting.DARK_BLUE));
-                    effectStack.setHoverName(comp);
+                    effectStack.set(DataComponents.CUSTOM_NAME, comp);
                     inv.updateStack(i, effectStack);
                 }
             }
@@ -113,8 +117,8 @@ public class PotionEditScreenHandler extends ServerOnlyScreenHandler<Claim> {
             player.getServer().execute(() -> StringResultScreenHandler.createNewStringResult(player, (s) -> {
                 String[] potion = s.split(";");
                 int amp = 1;
-                MobEffect effect = CrossPlatformStuff.INSTANCE.registryStatusEffects().getFromId(new ResourceLocation(potion[0]));
-                if (effect == null || (effect == MobEffects.LUCK && !potion[0].equals("minecraft:luck"))) {
+                Optional<Holder.Reference<MobEffect>> holder = BuiltInRegistries.MOB_EFFECT.getHolder(new ResourceLocation(potion[0]));
+                if (holder.map(effect -> effect == MobEffects.LUCK && !potion[0].equals("minecraft:luck")).orElse(true)) {
                     ServerScreenHelper.playSongToPlayer(player, SoundEvents.VILLAGER_NO, 1, 1f);
                     return;
                 }
@@ -124,7 +128,7 @@ public class PotionEditScreenHandler extends ServerOnlyScreenHandler<Claim> {
                     } catch (NumberFormatException e) {
                     }
                 }
-                this.claim.addPotion(effect, amp);
+                this.claim.addPotion(holder.get(), amp);
                 player.closeContainer();
                 player.getServer().execute(() -> PotionEditScreenHandler.openPotionMenu(player, this.claim));
                 ServerScreenHelper.playSongToPlayer(player, SoundEvents.ANVIL_USE, 1, 1f);
@@ -139,15 +143,18 @@ public class PotionEditScreenHandler extends ServerOnlyScreenHandler<Claim> {
         if (index == 4) {
             this.removeMode = !this.removeMode;
             ItemStack stack = new ItemStack(Items.REDSTONE_BLOCK);
-            stack.setHoverName(ServerScreenHelper.coloredGuiText(String.format(ConfigHandler.langManager.get("screenRemoveMode"), this.removeMode ? ConfigHandler.langManager.get("screenTrue") : ConfigHandler.langManager.get("screenFalse")), ChatFormatting.DARK_RED));
+            stack.set(DataComponents.CUSTOM_NAME, ServerScreenHelper.coloredGuiText(String.format(ConfigHandler.langManager.get("screenRemoveMode"), this.removeMode ? ConfigHandler.langManager.get("screenTrue") : ConfigHandler.langManager.get("screenFalse")), ChatFormatting.DARK_RED));
             slot.set(stack);
             ServerScreenHelper.playSongToPlayer(player, SoundEvents.UI_BUTTON_CLICK, 1, 1f);
             return true;
         }
         ItemStack stack = slot.getItem();
         if (!stack.isEmpty() && this.removeMode) {
-            String effect = stack.getOrCreateTag().getString("FlanEffect");
-            this.claim.removePotion(CrossPlatformStuff.INSTANCE.registryStatusEffects().getFromId(new ResourceLocation(effect)));
+            String effect = stack.getOrDefault(DataComponents.CUSTOM_DATA, CustomData.EMPTY)
+                    .copyTag().getString("FlanEffect");
+            if (!effect.isEmpty())
+                BuiltInRegistries.MOB_EFFECT.getHolder(new ResourceLocation(effect))
+                        .ifPresent(this.claim::removePotion);
             slot.set(ItemStack.EMPTY);
             ServerScreenHelper.playSongToPlayer(player, SoundEvents.BAT_DEATH, 1, 1f);
         }

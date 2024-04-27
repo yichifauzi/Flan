@@ -9,6 +9,7 @@ import io.github.flemmli97.flan.api.permission.BuiltinPermission;
 import io.github.flemmli97.flan.api.permission.ClaimPermission;
 import io.github.flemmli97.flan.api.permission.PermissionManager;
 import io.github.flemmli97.flan.platform.CrossPlatformStuff;
+import net.minecraft.core.registries.BuiltInRegistries;
 import net.minecraft.nbt.CompoundTag;
 import net.minecraft.resources.ResourceLocation;
 import net.minecraft.server.MinecraftServer;
@@ -191,13 +192,13 @@ public class Config {
             this.worldWhitelist = ConfigHandler.fromJson(obj, "worldWhitelist", this.worldWhitelist);
 
             if (obj.has("claimingItem"))
-                this.claimingItem = CrossPlatformStuff.INSTANCE.registryItems().getFromId(new ResourceLocation((obj.get("claimingItem").getAsString())));
+                this.claimingItem = BuiltInRegistries.ITEM.get(new ResourceLocation((obj.get("claimingItem").getAsString())));
             this.claimingNBT = CompoundTag.CODEC.parse(JsonOps.INSTANCE, GsonHelper.getAsJsonObject(obj, "claimingNBT", new JsonObject()))
-                    .getOrThrow(true, Flan::error);
+                    .getOrThrow();
             if (obj.has("inspectionItem"))
-                this.inspectionItem = CrossPlatformStuff.INSTANCE.registryItems().getFromId(new ResourceLocation((obj.get("inspectionItem").getAsString())));
+                this.inspectionItem = BuiltInRegistries.ITEM.get(new ResourceLocation((obj.get("inspectionItem").getAsString())));
             this.inspectionNBT = CompoundTag.CODEC.parse(JsonOps.INSTANCE, GsonHelper.getAsJsonObject(obj, "inspectionNBT", new JsonObject()))
-                    .getOrThrow(true, Flan::error);
+                    .getOrThrow();
             this.claimDisplayTime = ConfigHandler.fromJson(obj, "claimDisplayTime", this.claimDisplayTime);
             this.particleDisplay = ConfigHandler.fromJson(obj, "particleDisplay", this.particleDisplay);
             this.claimDisplayActionBar = ConfigHandler.fromJson(obj, "claimDisplayActionBar", this.claimDisplayActionBar);
@@ -307,12 +308,12 @@ public class Config {
         obj.add("blacklistedWorlds", arr);
         obj.addProperty("worldWhitelist", this.worldWhitelist);
 
-        obj.addProperty("claimingItem", CrossPlatformStuff.INSTANCE.registryItems().getIDFrom(this.claimingItem).toString());
+        obj.addProperty("claimingItem", BuiltInRegistries.ITEM.getKey(this.claimingItem).toString());
         obj.add("claimingNBT", CompoundTag.CODEC.encodeStart(JsonOps.INSTANCE, this.claimingNBT)
-                .getOrThrow(true, Flan::error));
-        obj.addProperty("inspectionItem", CrossPlatformStuff.INSTANCE.registryItems().getIDFrom(this.inspectionItem).toString());
+                .getOrThrow());
+        obj.addProperty("inspectionItem", BuiltInRegistries.ITEM.getKey(this.inspectionItem).toString());
         obj.add("inspectionNBT", CompoundTag.CODEC.encodeStart(JsonOps.INSTANCE, this.inspectionNBT)
-                .getOrThrow(true, Flan::error));
+                .getOrThrow());
         obj.addProperty("claimDisplayTime", this.claimDisplayTime);
         obj.addProperty("particleDisplay", this.particleDisplay);
         obj.addProperty("claimDisplayActionBar", this.claimDisplayActionBar);

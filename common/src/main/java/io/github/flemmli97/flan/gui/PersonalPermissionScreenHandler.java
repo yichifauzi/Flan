@@ -7,6 +7,7 @@ import io.github.flemmli97.flan.config.ConfigHandler;
 import io.github.flemmli97.flan.gui.inv.SeparateInv;
 import io.github.flemmli97.flan.player.PlayerClaimData;
 import net.minecraft.ChatFormatting;
+import net.minecraft.core.component.DataComponents;
 import net.minecraft.network.chat.Component;
 import net.minecraft.resources.ResourceLocation;
 import net.minecraft.server.level.ServerPlayer;
@@ -18,6 +19,7 @@ import net.minecraft.world.inventory.AbstractContainerMenu;
 import net.minecraft.world.inventory.Slot;
 import net.minecraft.world.item.ItemStack;
 import net.minecraft.world.item.Items;
+import net.minecraft.world.item.component.CustomData;
 
 import java.util.ArrayList;
 import java.util.HashMap;
@@ -62,15 +64,15 @@ public class PersonalPermissionScreenHandler extends ServerOnlyScreenHandler<Str
             int page = 0;
             if (i == 0) {
                 ItemStack close = new ItemStack(Items.TNT);
-                close.setHoverName(ServerScreenHelper.coloredGuiText(ConfigHandler.langManager.get("screenBack"), ChatFormatting.DARK_RED));
+                close.set(DataComponents.CUSTOM_NAME, ServerScreenHelper.coloredGuiText(ConfigHandler.langManager.get("screenBack"), ChatFormatting.DARK_RED));
                 inv.updateStack(i, close);
             } else if (page == 1 && i == 47) {
                 ItemStack close = new ItemStack(Items.ARROW);
-                close.setHoverName(ServerScreenHelper.coloredGuiText(ConfigHandler.langManager.get("screenPrevious"), ChatFormatting.WHITE));
+                close.set(DataComponents.CUSTOM_NAME, ServerScreenHelper.coloredGuiText(ConfigHandler.langManager.get("screenPrevious"), ChatFormatting.WHITE));
                 inv.updateStack(i, close);
             } else if (page == 0 && i == 51) {
                 ItemStack close = new ItemStack(Items.ARROW);
-                close.setHoverName(ServerScreenHelper.coloredGuiText(ConfigHandler.langManager.get("screenNext"), ChatFormatting.WHITE));
+                close.set(DataComponents.CUSTOM_NAME, ServerScreenHelper.coloredGuiText(ConfigHandler.langManager.get("screenNext"), ChatFormatting.WHITE));
                 inv.updateStack(i, close);
             } else if (i < 9 || i > 44 || i % 9 == 0 || i % 9 == 8)
                 inv.updateStack(i, ServerScreenHelper.emptyFiller());
@@ -93,20 +95,20 @@ public class PersonalPermissionScreenHandler extends ServerOnlyScreenHandler<Str
         for (int i = 0; i < 54; i++) {
             if (i == 0) {
                 ItemStack close = new ItemStack(Items.TNT);
-                close.setHoverName(ServerScreenHelper.coloredGuiText(ConfigHandler.langManager.get("screenBack"), ChatFormatting.DARK_RED));
+                close.set(DataComponents.CUSTOM_NAME, ServerScreenHelper.coloredGuiText(ConfigHandler.langManager.get("screenBack"), ChatFormatting.DARK_RED));
                 this.slots.get(i).set(close);
             } else if (i == 47) {
                 ItemStack stack = ServerScreenHelper.emptyFiller();
                 if (this.page >= 1) {
                     stack = new ItemStack(Items.ARROW);
-                    stack.setHoverName(ServerScreenHelper.coloredGuiText(ConfigHandler.langManager.get("screenPrevious"), ChatFormatting.WHITE));
+                    stack.set(DataComponents.CUSTOM_NAME, ServerScreenHelper.coloredGuiText(ConfigHandler.langManager.get("screenPrevious"), ChatFormatting.WHITE));
                 }
                 this.slots.get(i).set(stack);
             } else if (i == 51) {
                 ItemStack stack = ServerScreenHelper.emptyFiller();
                 if (this.page < maxPages) {
                     stack = new ItemStack(Items.ARROW);
-                    stack.setHoverName(ServerScreenHelper.coloredGuiText(ConfigHandler.langManager.get("screenNext"), ChatFormatting.WHITE));
+                    stack.set(DataComponents.CUSTOM_NAME, ServerScreenHelper.coloredGuiText(ConfigHandler.langManager.get("screenNext"), ChatFormatting.WHITE));
                 }
                 this.slots.get(i).set(stack);
             } else if (i < 9 || i > 44 || i % 9 == 0 || i % 9 == 8)
@@ -144,7 +146,8 @@ public class PersonalPermissionScreenHandler extends ServerOnlyScreenHandler<Str
         ItemStack stack = slot.getItem();
         ClaimPermission perm;
         try {
-            perm = PermissionManager.INSTANCE.get(new ResourceLocation(stack.getTag().getString(ServerScreenHelper.PERMISSION_KEY)));
+            perm = PermissionManager.INSTANCE.get(new ResourceLocation(stack.getOrDefault(DataComponents.CUSTOM_DATA, CustomData.EMPTY)
+                    .copyTag().getString(ServerScreenHelper.PERMISSION_KEY)));
             if (perm == null)
                 return false;
         } catch (NullPointerException e) {
