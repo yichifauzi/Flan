@@ -6,13 +6,12 @@ import io.github.flemmli97.flan.event.PlayerEvents;
 import io.github.flemmli97.flan.platform.integration.webmap.BluemapIntegration;
 import io.github.flemmli97.flan.player.LogoutTracker;
 import io.github.flemmli97.flan.player.PlayerDataHandler;
-import net.minecraft.world.level.Level;
 import net.neoforged.fml.ModList;
 import net.neoforged.neoforge.event.RegisterCommandsEvent;
-import net.neoforged.neoforge.event.TickEvent;
 import net.neoforged.neoforge.event.entity.player.PlayerEvent;
 import net.neoforged.neoforge.event.server.ServerAboutToStartEvent;
 import net.neoforged.neoforge.event.server.ServerStartedEvent;
+import net.neoforged.neoforge.event.tick.ServerTickEvent;
 
 public class ServerEvents {
 
@@ -43,8 +42,7 @@ public class ServerEvents {
         PlayerEvents.onLogout(event.getEntity());
     }
 
-    public static void serverTick(TickEvent.LevelTickEvent event) {
-        if (event.phase == TickEvent.Phase.START && event.level.getServer() != null && event.level.dimension() == Level.OVERWORLD)
-            LogoutTracker.getInstance(event.level.getServer()).tick();
+    public static void serverTick(ServerTickEvent.Pre event) {
+        LogoutTracker.getInstance(event.getServer()).tick();
     }
 }

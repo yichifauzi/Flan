@@ -1,3 +1,7 @@
+Flan 1.10.1
+================
+- Neoforge: update neoforge version addressing TickEvent change
+
 Flan 1.10.0
 ================
 - Port to 1.20.5
