@@ -1,3 +1,7 @@
+Flan 1.10.2
+================
+- Fabric: Fix a mixin crash in prod
+
 Flan 1.10.1
 ================
 - Neoforge: update neoforge version addressing TickEvent change
