@@ -154,10 +154,10 @@ public class CommandClaim {
                                 .then(Commands.argument("permission", ResourceLocationArgument.id()).suggests((ctx, b) -> CommandHelpers.permSuggestions(ctx, b, true))
                                         .then(Commands.argument("toggle", StringArgumentType.word())
                                                 .suggests((ctx, b) -> SharedSuggestionProvider.suggest(new String[]{"default", "true", "false"}, b)).executes(CommandClaim::editPersonalPerm)))))
-                        .then(Commands.literal("global").then(Commands.argument("permission", StringArgumentType.word()).suggests((ctx, b) -> CommandHelpers.permSuggestions(ctx, b, false))
+                        .then(Commands.literal("global").then(Commands.argument("permission", ResourceLocationArgument.id()).suggests((ctx, b) -> CommandHelpers.permSuggestions(ctx, b, false))
                                 .then(Commands.argument("toggle", StringArgumentType.word()).suggests((ctx, b) -> SharedSuggestionProvider.suggest(new String[]{"default", "true", "false"}, b)).executes(CommandClaim::editGlobalPerm))))
                         .then(Commands.literal("group").then(Commands.argument("group", StringArgumentType.string()).suggests(CommandHelpers::groupSuggestion)
-                                .then(Commands.argument("permission", StringArgumentType.word()).suggests((ctx, b) -> CommandHelpers.permSuggestions(ctx, b, true))
+                                .then(Commands.argument("permission", ResourceLocationArgument.id()).suggests((ctx, b) -> CommandHelpers.permSuggestions(ctx, b, true))
                                         .then(Commands.argument("toggle", StringArgumentType.word())
                                                 .suggests((ctx, b) -> SharedSuggestionProvider.suggest(new String[]{"default", "true", "false"}, b)).executes(CommandClaim::editGroupPerm))))));
         builder.then(Commands.literal("help").executes(ctx -> CommandHelp.helpMessage(ctx, 0, builder.getArguments()))
