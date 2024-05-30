@@ -1,3 +1,7 @@
+Flan 1.10.4
+================
+- Fix permission command
+
 Flan 1.10.3
 ================
 - Fix group screen
