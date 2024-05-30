@@ -1,3 +1,7 @@
+Flan 1.10.4
+================
+- Fix permission command
+
 Flan 1.10.0
 ================
 - Fix wandering trader not being in trade permission
