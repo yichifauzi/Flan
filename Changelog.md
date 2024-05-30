@@ -1,3 +1,8 @@
+Flan 1.10.3
+================
+- Fix group screen
+- Update neoforge and fix neoforge events
+
 Flan 1.10.2
 ================
 - Fabric: Fix a mixin crash in prod
