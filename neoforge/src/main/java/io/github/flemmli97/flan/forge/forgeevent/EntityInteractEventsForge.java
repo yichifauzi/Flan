@@ -7,7 +7,6 @@ import net.minecraft.world.entity.animal.SnowGolem;
 import net.minecraft.world.entity.boss.wither.WitherBoss;
 import net.minecraft.world.entity.projectile.Projectile;
 import net.minecraft.world.phys.EntityHitResult;
-import net.neoforged.bus.api.Event;
 import net.neoforged.neoforge.event.entity.EntityMobGriefingEvent;
 import net.neoforged.neoforge.event.entity.EntityStruckByLightningEvent;
 import net.neoforged.neoforge.event.entity.ProjectileImpactEvent;
@@ -79,10 +78,10 @@ public class EntityInteractEventsForge {
      */
     public static void mobGriefing(EntityMobGriefingEvent event) {
         if (event.getEntity() instanceof WitherBoss && !EntityInteractEvents.witherCanDestroy((WitherBoss) event.getEntity())) {
-            event.setResult(Event.Result.DENY);
+            event.setCanGrief(false);
         }
         if (event.getEntity() instanceof SnowGolem && !EntityInteractEvents.canSnowGolemInteract((SnowGolem) event.getEntity())) {
-            event.setResult(Event.Result.DENY);
+            event.setCanGrief(false);
         }
     }
 

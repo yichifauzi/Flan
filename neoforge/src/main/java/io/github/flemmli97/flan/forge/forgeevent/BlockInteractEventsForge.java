@@ -21,7 +21,7 @@ import net.minecraft.world.entity.Entity;
 import net.minecraft.world.item.context.UseOnContext;
 import net.minecraft.world.level.Level;
 import net.minecraft.world.level.block.state.BlockState;
-import net.neoforged.bus.api.Event;
+import net.neoforged.neoforge.common.util.TriState;
 import net.neoforged.neoforge.event.entity.player.PlayerInteractEvent;
 import net.neoforged.neoforge.event.level.BlockEvent;
 
@@ -49,10 +49,10 @@ public class BlockInteractEventsForge {
             return;
         }
         if (res == InteractionResult.FAIL)
-            event.setUseBlock(Event.Result.DENY);
+            event.setUseBlock(TriState.FALSE);
         res = ItemInteractEvents.onItemUseBlock(new UseOnContext(event.getEntity(), event.getHand(), event.getHitVec()));
         if (res == InteractionResult.FAIL)
-            event.setUseItem(Event.Result.DENY);
+            event.setUseItem(TriState.FALSE);
     }
 
     /**
