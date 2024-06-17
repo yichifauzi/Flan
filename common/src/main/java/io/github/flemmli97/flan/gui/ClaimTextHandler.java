@@ -128,11 +128,10 @@ public class ClaimTextHandler extends ServerOnlyScreenHandler<Claim> {
             };
             if (cons != null) {
                 player.closeContainer();
-                Consumer<Component> finalCons = cons;
                 if (clickType == 0) {
                     player.getServer().execute(() -> StringResultScreenHandler.createNewStringResult(player, (s) -> {
                         player.closeContainer();
-                        finalCons.accept(Component.literal(s).withStyle(Style.EMPTY.withItalic(false).applyFormat(ChatFormatting.WHITE)));
+                        cons.accept(Component.literal(s).withStyle(Style.EMPTY.withItalic(false).applyFormat(ChatFormatting.WHITE)));
                         player.getServer().execute(() -> ClaimTextHandler.openClaimMenu(player, this.claim));
                         ServerScreenHelper.playSongToPlayer(player, SoundEvents.ANVIL_USE, 1, 1f);
                     }, () -> {
