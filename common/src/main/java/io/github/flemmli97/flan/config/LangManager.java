@@ -175,6 +175,8 @@ public class LangManager {
         this.defaultTranslation.put(CustomInteractListScreenHandler.Type.ITEM.translationKey, "Allowed item use");
         this.defaultTranslation.put(CustomInteractListScreenHandler.Type.BLOCKBREAK.translationKey, "Allowed block break");
         this.defaultTranslation.put(CustomInteractListScreenHandler.Type.BLOCKUSE.translationKey, "Allowed block use");
+        this.defaultTranslation.put(CustomInteractListScreenHandler.Type.ENTITYATTACK.translationKey, "Allowed entities to attack");
+        this.defaultTranslation.put(CustomInteractListScreenHandler.Type.ENTITYUSE.translationKey, "Allowed entity interactions");
         this.defaultTranslation.put("allowListEmptyTag", "Empty Tag");
 
         this.defaultTranslation.put("chatClaimTextEdit", "[Click for command]");
@@ -216,6 +218,9 @@ public class LangManager {
         this.defaultTranslation.put("setLeaveMessage", "Set leave title to %1$s");
         this.defaultTranslation.put("setLeaveSubMessage", "Set leave subtitle to %1$s");
 
+        this.defaultTranslation.put("addIgnoreEntry", "Added %1$s to the claims ignore list %2$s");
+        this.defaultTranslation.put("removeIgnoreEntry", "Removed %1$s from the claims ignore list %2$s");
+
         this.defaultTranslation.put("wiki", "For more info check out the wiki:");
 
         for (ClaimPermission perm : PermissionManager.INSTANCE.getAll()) {
@@ -244,6 +249,7 @@ public class LangManager {
         this.defaultTranslationArray.put("command.teleport", new String[]{"teleport self | admin | (other <player>) (<claim name> | <claim uuid>)", "Teleport to the given claims home position. Use admin to teleport to admin claims"});
         this.defaultTranslationArray.put("command.name", new String[]{"name self <name>", "Sets the current claims name"});
         this.defaultTranslationArray.put("command.claimMessage", new String[]{"claimMessage (enter | leave) (title | subtitle) (string | text) <value>", "Sets the claims message. Use \"$empty\" to remove the message"});
+        this.defaultTranslationArray.put("command.ignoreList", new String[]{"ignoreList (add | remove) <type> <value>", "Adds/Removes an entry to the claim specific ignore list"});
 
         this.defaultTranslationArray.put("command.reload", new String[]{"reload", "Reloads the config ingame."});
         this.defaultTranslationArray.put("command.adminMode", new String[]{"adminMode", "Switches to admin mode ignoring all claims."});

@@ -38,6 +38,7 @@ public interface PermissionNodeHandler {
     String cmdGroup = "flan.command.group";
     String cmdFakePlayer = "flan.command.fakeplayer";
     String cmdPermission = "flan.command.permission";
+    String cmdClaimIgnore = "flan.command.claim.ignore";
 
     String cmdSell = "flan.command.buy";
     String cmdBuy = "flan.command.sell";
