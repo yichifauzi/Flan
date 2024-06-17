@@ -24,6 +24,8 @@ import net.minecraft.core.registries.BuiltInRegistries;
 import net.minecraft.network.chat.Component;
 import net.minecraft.network.chat.MutableComponent;
 import net.minecraft.network.chat.Style;
+import net.minecraft.network.chat.contents.PlainTextContents;
+import net.minecraft.network.chat.contents.TranslatableContents;
 import net.minecraft.network.protocol.game.ClientboundSetSubtitleTextPacket;
 import net.minecraft.network.protocol.game.ClientboundSetTitleTextPacket;
 import net.minecraft.resources.ResourceLocation;
@@ -608,7 +610,9 @@ public class Claim implements IPermissionContainer {
     }
 
     private void displayTitleMessage(ServerPlayer player, @Nullable Component title, @Nullable Component subtitle) {
+        title = this.transformForDisplay(title);
         if (title == null) return;
+        subtitle = this.transformForDisplay(subtitle);
         if (ConfigHandler.config.claimDisplayActionBar) {
             if (subtitle != null) {
                 MutableComponent message = title.copy().append(Component.literal(" | ").setStyle(Style.EMPTY.withColor(ChatFormatting.WHITE))).append(subtitle);
@@ -622,6 +626,23 @@ public class Claim implements IPermissionContainer {
         if (subtitle != null) {
             player.connection.send(new ClientboundSetSubtitleTextPacket(subtitle));
         }
+    }
+
+    @Nullable
+    private Component transformForDisplay(Component component) {
+        if (component == null)
+            return null;
+        MutableComponent res;
+        if (component.getContents() instanceof TranslatableContents trans) {
+            res = Component.translatable(trans.getKey(), this.level.getServer().getProfileCache().get(this.owner).map(GameProfile::getName).orElse("<UNKNOWN>"), this.claimName);
+        } else if (component.getContents() instanceof PlainTextContents comp) {
+            res = Component.translatable(comp.text(), this.level.getServer().getProfileCache().get(this.owner).map(GameProfile::getName).orElse("<UNKNOWN>"), this.claimName);
+        } else {
+            res = component.plainCopy();
+        }
+        res.getSiblings().addAll(component.getSiblings().stream().map(c -> this.transformForDisplay(component)).toList());
+        res.setStyle(component.getStyle());
+        return res;
     }
 
     public void displayEnterTitle(ServerPlayer player) {
