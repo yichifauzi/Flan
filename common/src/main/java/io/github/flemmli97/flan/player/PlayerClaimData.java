@@ -222,7 +222,7 @@ public class PlayerClaimData implements IPlayerData {
                 pos = pos.below();
                 state = this.player.level().getBlockState(pos);
             }
-            this.cornerRenderPos = ClaimDisplay.getPosFrom(this.player.serverLevel(), pos.getX(), pos.getZ(), pos.getY());
+            this.cornerRenderPos = ClaimDisplay.getPosFrom(this.player.serverLevel(), pos.getX(), pos.getZ(), pos.getY(), new HashMap<>());
         } else
             this.cornerRenderPos = null;
         this.firstCorner = pos;
