@@ -4,7 +4,6 @@ import com.google.gson.Gson;
 import com.google.gson.GsonBuilder;
 import com.google.gson.JsonArray;
 import com.google.gson.JsonObject;
-import io.github.flemmli97.flan.Flan;
 import io.github.flemmli97.flan.api.permission.ObjectToPermissionMap;
 import net.minecraft.nbt.CompoundTag;
 import net.minecraft.resources.ResourceKey;
@@ -25,7 +24,7 @@ public class ConfigHandler {
 
     public static Config config;
     public static LangManager langManager;
-    private static final Map<ResourceKey<Level>, Path> claimSavePath = new HashMap<>();
+    private static final Map<ResourceKey<Level>, Path> CLAIM_SAVE_PATH = new HashMap<>();
     private static Path playerSavePath;
 
     public static void serverLoad(MinecraftServer server) {
@@ -41,7 +40,7 @@ public class ConfigHandler {
     }
 
     public static Path getClaimSavePath(MinecraftServer server, ResourceKey<Level> reg) {
-        return claimSavePath.computeIfAbsent(reg, r -> DimensionType.getStorageFolder(r, server.getWorldPath(LevelResource.ROOT)).resolve("data").resolve("claims"));
+        return CLAIM_SAVE_PATH.computeIfAbsent(reg, r -> DimensionType.getStorageFolder(r, server.getWorldPath(LevelResource.ROOT)).resolve("data").resolve("claims"));
     }
 
     public static Path getPlayerSavePath(MinecraftServer server) {

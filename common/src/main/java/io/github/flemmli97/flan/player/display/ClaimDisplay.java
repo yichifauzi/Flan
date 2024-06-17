@@ -11,6 +11,7 @@ import net.minecraft.network.protocol.game.ClientboundBlockUpdatePacket;
 import net.minecraft.network.protocol.game.ClientboundLevelParticlesPacket;
 import net.minecraft.server.level.ServerLevel;
 import net.minecraft.server.level.ServerPlayer;
+import net.minecraft.world.level.ChunkPos;
 import net.minecraft.world.level.Level;
 import net.minecraft.world.level.block.Block;
 import net.minecraft.world.level.block.Blocks;
@@ -18,8 +19,10 @@ import net.minecraft.world.level.block.state.BlockState;
 import net.minecraft.world.level.chunk.LevelChunk;
 
 import java.util.ArrayList;
+import java.util.HashMap;
 import java.util.HashSet;
 import java.util.List;
+import java.util.Map;
 import java.util.Set;
 
 public class ClaimDisplay {
@@ -78,13 +81,9 @@ public class ClaimDisplay {
         DisplayBox.Box dims = this.display.box();
         if (this.corners == null || this.changed(dims)) {
             this.onRemoved(player);
-            this.middlePoss = calculateDisplayPos(player.getLevel(), dims, this.height, this.display.excludedSides());
-            this.corners = new int[][]{
-                    getPosFrom(player.getLevel(), dims.minX(), dims.minZ(), this.height),
-                    getPosFrom(player.getLevel(), dims.maxX(), dims.minZ(), this.height),
-                    getPosFrom(player.getLevel(), dims.minX(), dims.maxZ(), this.height),
-                    getPosFrom(player.getLevel(), dims.maxX(), dims.maxZ(), this.height),
-            };
+            Map<ChunkPos, LevelChunk> chunkCache = new HashMap<>();
+            this.middlePoss = calculateDisplayPos(player.getLevel(), dims, this.height, this.display.excludedSides(), chunkCache);
+            this.corners = this.calculateCorners(player.getLevel(), dims, chunkCache);
             this.initialDisplay = false;
         }
         if (ConfigHandler.config.particleDisplay) {
@@ -133,11 +132,28 @@ public class ClaimDisplay {
         }
     }
 
+    private int[][] calculateCorners(ServerLevel level, DisplayBox.Box from, Map<ChunkPos, LevelChunk> chunkCache) {
+        List<int[]> l = new ArrayList<>();
+        int[] pos = getPosFrom(level, from.minX(), from.minZ(), this.height, chunkCache);
+        if (pos != null)
+            l.add(pos);
+        pos = getPosFrom(level, from.maxX(), from.minZ(), this.height, chunkCache);
+        if (pos != null)
+            l.add(pos);
+        pos = getPosFrom(level, from.minX(), from.maxZ(), this.height, chunkCache);
+        if (pos != null)
+            l.add(pos);
+        pos = getPosFrom(level, from.maxX(), from.maxZ(), this.height, chunkCache);
+        if (pos != null)
+            l.add(pos);
+        return l.toArray(new int[0][]);
+    }
+
     private boolean changed(DisplayBox.Box dims) {
         return !this.prevDims.equals(dims);
     }
 
-    public static int[][] calculateDisplayPos(ServerLevel world, DisplayBox.Box from, int height, Set<Direction> exclude) {
+    public static int[][] calculateDisplayPos(ServerLevel level, DisplayBox.Box from, int height, Set<Direction> exclude, Map<ChunkPos, LevelChunk> chunkCache) {
         List<int[]> l = new ArrayList<>();
         Set<Integer> xs = new HashSet<>();
         addEvenly(from.minX(), from.maxX(), 10, xs);
@@ -148,16 +164,28 @@ public class ClaimDisplay {
         zs.add(from.minZ() + 1);
         zs.add(from.maxZ() - 1);
         for (int x : xs) {
-            if (!exclude.contains(Direction.NORTH))
-                l.add(getPosFrom(world, x, from.minZ(), height));
-            if (!exclude.contains(Direction.SOUTH))
-                l.add(getPosFrom(world, x, from.maxZ(), height));
+            if (!exclude.contains(Direction.NORTH)) {
+                int[] pos = getPosFrom(level, x, from.minZ(), height, chunkCache);
+                if (pos != null)
+                    l.add(pos);
+            }
+            if (!exclude.contains(Direction.SOUTH)) {
+                int[] pos = getPosFrom(level, x, from.maxZ(), height, chunkCache);
+                if (pos != null)
+                    l.add(pos);
+            }
         }
         for (int z : zs) {
-            if (!exclude.contains(Direction.WEST))
-                l.add(getPosFrom(world, from.minX(), z, height));
-            if (!exclude.contains(Direction.EAST))
-                l.add(getPosFrom(world, from.maxX(), z, height));
+            if (!exclude.contains(Direction.WEST)) {
+                int[] pos = getPosFrom(level, from.minX(), z, height, chunkCache);
+                if (pos != null)
+                    l.add(pos);
+            }
+            if (!exclude.contains(Direction.EAST)) {
+                int[] pos = getPosFrom(level, from.maxX(), z, height, chunkCache);
+                if (pos != null)
+                    l.add(pos);
+            }
         }
 
         return l.toArray(new int[0][]);
@@ -180,8 +208,15 @@ public class ClaimDisplay {
      * Returns an array of form [x,y1,y2,z] where y1 = height of the lowest replaceable block and y2 = height of the
      * lowest air block above water (if possible)
      */
-    public static int[] getPosFrom(ServerLevel world, int x, int z, int maxY) {
-        LevelChunk chunk = world.getChunk(SectionPos.blockToSectionCoord(x), SectionPos.blockToSectionCoord(z));
+    public static int[] getPosFrom(ServerLevel level, int x, int z, int maxY, Map<ChunkPos, LevelChunk> chunkCache) {
+        ChunkPos pos = new ChunkPos(SectionPos.blockToSectionCoord(x), SectionPos.blockToSectionCoord(z));
+        LevelChunk chunk = chunkCache.computeIfAbsent(pos, k -> {
+            if (!level.hasChunk(pos.x, pos.z))
+                return null;
+            return level.getChunk(pos.x, pos.z);
+        });
+        if (chunk == null)
+            return null;
         int[] y = nextAirAndWaterBlockFrom(chunk, x, maxY, z);
         return new int[]{x, y[0], y[1], z};
     }
