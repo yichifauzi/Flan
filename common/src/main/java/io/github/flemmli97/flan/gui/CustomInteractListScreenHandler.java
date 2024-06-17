@@ -14,6 +14,7 @@ import net.minecraft.server.level.ServerPlayer;
 import net.minecraft.sounds.SoundEvents;
 import net.minecraft.tags.TagKey;
 import net.minecraft.world.MenuProvider;
+import net.minecraft.world.entity.EntityType;
 import net.minecraft.world.entity.player.Inventory;
 import net.minecraft.world.entity.player.Player;
 import net.minecraft.world.inventory.AbstractContainerMenu;
@@ -76,6 +77,8 @@ public class CustomInteractListScreenHandler extends ServerOnlyScreenHandler<Cus
                     case ITEM -> data.claim.allowedItems.asStacks();
                     case BLOCKBREAK -> data.claim.allowedBreakBlocks.asStacks();
                     case BLOCKUSE -> data.claim.allowedUseBlocks.asStacks();
+                    case ENTITYATTACK -> data.claim.allowedEntityAttack.asStacks();
+                    case ENTITYUSE -> data.claim.allowedEntityUse.asStacks();
                 };
                 int row = i / 9 - 1;
                 int id = (i % 9) + row * 7 - 1;
@@ -120,7 +123,7 @@ public class CustomInteractListScreenHandler extends ServerOnlyScreenHandler<Cus
                         else {
                             Block block = Registry.BLOCK.get(new ResourceLocation(s));
                             if (block != Blocks.AIR)
-                                this.claim.allowedUseBlocks.addAllowedItem(Either.left(block));
+                                this.claim.allowedBreakBlocks.addAllowedItem(Either.left(block));
                         }
                     }
                     case BLOCKUSE -> {
@@ -130,6 +133,24 @@ public class CustomInteractListScreenHandler extends ServerOnlyScreenHandler<Cus
                             Block block = Registry.BLOCK.get(new ResourceLocation(s));
                             if (block != Blocks.AIR)
                                 this.claim.allowedUseBlocks.addAllowedItem(Either.left(block));
+                        }
+                    }
+                    case ENTITYATTACK -> {
+                        if (s.startsWith("#"))
+                            this.claim.allowedEntityAttack.addAllowedItem(Either.right(TagKey.create(Registry.ENTITY_TYPE_REGISTRY, new ResourceLocation(s.substring(1)))));
+                        else {
+                            EntityType<?> entityType = Registry.ENTITY_TYPE.get(new ResourceLocation(s));
+                            if (entityType != EntityType.PIG || s.equals("minecraft:pig"))
+                                this.claim.allowedEntityAttack.addAllowedItem(Either.left(entityType));
+                        }
+                    }
+                    case ENTITYUSE -> {
+                        if (s.startsWith("#"))
+                            this.claim.allowedEntityUse.addAllowedItem(Either.right(TagKey.create(Registry.ENTITY_TYPE_REGISTRY, new ResourceLocation(s.substring(1)))));
+                        else {
+                            EntityType<?> entityType = Registry.ENTITY_TYPE.get(new ResourceLocation(s));
+                            if (entityType != EntityType.PIG || s.equals("minecraft:pig"))
+                                this.claim.allowedEntityUse.addAllowedItem(Either.left(entityType));
                         }
                     }
                 }
@@ -173,14 +194,18 @@ public class CustomInteractListScreenHandler extends ServerOnlyScreenHandler<Cus
     }
 
     public enum Type {
-        ITEM("screenMenuItemUse"),
-        BLOCKBREAK("screenMenuBlockBreak"),
-        BLOCKUSE("screenMenuBlockUse");
+        ITEM("screenMenuItemUse", "item"),
+        BLOCKBREAK("screenMenuBlockBreak", "block_break"),
+        BLOCKUSE("screenMenuBlockUse", "block_use"),
+        ENTITYATTACK("screenMenuEntityAttack", "entity_attack"),
+        ENTITYUSE("screenMenuEntityUse", "entity_use");
 
         public final String translationKey;
+        public final String commandKey;
 
-        Type(String translationKey) {
+        Type(String translationKey, String commandKey) {
             this.translationKey = translationKey;
+            this.commandKey = commandKey;
         }
     }
 }

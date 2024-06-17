@@ -73,6 +73,8 @@ public class EntityInteractEvents {
         BlockPos pos = entity.blockPosition();
         IPermissionContainer claim = storage.getForPermissionCheck(pos);
         if (claim != null) {
+            if (claim instanceof Claim real && real.canInteractWithEntity(entity))
+                return InteractionResult.PASS;
             ResourceLocation perm = ObjectToPermissionMap.getFromEntity(entity.getType());
             if (perm != null) {
                 return claim.canInteract(serverPlayer, perm, pos, true) ? InteractionResult.PASS : InteractionResult.FAIL;
@@ -96,6 +98,8 @@ public class EntityInteractEvents {
         BlockPos pos = entity.blockPosition();
         IPermissionContainer claim = storage.getForPermissionCheck(pos);
         if (claim != null) {
+            if (claim instanceof Claim real && real.canInteractWithEntity(entity))
+                return InteractionResult.PASS;
             ResourceLocation perm = ObjectToPermissionMap.getFromEntity(entity.getType());
             if (perm != null) {
                 return claim.canInteract(player, perm, pos, true) ? InteractionResult.PASS : InteractionResult.FAIL;
@@ -213,6 +217,8 @@ public class EntityInteractEvents {
         BlockPos pos = entity.blockPosition();
         IPermissionContainer claim = storage.getForPermissionCheck(pos);
         if (claim != null) {
+            if (claim instanceof Claim real && real.canAttackEntity(entity))
+                return InteractionResult.PASS;
             if (entity instanceof ArmorStand || !(entity instanceof LivingEntity))
                 return claim.canInteract(player, BuiltinPermission.BREAKNONLIVING, pos, message) ? InteractionResult.PASS : InteractionResult.FAIL;
             if (entity instanceof Player)

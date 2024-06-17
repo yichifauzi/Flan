@@ -9,15 +9,18 @@ import com.mojang.brigadier.arguments.StringArgumentType;
 import com.mojang.brigadier.builder.LiteralArgumentBuilder;
 import com.mojang.brigadier.context.CommandContext;
 import com.mojang.brigadier.exceptions.CommandSyntaxException;
+import com.mojang.datafixers.util.Either;
 import io.github.flemmli97.flan.api.data.IPlayerData;
 import io.github.flemmli97.flan.api.permission.BuiltinPermission;
 import io.github.flemmli97.flan.api.permission.PermissionManager;
+import io.github.flemmli97.flan.claim.AllowedRegistryList;
 import io.github.flemmli97.flan.claim.Claim;
 import io.github.flemmli97.flan.claim.ClaimStorage;
 import io.github.flemmli97.flan.claim.PermHelper;
 import io.github.flemmli97.flan.config.ConfigHandler;
 import io.github.flemmli97.flan.event.ItemInteractEvents;
 import io.github.flemmli97.flan.gui.ClaimMenuScreenHandler;
+import io.github.flemmli97.flan.gui.CustomInteractListScreenHandler;
 import io.github.flemmli97.flan.gui.PersonalGroupScreenHandler;
 import io.github.flemmli97.flan.platform.integration.permissions.PermissionNodeHandler;
 import io.github.flemmli97.flan.player.EnumEditMode;
@@ -31,6 +34,7 @@ import net.minecraft.commands.SharedSuggestionProvider;
 import net.minecraft.commands.arguments.ComponentArgument;
 import net.minecraft.commands.arguments.GameProfileArgument;
 import net.minecraft.commands.arguments.ResourceLocationArgument;
+import net.minecraft.commands.arguments.ResourceOrTagLocationArgument;
 import net.minecraft.commands.arguments.UuidArgument;
 import net.minecraft.commands.arguments.coordinates.BlockPosArgument;
 import net.minecraft.core.BlockPos;
@@ -47,6 +51,7 @@ import net.minecraft.server.MinecraftServer;
 import net.minecraft.server.level.ServerLevel;
 import net.minecraft.server.level.ServerPlayer;
 import net.minecraft.util.Tuple;
+import net.minecraft.world.item.Items;
 import net.minecraft.world.level.Level;
 
 import java.util.ArrayList;
@@ -159,7 +164,41 @@ public class CommandClaim {
                         .then(Commands.literal("group").then(Commands.argument("group", StringArgumentType.string()).suggests(CommandHelpers::groupSuggestion)
                                 .then(Commands.argument("permission", ResourceLocationArgument.id()).suggests((ctx, b) -> CommandHelpers.permSuggestions(ctx, b, true))
                                         .then(Commands.argument("toggle", StringArgumentType.word())
-                                                .suggests((ctx, b) -> SharedSuggestionProvider.suggest(new String[]{"default", "true", "false"}, b)).executes(CommandClaim::editGroupPerm))))));
+                                                .suggests((ctx, b) -> SharedSuggestionProvider.suggest(new String[]{"default", "true", "false"}, b)).executes(CommandClaim::editGroupPerm))))))
+                .then(Commands.literal("ignoreList").requires(src -> PermissionNodeHandler.INSTANCE.perm(src, PermissionNodeHandler.cmdClaimIgnore, false))
+                        .then(Commands.literal("add")
+                                .then(Commands.literal(CustomInteractListScreenHandler.Type.ITEM.commandKey)
+                                        .then(Commands.argument("entry", ResourceOrTagLocationArgument.resourceOrTag(Registry.ITEM_REGISTRY))
+                                                .executes(src -> CommandClaim.addClaimListEntries(src, CustomInteractListScreenHandler.Type.ITEM))))
+                                .then(Commands.literal(CustomInteractListScreenHandler.Type.BLOCKBREAK.commandKey)
+                                        .then(Commands.argument("entry", ResourceOrTagLocationArgument.resourceOrTag(Registry.BLOCK_REGISTRY))
+                                                .executes(src -> CommandClaim.addClaimListEntries(src, CustomInteractListScreenHandler.Type.BLOCKBREAK))))
+                                .then(Commands.literal(CustomInteractListScreenHandler.Type.BLOCKUSE.commandKey)
+                                        .then(Commands.argument("entry", ResourceOrTagLocationArgument.resourceOrTag(Registry.BLOCK_REGISTRY))
+                                                .executes(src -> CommandClaim.addClaimListEntries(src, CustomInteractListScreenHandler.Type.BLOCKUSE))))
+                                .then(Commands.literal(CustomInteractListScreenHandler.Type.ENTITYATTACK.commandKey)
+                                        .then(Commands.argument("entry", ResourceOrTagLocationArgument.resourceOrTag(Registry.ENTITY_TYPE_REGISTRY))
+                                                .executes(src -> CommandClaim.addClaimListEntries(src, CustomInteractListScreenHandler.Type.ENTITYATTACK))))
+                                .then(Commands.literal(CustomInteractListScreenHandler.Type.ENTITYUSE.commandKey)
+                                        .then(Commands.argument("entry", ResourceOrTagLocationArgument.resourceOrTag(Registry.ENTITY_TYPE_REGISTRY))
+                                                .executes(src -> CommandClaim.addClaimListEntries(src, CustomInteractListScreenHandler.Type.ENTITYUSE)))))
+                        .then(Commands.literal("remove")
+                                .then(Commands.literal(CustomInteractListScreenHandler.Type.ITEM.commandKey)
+                                        .then(Commands.argument("entry", ResourceOrTagLocationArgument.resourceOrTag(Registry.ITEM_REGISTRY)).suggests((src, b) -> CommandHelpers.claimEntryListSuggestion(src, b, CustomInteractListScreenHandler.Type.ITEM))
+                                                .executes(src -> CommandClaim.removeClaimListEntries(src, CustomInteractListScreenHandler.Type.ITEM))))
+                                .then(Commands.literal(CustomInteractListScreenHandler.Type.BLOCKBREAK.commandKey)
+                                        .then(Commands.argument("entry", ResourceOrTagLocationArgument.resourceOrTag(Registry.BLOCK_REGISTRY)).suggests((src, b) -> CommandHelpers.claimEntryListSuggestion(src, b, CustomInteractListScreenHandler.Type.BLOCKBREAK))
+                                                .executes(src -> CommandClaim.removeClaimListEntries(src, CustomInteractListScreenHandler.Type.BLOCKBREAK))))
+                                .then(Commands.literal(CustomInteractListScreenHandler.Type.BLOCKUSE.commandKey)
+                                        .then(Commands.argument("entry", ResourceOrTagLocationArgument.resourceOrTag(Registry.BLOCK_REGISTRY)).suggests((src, b) -> CommandHelpers.claimEntryListSuggestion(src, b, CustomInteractListScreenHandler.Type.BLOCKUSE))
+                                                .executes(src -> CommandClaim.removeClaimListEntries(src, CustomInteractListScreenHandler.Type.BLOCKUSE))))
+                                .then(Commands.literal(CustomInteractListScreenHandler.Type.ENTITYATTACK.commandKey)
+                                        .then(Commands.argument("entry", ResourceOrTagLocationArgument.resourceOrTag(Registry.ENTITY_TYPE_REGISTRY)).suggests((src, b) -> CommandHelpers.claimEntryListSuggestion(src, b, CustomInteractListScreenHandler.Type.ENTITYATTACK))
+                                                .executes(src -> CommandClaim.removeClaimListEntries(src, CustomInteractListScreenHandler.Type.ENTITYATTACK))))
+                                .then(Commands.literal(CustomInteractListScreenHandler.Type.ENTITYUSE.commandKey)
+                                        .then(Commands.argument("entry", ResourceOrTagLocationArgument.resourceOrTag(Registry.ENTITY_TYPE_REGISTRY)).suggests((src, b) -> CommandHelpers.claimEntryListSuggestion(src, b, CustomInteractListScreenHandler.Type.ENTITYUSE))
+                                                .executes(src -> CommandClaim.removeClaimListEntries(src, CustomInteractListScreenHandler.Type.ENTITYUSE)))))
+                );
         builder.then(Commands.literal("help").executes(ctx -> CommandHelp.helpMessage(ctx, 0, builder.getArguments()))
                 .then(Commands.argument("page", IntegerArgumentType.integer()).executes(ctx -> CommandHelp.helpMessage(ctx, builder.getArguments())))
                 .then(Commands.literal("cmd").then(Commands.argument("command", StringArgumentType.word()).suggests((ctx, sb) -> SharedSuggestionProvider.suggest(CommandHelp.registeredCommands(ctx, builder.getArguments()), sb)).executes(CommandHelp::helpCmd))));
@@ -963,6 +1002,49 @@ public class CommandClaim {
         return Command.SINGLE_SUCCESS;
     }
 
+    public static int addClaimListEntries(CommandContext<CommandSourceStack> context, CustomInteractListScreenHandler.Type type) throws CommandSyntaxException {
+        ServerPlayer player = context.getSource().getPlayerOrException();
+        PlayerClaimData data = PlayerClaimData.get(player);
+        Claim rootClaim = PermHelper.checkReturn(player, BuiltinPermission.CLAIMMESSAGE, PermHelper.genericNoPermMessage(player));
+        if (rootClaim == null)
+            return 0;
+        Claim claim = data.getEditMode() == EnumEditMode.SUBCLAIM ? rootClaim.getSubClaim(player.blockPosition()) : rootClaim;
+        if (claim == null)
+            return 0;
+        String result = switch (type) {
+            case ITEM -> addClaimListEntry(context, Registry.ITEM, claim.allowedItems);
+            case BLOCKBREAK -> addClaimListEntry(context, Registry.BLOCK, claim.allowedBreakBlocks);
+            case BLOCKUSE -> addClaimListEntry(context, Registry.BLOCK, claim.allowedUseBlocks);
+            case ENTITYATTACK -> addClaimListEntry(context, Registry.ENTITY_TYPE, claim.allowedEntityAttack);
+            case ENTITYUSE -> addClaimListEntry(context, Registry.ENTITY_TYPE, claim.allowedEntityUse);
+        };
+        MutableComponent cmdFeed = new TranslatableComponent(ConfigHandler.langManager.get("addIgnoreEntry"), result, type.commandKey).withStyle(ChatFormatting.GOLD);
+        context.getSource().sendSuccess(cmdFeed, false);
+        return Command.SINGLE_SUCCESS;
+    }
+
+    public static int removeClaimListEntries(CommandContext<CommandSourceStack> context, CustomInteractListScreenHandler.Type type) throws CommandSyntaxException {
+        ServerPlayer player = context.getSource().getPlayerOrException();
+        PlayerClaimData data = PlayerClaimData.get(player);
+        Claim rootClaim = PermHelper.checkReturn(player, BuiltinPermission.CLAIMMESSAGE, PermHelper.genericNoPermMessage(player));
+        if (rootClaim == null)
+            return 0;
+        Claim claim = data.getEditMode() == EnumEditMode.SUBCLAIM ? rootClaim.getSubClaim(player.blockPosition()) : rootClaim;
+        if (claim == null)
+            return 0;
+        String value = context.getArgument("entry", ResourceOrTagLocationArgument.Result.class).asPrintable();
+        switch (type) {
+            case ITEM -> claim.allowedItems.removeAllowedItem(value);
+            case BLOCKBREAK -> claim.allowedBreakBlocks.removeAllowedItem(value);
+            case BLOCKUSE -> claim.allowedUseBlocks.removeAllowedItem(value);
+            case ENTITYATTACK -> claim.allowedEntityAttack.removeAllowedItem(value);
+            case ENTITYUSE -> claim.allowedEntityUse.removeAllowedItem(value);
+        }
+        MutableComponent cmdFeed = new TranslatableComponent(ConfigHandler.langManager.get("removeIgnoreEntry"), value, type.commandKey).withStyle(ChatFormatting.GOLD);
+        context.getSource().sendSuccess(cmdFeed, false);
+        return Command.SINGLE_SUCCESS;
+    }
+
     private static int sellClaimBlocks(CommandContext<CommandSourceStack> context) throws CommandSyntaxException {
         boolean b = ConfigHandler.config.buySellHandler.sell(context.getSource().getPlayerOrException(), Math.max(0, IntegerArgumentType.getInteger(context, "amount")), m -> context.getSource().sendSuccess(m, false));
         return b ? Command.SINGLE_SUCCESS : 0;
@@ -971,5 +1053,16 @@ public class CommandClaim {
     private static int buyClaimBlocks(CommandContext<CommandSourceStack> context) throws CommandSyntaxException {
         boolean b = ConfigHandler.config.buySellHandler.buy(context.getSource().getPlayerOrException(), Math.max(0, IntegerArgumentType.getInteger(context, "amount")), m -> context.getSource().sendSuccess(m, false));
         return b ? Command.SINGLE_SUCCESS : 0;
+    }
+
+    @SuppressWarnings("unchecked")
+    private static <T> String addClaimListEntry(CommandContext<CommandSourceStack> context, Registry<T> registry, AllowedRegistryList<T> list) throws CommandSyntaxException {
+        ResourceOrTagLocationArgument.Result<T> value = CommandHelpers.getRegistryType(context, "entry", (ResourceKey<Registry<T>>) registry.key());
+        value.unwrap().ifRight(tag -> list.addAllowedItem(Either.right(tag))).ifLeft(id -> {
+            T entry = registry.get(id);
+            if (entry != Items.AIR)
+                list.addAllowedItem(Either.left(entry));
+        });
+        return value.asPrintable();
     }
 }
