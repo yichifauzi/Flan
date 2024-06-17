@@ -113,7 +113,7 @@ public class CommandHelpers {
         ResourceOrTagLocationArgument.Result<?> result = (ResourceOrTagLocationArgument.Result<T>) context.getArgument(name, ResourceOrTagLocationArgument.Result.class);
         Optional<ResourceOrTagLocationArgument.Result<T>> optional = result.cast(registryKey);
         return optional.orElseThrow(() -> new DynamicCommandExceptionType((object) ->
-                new TranslatableComponent("commands.locatebiome.invalid", object)).create(result));
+                new TranslatableComponent("No such entry %1$s", object)).create(result));
     }
 
     public static CompletableFuture<Suggestions> claimEntryListSuggestion(CommandContext<CommandSourceStack> context, SuggestionsBuilder build, CustomInteractListScreenHandler.Type type) throws CommandSyntaxException {
