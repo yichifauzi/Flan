@@ -613,7 +613,9 @@ public class Claim implements IPermissionContainer {
     }
 
     private void displayTitleMessage(ServerPlayer player, @Nullable Component title, @Nullable Component subtitle) {
+        title = this.transformForDisplay(title);
         if (title == null) return;
+        subtitle = this.transformForDisplay(subtitle);
         if (ConfigHandler.config.claimDisplayActionBar) {
             if (subtitle != null) {
                 MutableComponent message = title.copy().append(new TextComponent(" | ").setStyle(Style.EMPTY.withColor(ChatFormatting.WHITE))).append(subtitle);
@@ -627,6 +629,23 @@ public class Claim implements IPermissionContainer {
         if (subtitle != null) {
             player.connection.send(new ClientboundSetSubtitleTextPacket(subtitle));
         }
+    }
+
+    @Nullable
+    private Component transformForDisplay(Component component) {
+        if (component == null)
+            return null;
+        MutableComponent res;
+        if (component instanceof TranslatableComponent trans) {
+            res = new TranslatableComponent(trans.getKey(), this.world.getServer().getProfileCache().get(this.owner).map(GameProfile::getName).orElse("<UNKNOWN>"), this.claimName);
+        } else if (component instanceof TextComponent comp) {
+            res = new TranslatableComponent(comp.getText(), this.world.getServer().getProfileCache().get(this.owner).map(GameProfile::getName).orElse("<UNKNOWN>"), this.claimName);
+        } else {
+            res = component.plainCopy();
+        }
+        res.getSiblings().addAll(component.getSiblings().stream().map(c -> this.transformForDisplay(component)).toList());
+        res.setStyle(component.getStyle());
+        return res;
     }
 
     public void displayEnterTitle(ServerPlayer player) {
