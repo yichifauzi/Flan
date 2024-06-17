@@ -36,6 +36,8 @@ import net.minecraft.world.InteractionResult;
 import net.minecraft.world.effect.MobEffect;
 import net.minecraft.world.effect.MobEffectInstance;
 import net.minecraft.world.effect.MobEffects;
+import net.minecraft.world.entity.Entity;
+import net.minecraft.world.entity.EntityType;
 import net.minecraft.world.item.Item;
 import net.minecraft.world.item.ItemStack;
 import net.minecraft.world.level.block.Block;
@@ -87,9 +89,11 @@ public class Claim implements IPermissionContainer {
 
     private final Map<MobEffect, Integer> potions = new HashMap<>();
 
-    public final AllowedRegistryList<Item> allowedItems = new AllowedRegistryList<>(BuiltInRegistries.ITEM, this);
-    public final AllowedRegistryList<Block> allowedUseBlocks = new AllowedRegistryList<>(BuiltInRegistries.BLOCK, this);
-    public final AllowedRegistryList<Block> allowedBreakBlocks = new AllowedRegistryList<>(BuiltInRegistries.BLOCK, this);
+    public final AllowedRegistryList<Item> allowedItems = AllowedRegistryList.ofItemLike(BuiltInRegistries.ITEM, this);
+    public final AllowedRegistryList<Block> allowedUseBlocks = AllowedRegistryList.ofItemLike(BuiltInRegistries.BLOCK, this);
+    public final AllowedRegistryList<Block> allowedBreakBlocks = AllowedRegistryList.ofItemLike(BuiltInRegistries.BLOCK, this);
+    public final AllowedRegistryList<EntityType<?>> allowedEntityAttack = new AllowedRegistryList<>(BuiltInRegistries.ENTITY_TYPE, this, AllowedRegistryList.ENTITY_AS_ITEM);
+    public final AllowedRegistryList<EntityType<?>> allowedEntityUse = new AllowedRegistryList<>(BuiltInRegistries.ENTITY_TYPE, this, AllowedRegistryList.ENTITY_AS_ITEM);
 
     public Component enterTitle, enterSubtitle, leaveTitle, leaveSubtitle;
 
@@ -666,6 +670,14 @@ public class Claim implements IPermissionContainer {
         return this.allowedBreakBlocks.matches(state::is, state::is);
     }
 
+    public boolean canAttackEntity(Entity entity) {
+        return this.allowedEntityAttack.matches(type -> entity.getType() == type, tag -> entity.getType().is(tag));
+    }
+
+    public boolean canInteractWithEntity(Entity entity) {
+        return this.allowedEntityUse.matches(type -> entity.getType() == type, tag -> entity.getType().is(tag));
+    }
+
     /**
      * Only marks non sub claims
      */
@@ -725,6 +737,8 @@ public class Claim implements IPermissionContainer {
             this.allowedItems.read(ConfigHandler.arryFromJson(obj, "AllowedItems"));
             this.allowedUseBlocks.read(ConfigHandler.arryFromJson(obj, "AllowedUseBlocks"));
             this.allowedBreakBlocks.read(ConfigHandler.arryFromJson(obj, "AllowedBreakBlocks"));
+            this.allowedEntityAttack.read(ConfigHandler.arryFromJson(obj, "AllowedEntityAttack"));
+            this.allowedEntityUse.read(ConfigHandler.arryFromJson(obj, "AllowedEntityUse"));
             this.globalPerm.clear();
             this.permissions.clear();
             this.subClaims.clear();
@@ -789,6 +803,8 @@ public class Claim implements IPermissionContainer {
         obj.add("AllowedItems", this.allowedItems.save());
         obj.add("AllowedUseBlocks", this.allowedUseBlocks.save());
         obj.add("AllowedBreakBlocks", this.allowedBreakBlocks.save());
+        obj.add("AllowedEntityAttack", this.allowedEntityAttack.save());
+        obj.add("AllowedEntityUse", this.allowedEntityUse.save());
         if (!this.globalPerm.isEmpty()) {
             JsonElement gPerm;
             if (this.parent == null) {

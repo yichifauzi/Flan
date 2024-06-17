@@ -3,6 +3,7 @@ package io.github.flemmli97.flan.commands;
 import com.mojang.authlib.GameProfile;
 import com.mojang.brigadier.context.CommandContext;
 import com.mojang.brigadier.exceptions.CommandSyntaxException;
+import com.mojang.brigadier.exceptions.DynamicCommandExceptionType;
 import com.mojang.brigadier.exceptions.SimpleCommandExceptionType;
 import com.mojang.brigadier.suggestion.Suggestions;
 import com.mojang.brigadier.suggestion.SuggestionsBuilder;
@@ -12,17 +13,23 @@ import io.github.flemmli97.flan.api.permission.PermissionManager;
 import io.github.flemmli97.flan.claim.Claim;
 import io.github.flemmli97.flan.claim.ClaimStorage;
 import io.github.flemmli97.flan.config.ConfigHandler;
+import io.github.flemmli97.flan.gui.CustomInteractListScreenHandler;
 import io.github.flemmli97.flan.player.PlayerClaimData;
 import net.minecraft.commands.CommandSourceStack;
 import net.minecraft.commands.SharedSuggestionProvider;
 import net.minecraft.commands.arguments.GameProfileArgument;
+import net.minecraft.commands.arguments.ResourceOrTagKeyArgument;
 import net.minecraft.core.BlockPos;
+import net.minecraft.core.Registry;
+import net.minecraft.network.chat.Component;
+import net.minecraft.resources.ResourceKey;
 import net.minecraft.server.level.ServerLevel;
 import net.minecraft.server.level.ServerPlayer;
 
 import java.util.ArrayList;
 import java.util.Collection;
 import java.util.List;
+import java.util.Optional;
 import java.util.UUID;
 import java.util.concurrent.CompletableFuture;
 import java.util.regex.Pattern;
@@ -99,5 +106,30 @@ public class CommandHelpers {
 
     public static <T extends Enum<T>> CompletableFuture<Suggestions> enumSuggestion(Class<T> clss, SuggestionsBuilder build) {
         return SharedSuggestionProvider.suggest(Stream.of(clss.getEnumConstants()).map(Object::toString), build);
+    }
+
+    @SuppressWarnings("unchecked")
+    public static <T> ResourceOrTagKeyArgument.Result<T> getRegistryType(CommandContext<CommandSourceStack> context, String name, ResourceKey<Registry<T>> registryKey) throws CommandSyntaxException {
+        ResourceOrTagKeyArgument.Result<?> result = (ResourceOrTagKeyArgument.Result<T>) context.getArgument(name, ResourceOrTagKeyArgument.Result.class);
+        Optional<ResourceOrTagKeyArgument.Result<T>> optional = result.cast(registryKey);
+        return optional.orElseThrow(() -> new DynamicCommandExceptionType((object) ->
+                Component.translatable("No such entry %1$s", object)).create(result));
+    }
+
+    public static CompletableFuture<Suggestions> claimEntryListSuggestion(CommandContext<CommandSourceStack> context, SuggestionsBuilder build, CustomInteractListScreenHandler.Type type) throws CommandSyntaxException {
+        ServerPlayer player = context.getSource().getPlayerOrException();
+        List<String> list = new ArrayList<>();
+        ClaimStorage storage = ClaimStorage.get(player.serverLevel());
+        Claim claim = storage.getClaimAt(player.blockPosition());
+        if (claim != null && claim.canInteract(player, BuiltinPermission.EDITPERMS, player.blockPosition())) {
+            switch (type) {
+                case ITEM -> list = claim.allowedItems.asString();
+                case BLOCKBREAK -> list = claim.allowedBreakBlocks.asString();
+                case BLOCKUSE -> list = claim.allowedUseBlocks.asString();
+                case ENTITYATTACK -> list = claim.allowedEntityAttack.asString();
+                case ENTITYUSE -> list = claim.allowedEntityUse.asString();
+            }
+        }
+        return SharedSuggestionProvider.suggest(list, build);
     }
 }
