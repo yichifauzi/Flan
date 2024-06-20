@@ -8,7 +8,7 @@ import java.util.Map;
 
 public class ConfigUpdater {
 
-    private static final Map<Integer, Updater> updater = Config.createHashMap(map -> {
+    private static final Map<Integer, Updater> UPDATER = Config.createHashMap(map -> {
         map.put(2, old -> {
             Flan.debug("Updating config to version 2");
             ConfigHandler.config.globalDefaultPerms.compute("*", (k, v) -> {
@@ -42,7 +42,7 @@ public class ConfigUpdater {
     });
 
     public static void updateConfig(int preVersion, JsonObject oldVals) {
-        updater.entrySet().stream().filter(e -> e.getKey() > preVersion).map(Map.Entry::getValue)
+        UPDATER.entrySet().stream().filter(e -> e.getKey() > preVersion).map(Map.Entry::getValue)
                 .forEach(u -> u.configUpdater(oldVals));
     }
 

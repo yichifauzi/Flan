@@ -1,6 +1,7 @@
 package io.github.flemmli97.flan;
 
 import io.github.flemmli97.flan.config.ConfigHandler;
+import net.minecraft.world.level.levelgen.blockpredicates.BlockPredicate;
 import org.apache.logging.log4j.LogManager;
 import org.apache.logging.log4j.Logger;
 
@@ -19,6 +20,8 @@ public class Flan {
             diamondCurrency, ftbChunks, gomlServer, mineColonies, commonProtApi, impactor, create;
 
     public static final DateTimeFormatter ONLINE_TIME_FORMATTER = DateTimeFormatter.ofPattern("yyyy-MM-dd HH:mm");
+
+    public static final BlockPredicate NONE_PREDICATE = BlockPredicate.not(BlockPredicate.alwaysTrue());
 
     public static void log(String msg, Object... o) {
         if (ConfigHandler.config.log)

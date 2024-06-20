@@ -15,6 +15,7 @@ import io.github.flemmli97.flan.player.PlayerClaimData;
 import io.github.flemmli97.flan.player.display.EnumDisplayType;
 import net.minecraft.ChatFormatting;
 import net.minecraft.core.BlockPos;
+import net.minecraft.core.component.DataComponents;
 import net.minecraft.network.chat.Component;
 import net.minecraft.network.protocol.game.ClientboundBlockUpdatePacket;
 import net.minecraft.network.protocol.game.ClientboundContainerSetSlotPacket;
@@ -75,7 +76,7 @@ public class ItemInteractEvents {
             return InteractionResultHolder.pass(stack);
         if (claim instanceof Claim real && real.canUseItem(stack))
             return InteractionResultHolder.pass(stack);
-        ResourceLocation perm = ObjectToPermissionMap.getFromItem(stack.getItem());
+        ResourceLocation perm = ObjectToPermissionMap.getFromItem(stack);
         if (perm != null) {
             boolean success = claim.canInteract(player, perm, pos, true);
             if (success)
@@ -118,7 +119,11 @@ public class ItemInteractEvents {
         boolean actualInClaim = !(claim instanceof Claim) || placePos.getY() >= ((Claim) claim).getDimensions()[4];
         if (actualInClaim && claim instanceof Claim real && real.canUseItem(stack))
             return InteractionResult.PASS;
-        ResourceLocation perm = ObjectToPermissionMap.getFromItem(stack.getItem());
+        ResourceLocation perm = ObjectToPermissionMap.getFromItem(stack);
+        if (perm == null) {
+            if (stack.has(DataComponents.JUKEBOX_PLAYABLE))
+                perm = BuiltinPermission.JUKEBOX;
+        }
         if (perm != null) {
             if (claim.canInteract(player, perm, placePos, false))
                 return InteractionResult.PASS;

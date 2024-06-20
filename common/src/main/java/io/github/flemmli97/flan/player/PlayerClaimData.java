@@ -63,7 +63,7 @@ import java.util.function.Consumer;
 
 public class PlayerClaimData implements IPlayerData {
 
-    public static final UUID MINING_SPEED_MOD = UUID.fromString("f44e0f63-4835-45df-84c5-397a22df2896");
+    public static final ResourceLocation MINING_SPEED_MOD = ResourceLocation.tryBuild(Flan.MODID, "mining_speed_modifier");
 
     private int claimBlocks, additionalClaimBlocks, confirmTick, actionCooldown;
     //Scoreboard tracking
@@ -347,7 +347,7 @@ public class PlayerClaimData implements IPlayerData {
                         tpTo.set(tpTo.getX(), yHighest, tpTo.getZ());
                     if (this.player.isPassenger())
                         this.player.stopRiding();
-                    this.player.teleportToWithTicket(tpTo.getX() + 0.5, tpTo.getY(), tpTo.getZ() + 0.5);
+                    this.player.teleportTo(tpTo.getX() + 0.5, tpTo.getY(), tpTo.getZ() + 0.5);
                     this.tpPos = null;
                 } else {
                     Vec3 tp = TeleportUtils.getTeleportPos(this.player, this.player.position(), ClaimStorage.get(this.player.serverLevel()),
@@ -355,7 +355,7 @@ public class PlayerClaimData implements IPlayerData {
                             TeleportUtils.roundedBlockPos(this.player.position()).mutable(), (claim, nPos) -> false);
                     if (this.player.isPassenger())
                         this.player.stopRiding();
-                    this.player.teleportToWithTicket(tp.x(), tp.y(), tp.z());
+                    this.player.teleportTo(tp.x(), tp.y(), tp.z());
                 }
             } else if (this.player.position().distanceToSqr(this.trappedPos) > 0.15) {
                 this.trappedTick = -1;

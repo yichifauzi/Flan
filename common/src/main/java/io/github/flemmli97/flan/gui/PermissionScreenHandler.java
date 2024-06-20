@@ -148,7 +148,7 @@ public class PermissionScreenHandler extends ServerOnlyScreenHandler<ClaimGroup>
         ItemStack stack = slot.getItem();
         ClaimPermission perm;
         try {
-            perm = PermissionManager.INSTANCE.get(new ResourceLocation(stack.getOrDefault(DataComponents.CUSTOM_DATA, CustomData.EMPTY)
+            perm = PermissionManager.INSTANCE.get(ResourceLocation.parse(stack.getOrDefault(DataComponents.CUSTOM_DATA, CustomData.EMPTY)
                     .copyTag().getString(ServerScreenHelper.PERMISSION_KEY)));
             if (perm == null)
                 return false;

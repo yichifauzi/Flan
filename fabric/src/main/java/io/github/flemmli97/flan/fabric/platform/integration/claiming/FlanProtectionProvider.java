@@ -25,7 +25,7 @@ import net.minecraft.world.phys.AABB;
 import org.jetbrains.annotations.Nullable;
 
 public class FlanProtectionProvider implements ProtectionProvider {
-    public static final ResourceLocation Id = new ResourceLocation("flan", "provider");
+    public static final ResourceLocation Id = ResourceLocation.tryBuild("flan", "provider");
 
     public static void register() {
         CommonProtection.register(Id, new FlanProtectionProvider());

@@ -729,7 +729,7 @@ public class Claim implements IPermissionContainer {
                 this.leaveSubtitle = null;
             JsonObject potion = ConfigHandler.fromJson(obj, "Potions");
             potion.entrySet().forEach(e ->
-                    BuiltInRegistries.MOB_EFFECT.getHolder(new ResourceLocation(e.getKey()))
+                    BuiltInRegistries.MOB_EFFECT.getHolder(ResourceLocation.parse(e.getKey()))
                             .ifPresent(effect -> this.potions.put(effect, e.getValue().getAsInt())));
             if (ConfigHandler.fromJson(obj, "AdminClaim", false))
                 this.owner = null;

@@ -50,7 +50,7 @@ public class PlayerEvents {
         if (context.getPlayer() instanceof ServerPlayer serverPlayer) {
             BlockState state = serverPlayer.level().getBlockState(context.getClickedPos());
             BlockPos.MutableBlockPos pos = context.getClickedPos().mutable();
-            ResourceLocation perm = ObjectToPermissionMap.getFromItem(context.getItemInHand().getItem());
+            ResourceLocation perm = ObjectToPermissionMap.getFromItem(context.getItemInHand());
             /**
              * {@link ItemInteractEvents#onItemUseBlock} handles this case already.
              * Sadly need to check again. In case its used in a claim. Less expensive than aoe check

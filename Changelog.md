@@ -1,12 +1,16 @@
 Flan 1.10.5
 ================
-- Cache chunks for claim display and don't load unloaded chunks which should solve some performance issue  
-  with large claims etc.
-- Fix placeholders not working for enter/leave messages
-- Add `entity attack` and `entity use` ignore list for claims similar to existing item, block ignore lists  
-  Entitites in that list can be interacted/attacked in that claim regardless of permission
-- Add command for the ignore list:  
-  `/ignoreList (add | remove) <type> <value>`
+- Update to 1.21
+- Removed frostwalker permission due to changes to the   
+  enchantment system making it impossible to determine from what enchant modifications now come from.  
+  It now uses the place permission.  
+~~- Cache chunks for claim display and don't load unloaded chunks which should solve some performance issue  
+  with large claims etc.~~  
+~~- Fix placeholders not working for enter/leave messages~~  
+~~- Add `entity attack` and `entity use` ignore list for claims similar to existing item, block ignore lists  
+  Entitites in that list can be interacted/attacked in that claim regardless of permission~~  
+~~- Add command for the ignore list:  
+  `/ignoreList (add | remove) <type> <value>`~~
 
 Flan 1.10.4
 ================

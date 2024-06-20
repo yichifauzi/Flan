@@ -111,45 +111,45 @@ public class CustomInteractListScreenHandler extends ServerOnlyScreenHandler<Cus
                 switch (this.type) {
                     case ITEM -> {
                         if (s.startsWith("#"))
-                            this.claim.allowedItems.addAllowedItem(Either.right(TagKey.create(BuiltInRegistries.ITEM.key(), new ResourceLocation(s.substring(1)))));
+                            this.claim.allowedItems.addAllowedItem(Either.right(TagKey.create(BuiltInRegistries.ITEM.key(), ResourceLocation.parse(s.substring(1)))));
                         else {
-                            Item item = BuiltInRegistries.ITEM.get(new ResourceLocation(s));
+                            Item item = BuiltInRegistries.ITEM.get(ResourceLocation.parse(s));
                             if (item != Items.AIR)
                                 this.claim.allowedItems.addAllowedItem(Either.left(item));
                         }
                     }
                     case BLOCKBREAK -> {
                         if (s.startsWith("#"))
-                            this.claim.allowedBreakBlocks.addAllowedItem(Either.right(TagKey.create(BuiltInRegistries.BLOCK.key(), new ResourceLocation(s.substring(1)))));
+                            this.claim.allowedBreakBlocks.addAllowedItem(Either.right(TagKey.create(BuiltInRegistries.BLOCK.key(), ResourceLocation.parse(s.substring(1)))));
                         else {
-                            Block block = BuiltInRegistries.BLOCK.get(new ResourceLocation(s));
+                            Block block = BuiltInRegistries.BLOCK.get(ResourceLocation.parse(s));
                             if (block != Blocks.AIR)
                                 this.claim.allowedBreakBlocks.addAllowedItem(Either.left(block));
                         }
                     }
                     case BLOCKUSE -> {
                         if (s.startsWith("#"))
-                            this.claim.allowedUseBlocks.addAllowedItem(Either.right(TagKey.create(BuiltInRegistries.BLOCK.key(), new ResourceLocation(s.substring(1)))));
+                            this.claim.allowedUseBlocks.addAllowedItem(Either.right(TagKey.create(BuiltInRegistries.BLOCK.key(), ResourceLocation.parse(s.substring(1)))));
                         else {
-                            Block block = BuiltInRegistries.BLOCK.get(new ResourceLocation(s));
+                            Block block = BuiltInRegistries.BLOCK.get(ResourceLocation.parse(s));
                             if (block != Blocks.AIR)
                                 this.claim.allowedUseBlocks.addAllowedItem(Either.left(block));
                         }
                     }
                     case ENTITYATTACK -> {
                         if (s.startsWith("#"))
-                            this.claim.allowedEntityAttack.addAllowedItem(Either.right(TagKey.create(BuiltInRegistries.ENTITY_TYPE.key(), new ResourceLocation(s.substring(1)))));
+                            this.claim.allowedEntityAttack.addAllowedItem(Either.right(TagKey.create(BuiltInRegistries.ENTITY_TYPE.key(), ResourceLocation.parse(s.substring(1)))));
                         else {
-                            EntityType<?> entityType = BuiltInRegistries.ENTITY_TYPE.get(new ResourceLocation(s));
+                            EntityType<?> entityType = BuiltInRegistries.ENTITY_TYPE.get(ResourceLocation.parse(s));
                             if (entityType != EntityType.PIG || s.equals("minecraft:pig"))
                                 this.claim.allowedEntityAttack.addAllowedItem(Either.left(entityType));
                         }
                     }
                     case ENTITYUSE -> {
                         if (s.startsWith("#"))
-                            this.claim.allowedEntityUse.addAllowedItem(Either.right(TagKey.create(BuiltInRegistries.ENTITY_TYPE.key(), new ResourceLocation(s.substring(1)))));
+                            this.claim.allowedEntityUse.addAllowedItem(Either.right(TagKey.create(BuiltInRegistries.ENTITY_TYPE.key(), ResourceLocation.parse(s.substring(1)))));
                         else {
-                            EntityType<?> entityType = BuiltInRegistries.ENTITY_TYPE.get(new ResourceLocation(s));
+                            EntityType<?> entityType = BuiltInRegistries.ENTITY_TYPE.get(ResourceLocation.parse(s));
                             if (entityType != EntityType.PIG || s.equals("minecraft:pig"))
                                 this.claim.allowedEntityUse.addAllowedItem(Either.left(entityType));
                         }

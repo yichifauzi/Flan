@@ -108,9 +108,9 @@ public class AllowedRegistryList<T> {
         array.forEach(e -> {
             String element = e.getAsString();
             if (element.startsWith("#"))
-                this.addAllowedItem(Either.right(TagKey.create(this.registry.key(), new ResourceLocation(element.substring(1)))));
+                this.addAllowedItem(Either.right(TagKey.create(this.registry.key(), ResourceLocation.parse(element.substring(1)))));
             else {
-                ResourceLocation id = new ResourceLocation(element);
+                ResourceLocation id = ResourceLocation.parse(element);
                 if (this.registry.containsKey(id)) {
                     this.addAllowedItem(Either.left(this.registry.get(id)));
                 } else {

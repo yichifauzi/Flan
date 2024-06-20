@@ -55,7 +55,6 @@ public class BuiltinPermission {
     public static ResourceLocation TARGETBLOCK = register("target_block", new ItemStack(Items.TARGET), "Permission to trigger target blocks");
     public static ResourceLocation PROJECTILES = register("projectiles", new ItemStack(Items.ARROW), "Permission to let shot projectiles", "interact with blocks (e.g. arrow on button)");
     public static ResourceLocation TRAMPLE = register("trample", new ItemStack(Items.FARMLAND), "Permission to enable block trampling", "(farmland, turtle eggs)");
-    public static ResourceLocation FROSTWALKER = register("frost_walker", new ItemStack(Items.LEATHER_BOOTS), "Permission for frostwalker to activate");
     public static ResourceLocation PORTAL = register("portal", new ItemStack(Items.OBSIDIAN), true, "Permission to use nether portals");
     public static ResourceLocation RAID = register("raid", holder -> Raid.getLeaderBannerInstance(holder.lookupOrThrow(Registries.BANNER_PATTERN)), false, false, "Permission to trigger raids in claim.", "Wont prevent raids (just) outside");
     public static ResourceLocation BOAT = register("boat", new ItemStack(Items.OAK_BOAT), "Permission to use boats");
@@ -107,7 +106,7 @@ public class BuiltinPermission {
     }
 
     private static ResourceLocation register(String key, Function<HolderLookup.Provider, ItemStack> item, boolean defaultVal, boolean global, String... description) {
-        ResourceLocation id = new ResourceLocation(Flan.MODID, key);
+        ResourceLocation id = ResourceLocation.tryBuild(Flan.MODID, key);
         if (CrossPlatformStuff.INSTANCE.isDataGen()) {
             DATAGEN_DATA.put(id, holder -> new ClaimPermission.Builder(item.apply(holder), defaultVal, global, order++, List.of(description)));
         }
@@ -116,6 +115,6 @@ public class BuiltinPermission {
     }
 
     public static ResourceLocation tryLegacy(String key) {
-        return LEGACY_MIGRATION.getOrDefault(key, new ResourceLocation(key.toLowerCase(Locale.ROOT)));
+        return LEGACY_MIGRATION.getOrDefault(key, ResourceLocation.parse(key.toLowerCase(Locale.ROOT)));
     }
 }

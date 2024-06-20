@@ -5,6 +5,7 @@ import io.github.flemmli97.flan.Flan;
 import io.github.flemmli97.flan.config.ConfigHandler;
 import net.minecraft.core.HolderSet;
 import net.minecraft.core.Registry;
+import net.minecraft.core.component.DataComponents;
 import net.minecraft.core.registries.BuiltInRegistries;
 import net.minecraft.resources.ResourceLocation;
 import net.minecraft.server.MinecraftServer;
@@ -15,8 +16,8 @@ import net.minecraft.world.item.BrushItem;
 import net.minecraft.world.item.BucketItem;
 import net.minecraft.world.item.EnderpearlItem;
 import net.minecraft.world.item.Item;
+import net.minecraft.world.item.ItemStack;
 import net.minecraft.world.item.Items;
-import net.minecraft.world.item.RecordItem;
 import net.minecraft.world.level.block.AnvilBlock;
 import net.minecraft.world.level.block.BasePressurePlateBlock;
 import net.minecraft.world.level.block.BeaconBlock;
@@ -57,31 +58,31 @@ import java.util.function.Supplier;
  */
 public class ObjectToPermissionMap {
 
-    private static final Map<Block, ResourceLocation> blockToPermission = new HashMap<>();
-    private static final Map<Predicate<Block>, Supplier<ResourceLocation>> blockPermissionBuilder = new HashMap<>();
+    private static final Map<Block, ResourceLocation> BLOCK_TO_PERMISSION = new HashMap<>();
+    private static final Map<Predicate<Block>, Supplier<ResourceLocation>> BLOCK_PERMISSION_BUILDER = new HashMap<>();
 
-    private static final Map<Item, ResourceLocation> itemToPermission = new HashMap<>();
-    private static final Map<Predicate<Item>, Supplier<ResourceLocation>> itemPermissionBuilder = new HashMap<>();
+    private static final Map<Item, ResourceLocation> ITEM_TO_PERMISSION = new HashMap<>();
+    private static final Map<Predicate<Item>, Supplier<ResourceLocation>> ITEM_PERMISSION_BUILDER = new HashMap<>();
 
-    private static final Map<EntityType<?>, ResourceLocation> entityToPermission = new HashMap<>();
+    private static final Map<EntityType<?>, ResourceLocation> ENTITY_TO_PERMISSION = new HashMap<>();
 
-    private static final Map<Block, ResourceLocation> leftClickBlockPermission = new HashMap<>();
+    private static final Map<Block, ResourceLocation> LEFT_CLICK_BLOCK_PERMISSION = new HashMap<>();
 
     public static void reload(MinecraftServer server) {
-        blockToPermission.clear();
-        itemToPermission.clear();
-        entityToPermission.clear();
-        leftClickBlockPermission.clear();
+        BLOCK_TO_PERMISSION.clear();
+        ITEM_TO_PERMISSION.clear();
+        ENTITY_TO_PERMISSION.clear();
+        LEFT_CLICK_BLOCK_PERMISSION.clear();
         for (Block block : BuiltInRegistries.BLOCK) {
-            blockPermissionBuilder.entrySet().stream().filter(e -> e.getKey().test(block)).map(Map.Entry::getValue).findFirst().ifPresent(sub -> blockToPermission.put(block, sub.get()));
+            BLOCK_PERMISSION_BUILDER.entrySet().stream().filter(e -> e.getKey().test(block)).map(Map.Entry::getValue).findFirst().ifPresent(sub -> BLOCK_TO_PERMISSION.put(block, sub.get()));
         }
         for (Item item : BuiltInRegistries.ITEM) {
-            itemPermissionBuilder.entrySet().stream().filter(e -> e.getKey().test(item)).map(Map.Entry::getValue).findFirst().ifPresent(sub -> itemToPermission.put(item, sub.get()));
+            ITEM_PERMISSION_BUILDER.entrySet().stream().filter(e -> e.getKey().test(item)).map(Map.Entry::getValue).findFirst().ifPresent(sub -> ITEM_TO_PERMISSION.put(item, sub.get()));
         }
-        process(ConfigHandler.config.itemPermission, BuiltInRegistries.ITEM, itemToPermission);
-        process(ConfigHandler.config.blockPermission, BuiltInRegistries.BLOCK, blockToPermission);
-        process(ConfigHandler.config.entityPermission, BuiltInRegistries.ENTITY_TYPE, entityToPermission);
-        process(ConfigHandler.config.leftClickBlockPermission, BuiltInRegistries.BLOCK, leftClickBlockPermission);
+        process(ConfigHandler.config.itemPermission, BuiltInRegistries.ITEM, ITEM_TO_PERMISSION);
+        process(ConfigHandler.config.blockPermission, BuiltInRegistries.BLOCK, BLOCK_TO_PERMISSION);
+        process(ConfigHandler.config.entityPermission, BuiltInRegistries.ENTITY_TYPE, ENTITY_TO_PERMISSION);
+        process(ConfigHandler.config.leftClickBlockPermission, BuiltInRegistries.BLOCK, LEFT_CLICK_BLOCK_PERMISSION);
     }
 
     private static <T> void process(List<String> list, Registry<T> registry, Map<T, ResourceLocation> map) {
@@ -89,7 +90,7 @@ public class ObjectToPermissionMap {
             String[] sub = s.split("-");
             boolean remove = sub[1].equals("NONE");
             if (s.startsWith("@")) {
-                ResourceLocation res = new ResourceLocation(sub[0].substring(1));
+                ResourceLocation res = ResourceLocation.parse(sub[0].substring(1));
                 processTag(res, registry, b -> {
                     if (remove)
                         map.remove(b);
@@ -103,13 +104,13 @@ public class ObjectToPermissionMap {
                 });
             } else {
                 if (remove)
-                    map.remove(registry.get(new ResourceLocation(sub[0])));
+                    map.remove(registry.get(ResourceLocation.parse(sub[0])));
                 else {
                     ResourceLocation id = BuiltinPermission.tryLegacy(sub[1]);
                     ClaimPermission perm = PermissionManager.INSTANCE.get(id);
                     if (perm == null)
                         Flan.error("Configuring custom permission map: No such permission for {} {}", sub[1], id);
-                    map.put(registry.get(new ResourceLocation(sub[0])), id);
+                    map.put(registry.get(ResourceLocation.parse(sub[0])), id);
                 }
             }
         }
@@ -122,19 +123,24 @@ public class ObjectToPermissionMap {
     }
 
     public static ResourceLocation getFromBlock(Block block) {
-        return blockToPermission.get(block);
+        return BLOCK_TO_PERMISSION.get(block);
     }
 
-    public static ResourceLocation getFromItem(Item item) {
-        return itemToPermission.get(item);
+    public static ResourceLocation getFromItem(ItemStack stack) {
+        ResourceLocation perm = ITEM_TO_PERMISSION.get(stack.getItem());
+        if (perm == null) {
+            if (stack.has(DataComponents.JUKEBOX_PLAYABLE))
+                perm = BuiltinPermission.JUKEBOX;
+        }
+        return perm;
     }
 
     public static ResourceLocation getFromEntity(EntityType<?> entity) {
-        return entityToPermission.get(entity);
+        return ENTITY_TO_PERMISSION.get(entity);
     }
 
     public static ResourceLocation getForLeftClickBlock(Block block) {
-        return leftClickBlockPermission.get(block);
+        return LEFT_CLICK_BLOCK_PERMISSION.get(block);
     }
 
     /**
@@ -145,7 +151,7 @@ public class ObjectToPermissionMap {
      * @param perm The given permission
      */
     public static void registerBlockPredicateMap(Predicate<Block> pred, Supplier<ResourceLocation> perm) {
-        blockPermissionBuilder.put(pred, perm);
+        BLOCK_PERMISSION_BUILDER.put(pred, perm);
     }
 
     /**
@@ -156,7 +162,7 @@ public class ObjectToPermissionMap {
      * @param perm The given permission
      */
     public static void registerItemPredicateMap(Predicate<Item> pred, Supplier<ResourceLocation> perm) {
-        itemPermissionBuilder.put(pred, perm);
+        ITEM_PERMISSION_BUILDER.put(pred, perm);
     }
 
     static {
@@ -186,7 +192,6 @@ public class ObjectToPermissionMap {
         registerItemPredicateMap(item -> item == Items.CHORUS_FRUIT, () -> BuiltinPermission.CHORUSFRUIT);
         registerItemPredicateMap(item -> item == Items.LILY_PAD, () -> BuiltinPermission.PLACE);
         registerItemPredicateMap(item -> item instanceof BoneMealItem, () -> BuiltinPermission.PLACE);
-        registerItemPredicateMap(item -> item instanceof RecordItem, () -> BuiltinPermission.JUKEBOX);
         registerItemPredicateMap(item -> item instanceof BoatItem, () -> BuiltinPermission.BOAT);
         registerItemPredicateMap(item -> item instanceof BrushItem, () -> BuiltinPermission.ARCHAEOLOGY);
     }

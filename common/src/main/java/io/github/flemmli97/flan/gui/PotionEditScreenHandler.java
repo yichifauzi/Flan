@@ -117,7 +117,7 @@ public class PotionEditScreenHandler extends ServerOnlyScreenHandler<Claim> {
             player.getServer().execute(() -> StringResultScreenHandler.createNewStringResult(player, (s) -> {
                 String[] potion = s.split(";");
                 int amp = 1;
-                Optional<Holder.Reference<MobEffect>> holder = BuiltInRegistries.MOB_EFFECT.getHolder(new ResourceLocation(potion[0]));
+                Optional<Holder.Reference<MobEffect>> holder = BuiltInRegistries.MOB_EFFECT.getHolder(ResourceLocation.parse(potion[0]));
                 if (holder.map(effect -> effect == MobEffects.LUCK && !potion[0].equals("minecraft:luck")).orElse(true)) {
                     ServerScreenHelper.playSongToPlayer(player, SoundEvents.VILLAGER_NO, 1, 1f);
                     return;
@@ -153,7 +153,7 @@ public class PotionEditScreenHandler extends ServerOnlyScreenHandler<Claim> {
             String effect = stack.getOrDefault(DataComponents.CUSTOM_DATA, CustomData.EMPTY)
                     .copyTag().getString("FlanEffect");
             if (!effect.isEmpty())
-                BuiltInRegistries.MOB_EFFECT.getHolder(new ResourceLocation(effect))
+                BuiltInRegistries.MOB_EFFECT.getHolder(ResourceLocation.parse(effect))
                         .ifPresent(this.claim::removePotion);
             slot.set(ItemStack.EMPTY);
             ServerScreenHelper.playSongToPlayer(player, SoundEvents.BAT_DEATH, 1, 1f);

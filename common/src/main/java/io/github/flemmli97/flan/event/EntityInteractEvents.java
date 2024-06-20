@@ -59,7 +59,7 @@ import java.util.function.Consumer;
 
 public class EntityInteractEvents {
 
-    private static ResourceLocation TATERZEN = new ResourceLocation("taterzen", "npc");
+    private static ResourceLocation TATERZEN = ResourceLocation.tryBuild("taterzen", "npc");
 
     public static InteractionResult attackEntity(Player player, Level world, InteractionHand hand, Entity entity, EntityHitResult hitResult) {
         return attackSimple(player, entity, true);
@@ -166,9 +166,8 @@ public class EntityInteractEvents {
                         ((IPersistentProjectileVars) pers).setInGround(true);
                         pers.shakeTime = 7;
                         pers.setCritArrow(false);
-                        pers.setPierceLevel((byte) 0);
+                        ((IPersistentProjectileVars) pers).setPierceLevel((byte) 0);
                         pers.setSoundEvent(SoundEvents.ARROW_HIT);
-                        pers.setShotFromCrossbow(false);
                         ((IPersistentProjectileVars) pers).resetPiercingStatus();
                     }
                     if (proj instanceof ThrownEnderpearl)
@@ -191,7 +190,7 @@ public class EntityInteractEvents {
                         pierced = new IntOpenHashSet(5);
                     pierced.add(hit.getId());
                     ((IPersistentProjectileVars) pers).setPiercedEntities(pierced);
-                    pers.setPierceLevel((byte) (pers.getPierceLevel() + 1));
+                    ((IPersistentProjectileVars) pers).setPierceLevel((byte) (pers.getPierceLevel() + 1));
                 }
                 return fail;
             }
@@ -370,9 +369,9 @@ public class EntityInteractEvents {
                         Vec3 tp = TeleportUtils.getTeleportPos(player, pos, storage, sub != null ? sub.getDimensions() : mainClaim.getDimensions(), true, bPos, (claim, nPos) -> claim.canInteract(player, BuiltinPermission.CANSTAY, nPos, false));
                         if (passenger != null) {
                             player.stopRiding();
-                            passenger.teleportToWithTicket(tp.x(), tp.y(), tp.z());
+                            passenger.teleportTo(tp.x(), tp.y(), tp.z());
                         }
-                        player.teleportToWithTicket(tp.x(), tp.y(), tp.z());
+                        player.teleportTo(tp.x(), tp.y(), tp.z());
                     }
                     if (player.getAbilities().flying && !player.isCreative() && !mainClaim.canInteract(player, BuiltinPermission.FLIGHT, rounded, true)) {
                         player.getAbilities().flying = false;
@@ -398,7 +397,7 @@ public class EntityInteractEvents {
     public static boolean canFrostwalkerFreeze(ServerLevel world, BlockPos pos, LivingEntity entity) {
         if (entity instanceof ServerPlayer) {
             IPermissionContainer claim = ClaimStorage.get(world).getForPermissionCheck(pos);
-            return claim.canInteract((ServerPlayer) entity, BuiltinPermission.FROSTWALKER, pos, false);
+            return claim.canInteract((ServerPlayer) entity, BuiltinPermission.PLACE, pos, false);
         }
         return true;
     }

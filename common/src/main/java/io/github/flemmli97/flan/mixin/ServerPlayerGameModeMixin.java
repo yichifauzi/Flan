@@ -32,7 +32,7 @@ public abstract class ServerPlayerGameModeMixin implements BlockBreakAttemptHand
             // All hail 1.20.5 with mining speed attribute!
             if (!this.flan_was_insta_break) {
                 this.player.getAttribute(Attributes.BLOCK_BREAK_SPEED)
-                        .addOrUpdateTransientModifier(new AttributeModifier(PlayerClaimData.MINING_SPEED_MOD, "flan.mod", -1, AttributeModifier.Operation.ADD_MULTIPLIED_TOTAL));
+                        .addOrUpdateTransientModifier(new AttributeModifier(PlayerClaimData.MINING_SPEED_MOD, -1, AttributeModifier.Operation.ADD_MULTIPLIED_TOTAL));
             }
         }
     }

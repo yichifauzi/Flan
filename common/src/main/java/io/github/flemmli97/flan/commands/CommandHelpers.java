@@ -38,7 +38,7 @@ import java.util.stream.Stream;
 
 public class CommandHelpers {
 
-    private static final Pattern allowed = Pattern.compile("[a-zA-Z0-9_+.-]+");
+    private static final Pattern ALLOWED = Pattern.compile("[a-zA-Z0-9_+.-]+");
 
     public static CompletableFuture<Suggestions> claimSuggestions(CommandContext<CommandSourceStack> context, SuggestionsBuilder build, UUID owner) {
         return SharedSuggestionProvider.suggest(ClaimStorage.get(context.getSource().getLevel()).allClaimsFromPlayer(owner)
@@ -77,7 +77,7 @@ public class CommandHelpers {
             list = claim.groups();
         }
         for (int i = 0; i < list.size(); i++) {
-            if (allowed.matcher(list.get(i)).matches())
+            if (ALLOWED.matcher(list.get(i)).matches())
                 continue;
             list.set(i, '\"' + list.get(i) + '\"');
         }
@@ -89,7 +89,7 @@ public class CommandHelpers {
         List<String> list = new ArrayList<>(PlayerClaimData.get(player).playerDefaultGroups().keySet());
         list.sort(null);
         for (int i = 0; i < list.size(); i++) {
-            if (allowed.matcher(list.get(i)).matches())
+            if (ALLOWED.matcher(list.get(i)).matches())
                 continue;
             list.set(i, '\"' + list.get(i) + '\"');
         }

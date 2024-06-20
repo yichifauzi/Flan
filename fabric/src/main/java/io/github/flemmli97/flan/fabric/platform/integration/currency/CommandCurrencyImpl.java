@@ -19,7 +19,7 @@ import java.util.function.Consumer;
 
 public class CommandCurrencyImpl implements CommandCurrency {
 
-    private static final ResourceLocation eightyEconomyCurrencyName = new ResourceLocation("eights_economy", "dollars");
+    private static final ResourceLocation eightyEconomyCurrencyName = ResourceLocation.tryBuild("eights_economy", "dollars");
 
     @Override
     public boolean sellClaimBlocks(ServerPlayer player, int blocks, float value, Consumer<Component> message) {
