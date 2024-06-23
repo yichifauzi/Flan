@@ -638,9 +638,9 @@ public class Claim implements IPermissionContainer {
             return null;
         MutableComponent res;
         if (component.getContents() instanceof TranslatableContents trans) {
-            res = Component.translatable(trans.getKey(), this.world.getServer().getProfileCache().get(this.owner).map(GameProfile::getName).orElse("<UNKNOWN>"), this.claimName);
+            res = Component.translatable(trans.getKey(), this.isAdminClaim() ? "Admin" :this.world.getServer().getProfileCache().get(this.owner).map(GameProfile::getName).orElse("<UNKNOWN>"), this.claimName);
         } else if (component.getContents() instanceof LiteralContents comp) {
-            res = Component.translatable(comp.text(), this.world.getServer().getProfileCache().get(this.owner).map(GameProfile::getName).orElse("<UNKNOWN>"), this.claimName);
+            res = Component.translatable(comp.text(), this.isAdminClaim() ? "Admin" : this.world.getServer().getProfileCache().get(this.owner).map(GameProfile::getName).orElse("<UNKNOWN>"), this.claimName);
         } else {
             res = component.plainCopy();
         }
