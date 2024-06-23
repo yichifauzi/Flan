@@ -1,3 +1,7 @@
+Flan 1.10.6
+================
+- Fix admin claim with enter/leave text crashing
+
 Flan 1.10.5
 ================
 - Update to 1.21
