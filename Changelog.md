@@ -1,3 +1,7 @@
+Flan 1.10.6
+================
+- Fix admin claim with enter/leave text crashing
+
 Flan 1.10.5
 ================
 - Cache chunks for claim display and don't load unloaded chunks which should solve some performance issue  
