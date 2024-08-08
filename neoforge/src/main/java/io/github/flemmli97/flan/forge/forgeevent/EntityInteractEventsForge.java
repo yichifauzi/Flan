@@ -11,7 +11,7 @@ import net.neoforged.neoforge.event.entity.EntityMobGriefingEvent;
 import net.neoforged.neoforge.event.entity.EntityStruckByLightningEvent;
 import net.neoforged.neoforge.event.entity.ProjectileImpactEvent;
 import net.neoforged.neoforge.event.entity.item.ItemTossEvent;
-import net.neoforged.neoforge.event.entity.living.LivingDamageEvent;
+import net.neoforged.neoforge.event.entity.living.LivingIncomingDamageEvent;
 import net.neoforged.neoforge.event.entity.player.AttackEntityEvent;
 import net.neoforged.neoforge.event.entity.player.PlayerInteractEvent;
 import net.neoforged.neoforge.event.entity.player.PlayerXpEvent;
@@ -52,7 +52,7 @@ public class EntityInteractEventsForge {
         }
     }
 
-    public static void preventDamage(LivingDamageEvent event) {
+    public static void preventDamage(LivingIncomingDamageEvent event) {
         boolean prevent = EntityInteractEvents.preventDamage(event.getEntity(), event.getSource());
         if (prevent) {
             event.setCanceled(true);
