@@ -34,7 +34,7 @@ public class ClaimPermission implements Comparable<ClaimPermission> {
      */
     public final int order;
 
-    public ClaimPermission(ResourceLocation id, ItemStack guiItem, boolean defaultVal, boolean global, int order, List<String> defaultDescription) {
+    private ClaimPermission(ResourceLocation id, ItemStack guiItem, boolean defaultVal, boolean global, int order, List<String> defaultDescription) {
         this.id = id;
         this.guiItem = guiItem;
         this.order = order;

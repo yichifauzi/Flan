@@ -3,6 +3,7 @@ package io.github.flemmli97.flan.api;
 import io.github.flemmli97.flan.api.data.IPermissionContainer;
 import io.github.flemmli97.flan.api.data.IPermissionStorage;
 import io.github.flemmli97.flan.api.data.IPlayerData;
+import io.github.flemmli97.flan.api.permission.BuiltinPermission;
 import io.github.flemmli97.flan.claim.ClaimStorage;
 import io.github.flemmli97.flan.player.OfflinePlayerData;
 import io.github.flemmli97.flan.player.PlayerClaimData;
@@ -18,6 +19,9 @@ public class ClaimHandler {
 
     /**
      * Check if a player can do an interaction at the given position
+     * @param player The player doing the interaction
+     * @param pos The position the player interacts with
+     * @param permission The id of the permission to check. For default permissions check {@link BuiltinPermission}
      */
     public static boolean canInteract(ServerPlayer player, BlockPos pos, ResourceLocation permission) {
         return ClaimStorage.get(player.serverLevel()).getClaimAt(pos).canInteract(player, permission, pos);
@@ -26,7 +30,8 @@ public class ClaimHandler {
     /**
      * Get the permission storage for the world to check for permissions.
      * You can then use IPermissionContainer#getForPermissionCheck
-     * to return an {@link IPermissionContainer} for which you can then check permissions against
+     * to return an {@link IPermissionContainer} for which you can then check permissions against.
+     * This can be the permissions for the world or a specific claim
      */
     public static IPermissionStorage getPermissionStorage(ServerLevel world) {
         return ClaimStorage.get(world);
@@ -47,5 +52,14 @@ public class ClaimHandler {
         if (player != null)
             return getPlayerData(player);
         return new OfflinePlayerData(server, uuid);
+    }
+
+    /**
+     * Registers a mapping to migrate old permission keys to their new ids
+     * @param key The old key of the permission
+     * @param newId The new datapack permission id
+     */
+    public static void registerMapping(String key, ResourceLocation newId) {
+        BuiltinPermission.registerMapping(key, newId);
     }
 }

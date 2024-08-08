@@ -22,9 +22,12 @@ import java.util.function.Function;
 public class BuiltinPermission {
 
     /**
-     * For datagen
+     * For datagen. Do not use!
      */
     public static final Map<ResourceLocation, Function<HolderLookup.Provider, ClaimPermission.Builder>> DATAGEN_DATA = new LinkedHashMap<>();
+    /**
+     * Mappings to migrate old permission to the new ones
+     */
     private static final HashMap<String, ResourceLocation> LEGACY_MIGRATION = new HashMap<>();
     public static int order = 0;
 
@@ -75,6 +78,7 @@ public class BuiltinPermission {
     public static ResourceLocation TELEPORT = register("teleport", new ItemStack(Items.END_PORTAL_FRAME), false, "Allow player to teleport to your claim home position");
     public static ResourceLocation NOHUNGER = register("no_hunger", new ItemStack(Items.COOKED_BEEF), false, "Disable hunger");
     public static ResourceLocation CLAIMMESSAGE = register("claim_message", new ItemStack(Items.OAK_SIGN), false, "Permission to edit the enter/leave message");
+    public static ResourceLocation ARCHAEOLOGY = register("archeology", new ItemStack(Items.BRUSH), false, false, "Allow players to brush blocks in this claim");
 
     public static ResourceLocation HURTPLAYER = register("hurt_player", new ItemStack(Items.DIAMOND_SWORD), false, true, "Permission to hurt other players");
     public static ResourceLocation EXPLOSIONS = register("explosions", new ItemStack(Items.TNT), false, true, "Toggle explosions in claim");
@@ -91,7 +95,6 @@ public class BuiltinPermission {
     public static ResourceLocation FAKEPLAYER = register("fake_player", new ItemStack(Items.CARROT_ON_A_STICK), false, true, "Allow fakeplayers to interact in this claim", "Some mods fakeplayer has the users uuid", "For those mods this permission is not needed");
     public static ResourceLocation PLAYERMOBSPAWN = register("player_mob_spawn", new ItemStack(Items.WARDEN_SPAWN_EGG), false, true, "Permission for affected players to spawn mobs with interactions", "E.g. wardens, or endermites with enderpearls");
     public static ResourceLocation SCULK = register("sculk", new ItemStack(Items.SCULK_SENSOR), false, true, "Permission for sculk sensors.", "Shriekers are handled under PLAYERMOBSPAWN");
-    public static ResourceLocation ARCHAEOLOGY = register("archeology", new ItemStack(Items.BRUSH), false, true, "Allow players to brush blocks in this claim");
 
     private static ResourceLocation register(String id, ItemStack item, String... description) {
         return register(id, item, false, description);
@@ -112,6 +115,13 @@ public class BuiltinPermission {
         }
         LEGACY_MIGRATION.put(key.replace("_", "").toUpperCase(Locale.ROOT), id);
         return id;
+    }
+
+    public static void registerMapping(String key, ResourceLocation newId) {
+        if(LEGACY_MIGRATION.containsKey(key)) {
+            throw new IllegalArgumentException("A mapping with key "+ key + " is already registered!");
+        }
+        LEGACY_MIGRATION.put(key, newId);
     }
 
     public static ResourceLocation tryLegacy(String key) {
