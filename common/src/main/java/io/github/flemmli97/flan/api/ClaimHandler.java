@@ -19,8 +19,9 @@ public class ClaimHandler {
 
     /**
      * Check if a player can do an interaction at the given position
-     * @param player The player doing the interaction
-     * @param pos The position the player interacts with
+     *
+     * @param player     The player doing the interaction
+     * @param pos        The position the player interacts with
      * @param permission The id of the permission to check. For default permissions check {@link BuiltinPermission}
      */
     public static boolean canInteract(ServerPlayer player, BlockPos pos, ResourceLocation permission) {
@@ -56,7 +57,8 @@ public class ClaimHandler {
 
     /**
      * Registers a mapping to migrate old permission keys to their new ids
-     * @param key The old key of the permission
+     *
+     * @param key   The old key of the permission
      * @param newId The new datapack permission id
      */
     public static void registerMapping(String key, ResourceLocation newId) {

@@ -42,6 +42,7 @@ public class Config {
     public String defaultClaimName = "";
     public String defaultEnterMessage = "";
     public String defaultLeaveMessage = "";
+    public boolean spawnProtection;
 
     public String[] blacklistedWorlds = new String[0];
     public boolean worldWhitelist;
@@ -184,6 +185,7 @@ public class Config {
             this.defaultClaimName = ConfigHandler.fromJson(obj, "defaultClaimName", this.defaultClaimName);
             this.defaultEnterMessage = ConfigHandler.fromJson(obj, "defaultEnterMessage", this.defaultEnterMessage);
             this.defaultLeaveMessage = ConfigHandler.fromJson(obj, "defaultLeaveMessage", this.defaultLeaveMessage);
+            this.spawnProtection = ConfigHandler.fromJson(obj, "noSpawnClaim", this.spawnProtection);
 
             JsonArray arr = ConfigHandler.arryFromJson(obj, "blacklistedWorlds");
             this.blacklistedWorlds = new String[arr.size()];
@@ -301,6 +303,7 @@ public class Config {
         obj.addProperty("defaultClaimName", this.defaultClaimName);
         obj.addProperty("defaultEnterMessage", this.defaultEnterMessage);
         obj.addProperty("defaultLeaveMessage", this.defaultLeaveMessage);
+        obj.addProperty("noSpawnClaim", this.spawnProtection);
 
         JsonArray arr = new JsonArray();
         for (String blacklistedWorld : this.blacklistedWorlds)

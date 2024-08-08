@@ -118,8 +118,8 @@ public class BuiltinPermission {
     }
 
     public static void registerMapping(String key, ResourceLocation newId) {
-        if(LEGACY_MIGRATION.containsKey(key)) {
-            throw new IllegalArgumentException("A mapping with key "+ key + " is already registered!");
+        if (LEGACY_MIGRATION.containsKey(key)) {
+            throw new IllegalArgumentException("A mapping with key " + key + " is already registered!");
         }
         LEGACY_MIGRATION.put(key, newId);
     }
