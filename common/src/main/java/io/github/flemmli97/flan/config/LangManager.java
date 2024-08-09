@@ -72,6 +72,7 @@ public class LangManager {
         this.defaultTranslation.put("wrongMode", "Wrong claim mode. You are in %1$s-mode");
         this.defaultTranslation.put("stringScreenReturn", "Click on paper to go back");
         this.defaultTranslation.put("conflictSpawn", "Claim would spawn protection area");
+        this.defaultTranslation.put("claimCooldown", "You need to wait %s ticks before creating another claim");
 
         this.defaultTranslation.put("groupAdd", "Added group %1$s");
         this.defaultTranslation.put("groupRemove", "Removed group %1$s");

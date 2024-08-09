@@ -94,6 +94,8 @@ public class PlayerClaimData implements IPlayerData {
 
     private boolean fakePlayerNotification = true;
 
+    private long lastClaimTime;
+
     public PlayerClaimData(ServerPlayer player) {
         this.player = player;
         this.claimBlocks = ConfigHandler.config.startingBlocks;
@@ -158,6 +160,14 @@ public class PlayerClaimData implements IPlayerData {
     @Override
     public int remainingClaimBlocks() {
         return this.getClaimBlocks() + this.getAdditionalClaims() - this.usedClaimBlocks();
+    }
+
+    public long nextClaimCooldown() {
+        return ConfigHandler.config.nextClaimCooldown <= 0 ? 0 : Math.max(0, this.player.level().getGameTime() - this.lastClaimTime - ConfigHandler.config.nextClaimCooldown);
+    }
+
+    public void updateLastClaim() {
+        this.lastClaimTime = this.player.level().getGameTime();
     }
 
     /**

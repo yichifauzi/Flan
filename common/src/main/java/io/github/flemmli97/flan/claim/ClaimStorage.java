@@ -113,6 +113,11 @@ public class ClaimStorage implements IPermissionStorage {
         Set<DisplayBox> conflicts = this.conflicts(claim, null);
         if (conflicts.isEmpty()) {
             PlayerClaimData data = PlayerClaimData.get(player);
+            long cooldown = data.nextClaimCooldown();
+            if (cooldown > 0) {
+                player.displayClientMessage(PermHelper.simpleColoredText(String.format(ConfigHandler.langManager.get("claimCooldown"), cooldown), ChatFormatting.RED), false);
+                return false;
+            }
             if (claim.getPlane() < ConfigHandler.config.minClaimsize) {
                 player.displayClientMessage(PermHelper.simpleColoredText(String.format(ConfigHandler.langManager.get("minClaimSize"), ConfigHandler.config.minClaimsize), ChatFormatting.RED), false);
                 return false;
@@ -128,6 +133,7 @@ public class ClaimStorage implements IPermissionStorage {
             claim.setClaimID(this.generateUUID());
             Flan.log("Creating new claim {}", claim);
             this.addClaim(claim);
+            data.updateLastClaim();
             data.addDisplayClaim(claim, EnumDisplayType.MAIN, player.blockPosition().getY());
             data.updateScoreboard();
             player.displayClientMessage(PermHelper.simpleColoredText(ConfigHandler.langManager.get("claimCreateSuccess"), ChatFormatting.GOLD), false);
