@@ -12,6 +12,7 @@ import io.github.flemmli97.flan.api.permission.PermissionManager;
 import io.github.flemmli97.flan.config.Config;
 import io.github.flemmli97.flan.config.ConfigHandler;
 import io.github.flemmli97.flan.platform.ClaimPermissionCheck;
+import io.github.flemmli97.flan.platform.integration.permissions.PermissionNodeHandler;
 import io.github.flemmli97.flan.platform.integration.webmap.WebmapCalls;
 import io.github.flemmli97.flan.player.LogoutTracker;
 import io.github.flemmli97.flan.player.PlayerClaimData;
@@ -359,7 +360,11 @@ public class Claim implements IPermissionContainer {
     }
 
     private boolean isAdminIgnore(ServerPlayer player) {
-        return player == null || ((this.isAdminClaim() && player.hasPermissions(2)) || PlayerClaimData.get(player).isAdminIgnoreClaim());
+        if (player == null)
+            return true;
+        if (PlayerClaimData.get(player).isAdminIgnoreClaim())
+            return !this.isAdminClaim() || PermissionNodeHandler.INSTANCE.perm(player, PermissionNodeHandler.cmdAdminBypass, true);
+        return this.isAdminClaim() && player.hasPermissions(2);
     }
 
     /**

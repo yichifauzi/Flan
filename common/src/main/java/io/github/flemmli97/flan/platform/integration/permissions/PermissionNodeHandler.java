@@ -34,7 +34,7 @@ public interface PermissionNodeHandler {
     String cmdAdminList = "flan.command.admin.list";
     String cmdAdminDelete = "flan.command.admin.delete";
     String cmdAdminGive = "flan.command.admin.give";
-    String cmdAdminBypass = "flan.command.admin.mode";
+    String cmdAdminBypass = "flan.command.bypass.admin.mode";
 
     String cmdGroup = "flan.command.group";
     String cmdFakePlayer = "flan.command.fakeplayer";
