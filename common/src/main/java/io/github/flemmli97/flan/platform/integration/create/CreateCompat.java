@@ -16,7 +16,7 @@ import java.util.Set;
 
 public class CreateCompat {
 
-    public static final ResourceLocation CREATE = ResourceLocation.tryBuild(Flan.MODID, "create_contraption");
+    public static final ResourceLocation CREATE = ResourceLocation.fromNamespaceAndPath(Flan.MODID, "create_contraption");
 
     // Checks if a minecart with a contraption can cross a claims border
     public static boolean canMinecartPass(AbstractMinecart minecart) {

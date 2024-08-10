@@ -59,7 +59,7 @@ import java.util.function.Consumer;
 
 public class EntityInteractEvents {
 
-    private static ResourceLocation TATERZEN = ResourceLocation.tryBuild("taterzen", "npc");
+    private static ResourceLocation TATERZEN = ResourceLocation.fromNamespaceAndPath("taterzen", "npc");
 
     public static InteractionResult attackEntity(Player player, Level world, InteractionHand hand, Entity entity, EntityHitResult hitResult) {
         return attackSimple(player, entity, true);

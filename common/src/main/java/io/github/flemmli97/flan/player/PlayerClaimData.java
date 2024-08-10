@@ -63,7 +63,7 @@ import java.util.function.Consumer;
 
 public class PlayerClaimData implements IPlayerData {
 
-    public static final ResourceLocation MINING_SPEED_MOD = ResourceLocation.tryBuild(Flan.MODID, "mining_speed_modifier");
+    public static final ResourceLocation MINING_SPEED_MOD = ResourceLocation.fromNamespaceAndPath(Flan.MODID, "mining_speed_modifier");
 
     private int claimBlocks, additionalClaimBlocks, confirmTick, actionCooldown;
     //Scoreboard tracking

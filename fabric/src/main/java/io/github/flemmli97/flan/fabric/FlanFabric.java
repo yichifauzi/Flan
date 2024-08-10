@@ -51,7 +51,7 @@ import java.util.concurrent.Executor;
 
 public class FlanFabric implements ModInitializer {
 
-    public static final ResourceLocation EventPhase = ResourceLocation.tryBuild("flan", "events");
+    public static final ResourceLocation EventPhase = ResourceLocation.fromNamespaceAndPath("flan", "events");
 
     @Override
     public void onInitialize() {
@@ -80,7 +80,7 @@ public class FlanFabric implements ModInitializer {
 
             @Override
             public ResourceLocation getFabricId() {
-                return ResourceLocation.tryBuild(Flan.MODID, "permission_gen");
+                return ResourceLocation.fromNamespaceAndPath(Flan.MODID, "permission_gen");
             }
         });
 

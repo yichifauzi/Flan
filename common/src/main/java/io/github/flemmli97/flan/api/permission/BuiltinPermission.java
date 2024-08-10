@@ -109,7 +109,7 @@ public class BuiltinPermission {
     }
 
     private static ResourceLocation register(String key, Function<HolderLookup.Provider, ItemStack> item, boolean defaultVal, boolean global, String... description) {
-        ResourceLocation id = ResourceLocation.tryBuild(Flan.MODID, key);
+        ResourceLocation id = ResourceLocation.fromNamespaceAndPath(Flan.MODID, key);
         if (CrossPlatformStuff.INSTANCE.isDataGen()) {
             DATAGEN_DATA.put(id, holder -> new ClaimPermission.Builder(item.apply(holder), defaultVal, global, order++, List.of(description)));
         }
