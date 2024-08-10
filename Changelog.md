@@ -1,3 +1,22 @@
+Flan 1.10.7
+================
+- Fix recursive error with claim messages
+- Added translations for:
+  - Mexican Spanish
+  - Italian
+  - Korean
+  - Traditional chinese
+- Add config to disable claiming over vanilla spawn protection (disabled by default)
+- Add config for claim cooldown. When claiming needs to wait x time to create another claim. (0 by default)
+- Renamed some commands to a shorter version:
+  - addClaim -> add
+  - claimInfo -> info
+  - adminMode -> bypass
+  - buyBlocks -> buy
+  - sellBlocks -> sell
+- Change buy item config to allow multiple items
+- Address neoforge breaking changes
+
 Flan 1.10.6
 ================
 - Fix admin claim with enter/leave text crashing
