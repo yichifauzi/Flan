@@ -15,6 +15,11 @@ Flan 1.10.7
   - buyBlocks -> buy
   - sellBlocks -> sell
 - Change buy item config to allow multiple items
+  - See the wiki for an example
+  - The item with the highest value will be consumed first
+- Add permission node required for admin mode editing admin claims
+  - `flan.command.bypass.admin.mode`
+  - Also admin mode permission node has been renamed to `flan.command.bypass.claim` to reflect command change
 - Address neoforge breaking changes
 
 Flan 1.10.6
