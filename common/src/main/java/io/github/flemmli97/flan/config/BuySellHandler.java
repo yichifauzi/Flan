@@ -1,7 +1,9 @@
 package io.github.flemmli97.flan.config;
 
+import com.google.gson.JsonArray;
 import com.google.gson.JsonObject;
 import com.google.gson.JsonParseException;
+import com.mojang.datafixers.util.Pair;
 import com.mojang.serialization.JsonOps;
 import io.github.flemmli97.flan.claim.PermHelper;
 import io.github.flemmli97.flan.platform.integration.currency.CommandCurrency;
@@ -15,6 +17,7 @@ import net.minecraft.world.entity.item.ItemEntity;
 import net.minecraft.world.entity.player.Player;
 import net.minecraft.world.item.ItemStack;
 import net.minecraft.world.item.crafting.Ingredient;
+import org.jetbrains.annotations.NotNull;
 
 import java.util.ArrayList;
 import java.util.List;
@@ -28,12 +31,13 @@ public class BuySellHandler {
     private Type sellType = Type.MONEY;
 
     private float buyAmount = -1;
-    private float sellAmount = -1;
+    private final List<BuyIngredient> buyIngredients = new ArrayList<>();
 
-    private Ingredient ingredient = Ingredient.EMPTY;
+    private float sellAmount = -1;
+    private Ingredient sellIngredient = Ingredient.EMPTY;
 
     public boolean buy(ServerPlayer player, int blocks, Consumer<Component> message) {
-        if (this.buyAmount == -1) {
+        if (this.buyAmount == -1 && this.buyType != Type.ITEM) {
             message.accept(PermHelper.simpleColoredText(ConfigHandler.langManager.get("buyDisabled"), ChatFormatting.DARK_RED));
             return false;
         }
@@ -47,41 +51,47 @@ public class BuySellHandler {
                 return CommandCurrency.INSTANCE.buyClaimBlocks(player, blocks, this.buyAmount, message);
             }
             case ITEM -> {
-                int deduct = Mth.ceil(blocks * this.buyAmount);
-                List<ItemStack> matching = new ArrayList<>();
-                int i = 0;
-                for (ItemStack stack : player.getInventory().items) {
-                    if (this.ingredient.test(stack)) {
-                        if (stack.isDamageableItem()) {
-                            if (stack.getDamageValue() != 0) {
+                if (this.buyIngredients.isEmpty()) {
+                    message.accept(PermHelper.simpleColoredText(ConfigHandler.langManager.get("buyDisabled"), ChatFormatting.DARK_RED));
+                    return false;
+                }
+                float payed = 0;
+                List<Pair<ItemStack, Integer>> matching = new ArrayList<>();
+                // Check if player can pay the amount
+                check: for (BuyIngredient ing : this.buyIngredients) {
+                    for (ItemStack stack : player.getInventory().items) {
+                        if (ing.ingredient().test(stack)) {
+                            if (stack.isDamageableItem()) {
+                                if (stack.getDamageValue() != 0) {
+                                    continue;
+                                }
+                            }
+                            //Ignore "special" items
+                            if (!this.isJustRenamedItem(stack)) {
                                 continue;
                             }
+                            float toPay = blocks - payed;
+                            int count = Math.min(stack.getCount(), Mth.ceil(toPay / ing.amount()));
+                            float amount = count * ing.amount();
+                            payed += amount;
+                            matching.add(Pair.of(stack, count));
+                            if (payed >= blocks)
+                                break check;
                         }
-                        //Ignore "special" items
-                        if (!this.isJustRenamedItem(stack)) {
-                            continue;
-                        }
-                        matching.add(stack);
-                        i += stack.getCount();
                     }
                 }
-                if (i < deduct) {
+                if (payed < blocks) {
                     message.accept(PermHelper.simpleColoredText(ConfigHandler.langManager.get("buyFailItem"), ChatFormatting.DARK_RED));
                     return false;
                 }
-                i = deduct;
-                for (ItemStack stack : matching) {
-                    if (i > stack.getCount()) {
-                        int count = stack.getCount();
-                        stack.setCount(0);
-                        i -= count;
-                    } else {
-                        stack.shrink(i);
-                        break;
-                    }
+                // Finally remove the items
+                int count = 0;
+                for (Pair<ItemStack, Integer> stack : matching) {
+                    stack.getFirst().shrink(stack.getSecond());
+                    count += stack.getSecond();
                 }
                 data.setAdditionalClaims(data.getAdditionalClaims() + blocks);
-                message.accept(PermHelper.simpleColoredText(String.format(ConfigHandler.langManager.get("buySuccessItem"), blocks, deduct)));
+                message.accept(PermHelper.simpleColoredText(String.format(ConfigHandler.langManager.get("buySuccessItem"), blocks, count)));
                 return true;
             }
             case XP -> {
@@ -114,8 +124,8 @@ public class BuySellHandler {
                 return CommandCurrency.INSTANCE.sellClaimBlocks(player, blocks, this.sellAmount, message);
             }
             case ITEM -> {
-                ItemStack[] stacks = this.ingredient.getItems();
-                if (this.ingredient.isEmpty()) {
+                ItemStack[] stacks = this.sellIngredient.getItems();
+                if (this.sellIngredient.isEmpty()) {
                     return false;
                 }
                 int amount = Mth.floor(blocks * this.sellAmount);
@@ -187,24 +197,52 @@ public class BuySellHandler {
     public JsonObject toJson() {
         JsonObject obj = new JsonObject();
         obj.addProperty("buyType", this.buyType.toString());
-        obj.addProperty("sellType", this.sellType.toString());
         obj.addProperty("buyValue", this.buyAmount);
+        JsonArray buyArr = new JsonArray();
+        this.buyIngredients.forEach((b -> {
+            JsonObject buyObj = new JsonObject();
+            buyObj.addProperty("amount", b.amount());
+            buyObj.add("ingredient", Ingredient.CODEC.encodeStart(JsonOps.INSTANCE, b.ingredient())
+                    .getOrThrow());
+            buyArr.add(buyObj);
+        }));
+        obj.add("buyIngredients", buyArr);
+
+        obj.addProperty("sellType", this.sellType.toString());
         obj.addProperty("sellValue", this.sellAmount);
-        obj.add("ingredient", Ingredient.CODEC.encodeStart(JsonOps.INSTANCE, this.ingredient)
+        obj.add("sellIngredient", Ingredient.CODEC.encodeStart(JsonOps.INSTANCE, this.sellIngredient)
                 .getOrThrow());
         return obj;
     }
 
     public void fromJson(JsonObject object) {
         this.buyType = Type.valueOf(ConfigHandler.fromJson(object, "buyType", this.buyType.toString()));
-        this.sellType = Type.valueOf(ConfigHandler.fromJson(object, "sellType", this.sellType.toString()));
         this.buyAmount = object.has("buyValue") ? object.get("buyValue").getAsFloat() : this.buyAmount;
+        this.buyIngredients.clear();
+        JsonArray obj = ConfigHandler.arryFromJson(object, "buyIngredients");
+        obj.forEach(k -> {
+            JsonObject o = k.getAsJsonObject();
+            try {
+                Ingredient ingredient = o.has("ingredient") ? Ingredient.CODEC.parse(JsonOps.INSTANCE, o.get("ingredient"))
+                        .getOrThrow() : Ingredient.EMPTY;
+                if (ingredient != Ingredient.EMPTY) {
+                    float amount = o.get("amount").getAsFloat();
+                    this.buyIngredients.add(new BuyIngredient(amount, ingredient));
+                }
+            } catch (JsonParseException ignored) {
+            }
+        });
+        this.buyIngredients.sort(BuyIngredient::compareTo);
+
+        this.sellType = Type.valueOf(ConfigHandler.fromJson(object, "sellType", this.sellType.toString()));
         this.sellAmount = object.has("sellValue") ? object.get("sellValue").getAsFloat() : this.sellAmount;
         try {
-            this.ingredient = object.has("ingredient") ? Ingredient.CODEC.parse(JsonOps.INSTANCE, object.get("ingredient"))
+            Ingredient legacy = object.has("ingredient") ? Ingredient.CODEC.parse(JsonOps.INSTANCE, object.get("ingredient"))
                     .getOrThrow() : Ingredient.EMPTY;
+            this.sellIngredient = object.has("sellIngredient") ? Ingredient.CODEC.parse(JsonOps.INSTANCE, object.get("sellIngredient"))
+                    .getOrThrow() : legacy;
         } catch (JsonParseException e) {
-            this.ingredient = Ingredient.EMPTY;
+            this.sellIngredient = Ingredient.EMPTY;
         }
     }
 
@@ -212,5 +250,12 @@ public class BuySellHandler {
         MONEY,
         ITEM,
         XP
+    }
+
+    record BuyIngredient(float amount, Ingredient ingredient) implements Comparable<BuyIngredient> {
+        @Override
+        public int compareTo(@NotNull BuySellHandler.BuyIngredient buyIngredient) {
+            return Float.compare(buyIngredient.amount, this.amount);
+        }
     }
 }
