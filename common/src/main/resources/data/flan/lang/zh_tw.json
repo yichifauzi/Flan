@@ -426,8 +426,8 @@
     "例如監守者，或終界珍珠生成的終界蟎"
   ],
   "flan:sculk.desc": [
-    "伏聆感測器的權限。",
-    "伏聆 shriekers 由 PLAYERMOBSPAWN 控制"
+    "伏聆振測器的權限。",
+    "伏聆振測器由 PLAYERMOBSPAWN 控制"
   ],
   "flan:archeology.desc": [
     "允許玩家在此領地中刷方塊"
