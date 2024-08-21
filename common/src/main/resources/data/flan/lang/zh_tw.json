@@ -189,7 +189,7 @@
   "flan:endcrystal_place": "放置終界水晶",
   "flan:target_block": "標靶方塊",
   "flan:projectiles": "拋射物",
-  "flan:trample": "踐踏",
+  "flan:trample": "踩踏",
   "flan:frost_walker": "冰霜行者",
   "flan:portal": "傳送門",
   "flan:raid": "突襲",
@@ -310,7 +310,7 @@
     "與方塊互動（例如按鈕上的箭）"
   ],
   "flan:trample.desc": [
-    "允許啟用方塊踐踏",
+    "允許啟用方塊踩踏",
     "（農田、海龜蛋）"
   ],
   "flan:frost_walker.desc": [
