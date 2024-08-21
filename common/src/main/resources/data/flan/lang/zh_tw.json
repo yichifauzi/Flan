@@ -187,7 +187,7 @@
   "flan:itemframe_rotate": "旋轉物品展示框",
   "flan:lectern_take": "拿取講台上的物品",
   "flan:endcrystal_place": "放置終界水晶",
-  "flan:target_block": "標靶方塊",
+  "flan:target_block": "標靶",
   "flan:projectiles": "拋射物",
   "flan:trample": "踩踏",
   "flan:frost_walker": "冰霜行者",
@@ -303,7 +303,7 @@
     "放置終界水晶的權限"
   ],
   "flan:target_block.desc": [
-    "觸發標靶方塊的權限"
+    "觸發標靶的權限"
   ],
   "flan:projectiles.desc": [
     "允許發射的拋射物",
@@ -314,7 +314,7 @@
     "（農田、海龜蛋）"
   ],
   "flan:frost_walker.desc": [
-    "冰霜行者啟動的權限"
+    "冰霜行者結冰的權限"
   ],
   "flan:portal.desc": [
     "使用地獄傳送門的權限"
