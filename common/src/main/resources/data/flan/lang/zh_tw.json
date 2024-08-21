@@ -176,7 +176,7 @@
   "flan:beacon": "烽火台",
   "flan:door": "門",
   "flan:fence_gate": "柵欄門",
-  "flan:trapdoor": "活板門",
+  "flan:trapdoor": "地板門",
   "flan:button_lever": "按鈕／拉桿",
   "flan:pressure_plate": "壓力板",
   "flan:noteblock": "音階盒",
@@ -270,7 +270,7 @@
     "使用柵欄門的權限"
   ],
   "flan:trapdoor.desc": [
-    "使用活板門的權限"
+    "使用地板門的權限"
   ],
   "flan:button_lever.desc": [
     "觸發拉桿和按鈕的權限"
