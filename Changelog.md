@@ -1,3 +1,9 @@
+Flan 1.10.8
+================
+- Fix claim message spam when claiming is disabled
+- Update zh_tw
+- Fix nullpointer with claim check api
+
 Flan 1.10.7
 ================
 - Fix recursive error with claim messages
