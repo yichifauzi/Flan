@@ -19,7 +19,7 @@ repositories {
 
 dependencies {    
     //Fabric==========    
-    modCompileOnly("io.github.flemmli97:flan:${minecraft_version}-${flan_version}-${mod_loader}-api") {
+    modCompileOnly("io.github.flemmli97:flan:${minecraft_version}-${flan_version}-${mod_loader}:api") {
 		transitive = false //Remove this if you want to have all those optional dependencies
 	}
     modRuntime("io.github.flemmli97:flan:${minecraft_version}-${flan_version}-${mod_loader}") {
@@ -27,7 +27,7 @@ dependencies {
 	}
     
     //Forge==========    
-    compileOnly fg.deobf("io.github.flemmli97:flan:${minecraft_version}-${flan_version}-${mod_loader}-api")
+    compileOnly fg.deobf("io.github.flemmli97:flan:${minecraft_version}-${flan_version}-${mod_loader}:api")
     runtimeOnly fg.deobf("io.github.flemmli97:flan:${minecraft_version}-${flan_version}-${mod_loader}")
 }
 ```
