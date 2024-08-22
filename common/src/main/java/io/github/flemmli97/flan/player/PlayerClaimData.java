@@ -331,11 +331,13 @@ public class PlayerClaimData implements IPlayerData {
             this.setEditingCorner(null);
             this.setEditClaim(null, 0);
             this.claimBlockMessage = false;
-        } else if (!this.claimBlockMessage && this.shouldDisplayClaimToolMessage()) {
+        } else if (!this.claimBlockMessage) {
             this.claimBlockMessage = true;
-            this.player.displayClientMessage(PermHelper.simpleColoredText(String.format(ConfigHandler.langManager.get("claimBlocksFormat"),
-                    this.getClaimBlocks(), this.getAdditionalClaims(), this.usedClaimBlocks(), this.remainingClaimBlocks()), ChatFormatting.GOLD), false);
-            this.addDisplayClaim(currentClaim, EnumDisplayType.MAIN, this.player.blockPosition().getY());
+            if (this.shouldDisplayClaimToolMessage()) {
+                this.player.displayClientMessage(PermHelper.simpleColoredText(String.format(ConfigHandler.langManager.get("claimBlocksFormat"),
+                        this.getClaimBlocks(), this.getAdditionalClaims(), this.usedClaimBlocks(), this.remainingClaimBlocks()), ChatFormatting.GOLD), false);
+                this.addDisplayClaim(currentClaim, EnumDisplayType.MAIN, this.player.blockPosition().getY());
+            }
         }
         this.actionCooldown--;
         if (--this.trappedTick >= 0) {
