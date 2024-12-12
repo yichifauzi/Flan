@@ -30,5 +30,5 @@ public interface IPersistentProjectileVars {
     void setPiercedEntities(IntOpenHashSet set);
 
     @Invoker("setPierceLevel")
-    void setPierceLevel(byte val);
+    void setPiercingLevel(byte val);
 }

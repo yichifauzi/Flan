@@ -166,7 +166,7 @@ public class EntityInteractEvents {
                         ((IPersistentProjectileVars) pers).setInGround(true);
                         pers.shakeTime = 7;
                         pers.setCritArrow(false);
-                        ((IPersistentProjectileVars) pers).setPierceLevel((byte) 0);
+                        ((IPersistentProjectileVars) pers).setPiercingLevel((byte) 0);
                         pers.setSoundEvent(SoundEvents.ARROW_HIT);
                         ((IPersistentProjectileVars) pers).resetPiercingStatus();
                     }
@@ -190,7 +190,7 @@ public class EntityInteractEvents {
                         pierced = new IntOpenHashSet(5);
                     pierced.add(hit.getId());
                     ((IPersistentProjectileVars) pers).setPiercedEntities(pierced);
-                    ((IPersistentProjectileVars) pers).setPierceLevel((byte) (pers.getPierceLevel() + 1));
+                    ((IPersistentProjectileVars) pers).setPiercingLevel((byte) (pers.getPierceLevel() + 1));
                 }
                 return fail;
             }
