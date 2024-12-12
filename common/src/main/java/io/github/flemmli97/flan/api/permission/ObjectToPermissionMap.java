@@ -79,10 +79,10 @@ public class ObjectToPermissionMap {
         for (Item item : BuiltInRegistries.ITEM) {
             ITEM_PERMISSION_BUILDER.entrySet().stream().filter(e -> e.getKey().test(item)).map(Map.Entry::getValue).findFirst().ifPresent(sub -> ITEM_TO_PERMISSION.put(item, sub.get()));
         }
-        process(ConfigHandler.config.itemPermission, BuiltInRegistries.ITEM, ITEM_TO_PERMISSION);
-        process(ConfigHandler.config.blockPermission, BuiltInRegistries.BLOCK, BLOCK_TO_PERMISSION);
-        process(ConfigHandler.config.entityPermission, BuiltInRegistries.ENTITY_TYPE, ENTITY_TO_PERMISSION);
-        process(ConfigHandler.config.leftClickBlockPermission, BuiltInRegistries.BLOCK, LEFT_CLICK_BLOCK_PERMISSION);
+        process(ConfigHandler.CONFIG.itemPermission, BuiltInRegistries.ITEM, ITEM_TO_PERMISSION);
+        process(ConfigHandler.CONFIG.blockPermission, BuiltInRegistries.BLOCK, BLOCK_TO_PERMISSION);
+        process(ConfigHandler.CONFIG.entityPermission, BuiltInRegistries.ENTITY_TYPE, ENTITY_TO_PERMISSION);
+        process(ConfigHandler.CONFIG.leftClickBlockPermission, BuiltInRegistries.BLOCK, LEFT_CLICK_BLOCK_PERMISSION);
     }
 
     private static <T> void process(List<String> list, Registry<T> registry, Map<T, ResourceLocation> map) {

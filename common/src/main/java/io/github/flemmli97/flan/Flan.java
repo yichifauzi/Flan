@@ -24,12 +24,12 @@ public class Flan {
     public static final BlockPredicate NONE_PREDICATE = BlockPredicate.not(BlockPredicate.alwaysTrue());
 
     public static void log(String msg, Object... o) {
-        if (ConfigHandler.config.log)
+        if (ConfigHandler.CONFIG.log)
             Flan.LOGGER.info(msg, o);
     }
 
     public static void debug(String msg, Object... o) {
-        if (ConfigHandler.config.log)
+        if (ConfigHandler.CONFIG.log)
             Flan.LOGGER.debug(msg, o);
     }
 

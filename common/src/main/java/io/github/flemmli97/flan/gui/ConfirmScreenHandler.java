@@ -35,7 +35,7 @@ public class ConfirmScreenHandler extends ServerOnlyScreenHandler<Object> {
 
             @Override
             public Component getDisplayName() {
-                return PermHelper.simpleColoredText(ConfigHandler.langManager.get("screenConfirm"));
+                return PermHelper.simpleColoredText(ConfigHandler.LANG_MANAGER.get("screenConfirm"));
             }
         };
         player.openMenu(fac);
@@ -48,12 +48,12 @@ public class ConfirmScreenHandler extends ServerOnlyScreenHandler<Object> {
             switch (i) {
                 case 3 -> {
                     ItemStack yes = new ItemStack(Items.GREEN_WOOL);
-                    yes.set(DataComponents.CUSTOM_NAME, ServerScreenHelper.coloredGuiText(ConfigHandler.langManager.get("screenYes"), ChatFormatting.GREEN));
+                    yes.set(DataComponents.CUSTOM_NAME, ServerScreenHelper.coloredGuiText(ConfigHandler.LANG_MANAGER.get("screenYes"), ChatFormatting.GREEN));
                     inv.updateStack(i, yes);
                 }
                 case 5 -> {
                     ItemStack no = new ItemStack(Items.RED_WOOL);
-                    no.set(DataComponents.CUSTOM_NAME, ServerScreenHelper.coloredGuiText(ConfigHandler.langManager.get("screenNo"), ChatFormatting.RED));
+                    no.set(DataComponents.CUSTOM_NAME, ServerScreenHelper.coloredGuiText(ConfigHandler.LANG_MANAGER.get("screenNo"), ChatFormatting.RED));
                     inv.updateStack(i, no);
                 }
                 default -> inv.updateStack(i, ServerScreenHelper.emptyFiller());

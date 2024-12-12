@@ -38,7 +38,7 @@ public class PersonalGroupScreenHandler extends ServerOnlyScreenHandler<Object> 
 
             @Override
             public Component getDisplayName() {
-                return PermHelper.simpleColoredText(ConfigHandler.langManager.get("screenPersonalGroups"));
+                return PermHelper.simpleColoredText(ConfigHandler.LANG_MANAGER.get("screenPersonalGroups"));
             }
         };
         player.openMenu(fac);
@@ -51,15 +51,15 @@ public class PersonalGroupScreenHandler extends ServerOnlyScreenHandler<Object> 
         for (int i = 0; i < 54; i++) {
             if (i == 0) {
                 ItemStack close = new ItemStack(Items.TNT);
-                close.set(DataComponents.CUSTOM_NAME, ServerScreenHelper.coloredGuiText(ConfigHandler.langManager.get("screenBack"), ChatFormatting.DARK_RED));
+                close.set(DataComponents.CUSTOM_NAME, ServerScreenHelper.coloredGuiText(ConfigHandler.LANG_MANAGER.get("screenBack"), ChatFormatting.DARK_RED));
                 inv.updateStack(i, close);
             } else if (i == 3) {
                 ItemStack stack = new ItemStack(Items.ANVIL);
-                stack.set(DataComponents.CUSTOM_NAME, ServerScreenHelper.coloredGuiText(ConfigHandler.langManager.get("screenAdd"), ChatFormatting.DARK_GREEN));
+                stack.set(DataComponents.CUSTOM_NAME, ServerScreenHelper.coloredGuiText(ConfigHandler.LANG_MANAGER.get("screenAdd"), ChatFormatting.DARK_GREEN));
                 inv.updateStack(i, stack);
             } else if (i == 4) {
                 ItemStack stack = new ItemStack(Items.REDSTONE_BLOCK);
-                stack.set(DataComponents.CUSTOM_NAME, ServerScreenHelper.coloredGuiText(String.format(ConfigHandler.langManager.get("screenRemoveMode"), this.removeMode ? ConfigHandler.langManager.get("screenTrue") : ConfigHandler.langManager.get("screenFalse")), ChatFormatting.DARK_RED));
+                stack.set(DataComponents.CUSTOM_NAME, ServerScreenHelper.coloredGuiText(String.format(ConfigHandler.LANG_MANAGER.get("screenRemoveMode"), this.removeMode ? ConfigHandler.LANG_MANAGER.get("screenTrue") : ConfigHandler.LANG_MANAGER.get("screenFalse")), ChatFormatting.DARK_RED));
                 inv.updateStack(i, stack);
             } else if (i < 9 || i > 44 || i % 9 == 0 || i % 9 == 8)
                 inv.updateStack(i, ServerScreenHelper.emptyFiller());
@@ -70,7 +70,7 @@ public class PersonalGroupScreenHandler extends ServerOnlyScreenHandler<Object> 
                 int id = (i % 9) + row * 7 - 1;
                 if (id < groups.size()) {
                     ItemStack group = new ItemStack(Items.PAPER);
-                    group.set(DataComponents.CUSTOM_NAME, ServerScreenHelper.coloredGuiText(String.format(ConfigHandler.langManager.get("screenGroupName"), groups.get(id)), ChatFormatting.DARK_BLUE));
+                    group.set(DataComponents.CUSTOM_NAME, ServerScreenHelper.coloredGuiText(String.format(ConfigHandler.LANG_MANAGER.get("screenGroupName"), groups.get(id)), ChatFormatting.DARK_BLUE));
                     inv.updateStack(i, group);
                 }
             }
@@ -107,7 +107,7 @@ public class PersonalGroupScreenHandler extends ServerOnlyScreenHandler<Object> 
         if (index == 4) {
             this.removeMode = !this.removeMode;
             ItemStack stack = new ItemStack(Items.REDSTONE_BLOCK);
-            stack.set(DataComponents.CUSTOM_NAME, ServerScreenHelper.coloredGuiText(String.format(ConfigHandler.langManager.get("screenRemoveMode"), this.removeMode ? ConfigHandler.langManager.get("screenTrue") : ConfigHandler.langManager.get("screenFalse")), ChatFormatting.DARK_RED));
+            stack.set(DataComponents.CUSTOM_NAME, ServerScreenHelper.coloredGuiText(String.format(ConfigHandler.LANG_MANAGER.get("screenRemoveMode"), this.removeMode ? ConfigHandler.LANG_MANAGER.get("screenTrue") : ConfigHandler.LANG_MANAGER.get("screenFalse")), ChatFormatting.DARK_RED));
             slot.set(stack);
             ServerScreenHelper.playSongToPlayer(player, SoundEvents.UI_BUTTON_CLICK, 1, 1f);
             return true;

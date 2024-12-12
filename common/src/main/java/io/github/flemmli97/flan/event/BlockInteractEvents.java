@@ -75,7 +75,7 @@ public class BlockInteractEvents {
             if (claim instanceof Claim real && real.canBreakBlockItem(state))
                 return true;
             ResourceLocation id = BuiltInRegistries.BLOCK.getKey(state.getBlock());
-            if (contains(id, world.getBlockEntity(pos), ConfigHandler.config.breakBlockBlacklist, ConfigHandler.config.breakBETagBlacklist))
+            if (contains(id, world.getBlockEntity(pos), ConfigHandler.CONFIG.breakBlockBlacklist, ConfigHandler.CONFIG.breakBETagBlacklist))
                 return true;
             if (attempt) {
                 ResourceLocation perm = ObjectToPermissionMap.getForLeftClickBlock(state.getBlock());
@@ -116,7 +116,7 @@ public class BlockInteractEvents {
                 return InteractionResult.PASS;
             ResourceLocation id = BuiltInRegistries.BLOCK.getKey(state.getBlock());
             BlockEntity blockEntity = world.getBlockEntity(hitResult.getBlockPos());
-            if (contains(id, blockEntity, ConfigHandler.config.interactBlockBlacklist, ConfigHandler.config.interactBETagBlacklist))
+            if (contains(id, blockEntity, ConfigHandler.CONFIG.interactBlockBlacklist, ConfigHandler.CONFIG.interactBETagBlacklist))
                 return InteractionResult.PASS;
             ResourceLocation perm = ObjectToPermissionMap.getFromBlock(state.getBlock());
             if (perm != null && perm.equals(BuiltinPermission.PROJECTILES))
@@ -152,7 +152,7 @@ public class BlockInteractEvents {
                         return InteractionResult.PASS;
                     return InteractionResult.FAIL;
                 }
-                if (!ConfigHandler.config.lenientBlockEntityCheck || CrossPlatformStuff.INSTANCE.isInventoryTile(blockEntity)) {
+                if (!ConfigHandler.CONFIG.lenientBlockEntityCheck || CrossPlatformStuff.INSTANCE.isInventoryTile(blockEntity)) {
                     if (claim.canInteract(player, BuiltinPermission.OPENCONTAINER, hitResult.getBlockPos(), true))
                         return InteractionResult.PASS;
                     PlayerClaimData.get(player).addDisplayClaim(claim, EnumDisplayType.MAIN, player.blockPosition().getY());

@@ -39,7 +39,7 @@ public class StringResultScreenHandler extends AnvilMenu {
         stack.set(DataComponents.CUSTOM_NAME, PermHelper.simpleColoredText(""));
         this.inputSlots.setItem(0, stack);
         ItemStack out = new ItemStack(Items.BOOK);
-        out.set(DataComponents.CUSTOM_NAME, ServerScreenHelper.coloredGuiText(ConfigHandler.langManager.get("stringScreenReturn")));
+        out.set(DataComponents.CUSTOM_NAME, ServerScreenHelper.coloredGuiText(ConfigHandler.LANG_MANAGER.get("stringScreenReturn")));
         this.resultSlots.setItem(0, out);
         this.cons = cons;
         this.ret = ret;
@@ -82,7 +82,7 @@ public class StringResultScreenHandler extends AnvilMenu {
         else if (i == 2) {
             Component name = slot.getItem().get(DataComponents.CUSTOM_NAME);
             String s = name != null ? name.getString() : "";
-            if (!s.isEmpty() && !s.equals(ConfigHandler.langManager.get("stringScreenReturn"))) {
+            if (!s.isEmpty() && !s.equals(ConfigHandler.LANG_MANAGER.get("stringScreenReturn"))) {
                 this.cons.accept(s);
             }
             player.connection.send(new ClientboundSetExperiencePacket(player.experienceProgress, player.totalExperience, player.experienceLevel));
@@ -100,7 +100,7 @@ public class StringResultScreenHandler extends AnvilMenu {
             Slot slot = this.slots.get(index);
             Component name = slot.getItem().get(DataComponents.CUSTOM_NAME);
             String s = name != null ? name.getString() : "";
-            if (!s.isEmpty() && !s.equals(ConfigHandler.langManager.get("stringScreenReturn")))
+            if (!s.isEmpty() && !s.equals(ConfigHandler.LANG_MANAGER.get("stringScreenReturn")))
                 this.cons.accept(s);
             ((ServerPlayer) player).connection.send(new ClientboundSetExperiencePacket(player.experienceProgress, player.totalExperience, player.experienceLevel));
         }

@@ -56,7 +56,7 @@ public class PermissionScreenHandler extends ServerOnlyScreenHandler<ClaimGroup>
 
             @Override
             public Component getDisplayName() {
-                return PermHelper.simpleColoredText(group == null ? ConfigHandler.langManager.get("screenGlobalPerms") : String.format(ConfigHandler.langManager.get("screenGroupPerms"), group));
+                return PermHelper.simpleColoredText(group == null ? ConfigHandler.LANG_MANAGER.get("screenGlobalPerms") : String.format(ConfigHandler.LANG_MANAGER.get("screenGroupPerms"), group));
             }
         };
         player.openMenu(fac);
@@ -71,11 +71,11 @@ public class PermissionScreenHandler extends ServerOnlyScreenHandler<ClaimGroup>
         for (int i = 0; i < 54; i++) {
             if (i == 0) {
                 ItemStack close = new ItemStack(Items.TNT);
-                close.set(DataComponents.CUSTOM_NAME, ServerScreenHelper.coloredGuiText(ConfigHandler.langManager.get("screenBack"), ChatFormatting.DARK_RED));
+                close.set(DataComponents.CUSTOM_NAME, ServerScreenHelper.coloredGuiText(ConfigHandler.LANG_MANAGER.get("screenBack"), ChatFormatting.DARK_RED));
                 inv.updateStack(i, close);
             } else if (i == 51) {
                 ItemStack close = new ItemStack(Items.ARROW);
-                close.set(DataComponents.CUSTOM_NAME, ServerScreenHelper.coloredGuiText(ConfigHandler.langManager.get("screenNext"), ChatFormatting.WHITE));
+                close.set(DataComponents.CUSTOM_NAME, ServerScreenHelper.coloredGuiText(ConfigHandler.LANG_MANAGER.get("screenNext"), ChatFormatting.WHITE));
                 inv.updateStack(i, close);
             } else if (i < 9 || i > 44 || i % 9 == 0 || i % 9 == 8)
                 inv.updateStack(i, ServerScreenHelper.emptyFiller());
@@ -92,20 +92,20 @@ public class PermissionScreenHandler extends ServerOnlyScreenHandler<ClaimGroup>
         for (int i = 0; i < 54; i++) {
             if (i == 0) {
                 ItemStack close = new ItemStack(Items.TNT);
-                close.set(DataComponents.CUSTOM_NAME, ServerScreenHelper.coloredGuiText(ConfigHandler.langManager.get("screenBack"), ChatFormatting.DARK_RED));
+                close.set(DataComponents.CUSTOM_NAME, ServerScreenHelper.coloredGuiText(ConfigHandler.LANG_MANAGER.get("screenBack"), ChatFormatting.DARK_RED));
                 this.slots.get(i).set(close);
             } else if (i == 47) {
                 ItemStack stack = ServerScreenHelper.emptyFiller();
                 if (this.page >= 1) {
                     stack = new ItemStack(Items.ARROW);
-                    stack.set(DataComponents.CUSTOM_NAME, ServerScreenHelper.coloredGuiText(ConfigHandler.langManager.get("screenPrevious"), ChatFormatting.WHITE));
+                    stack.set(DataComponents.CUSTOM_NAME, ServerScreenHelper.coloredGuiText(ConfigHandler.LANG_MANAGER.get("screenPrevious"), ChatFormatting.WHITE));
                 }
                 this.slots.get(i).set(stack);
             } else if (i == 51) {
                 ItemStack stack = ServerScreenHelper.emptyFiller();
                 if (this.page < this.maxPages) {
                     stack = new ItemStack(Items.ARROW);
-                    stack.set(DataComponents.CUSTOM_NAME, ServerScreenHelper.coloredGuiText(ConfigHandler.langManager.get("screenNext"), ChatFormatting.WHITE));
+                    stack.set(DataComponents.CUSTOM_NAME, ServerScreenHelper.coloredGuiText(ConfigHandler.LANG_MANAGER.get("screenNext"), ChatFormatting.WHITE));
                 }
                 this.slots.get(i).set(stack);
             } else if (i < 9 || i > 44 || i % 9 == 0 || i % 9 == 8)

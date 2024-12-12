@@ -16,7 +16,7 @@ import net.neoforged.neoforge.event.tick.ServerTickEvent;
 public class ServerEvents {
 
     public static void serverStart(ServerAboutToStartEvent event) {
-        ConfigHandler.serverLoad(event.getServer());
+        ConfigHandler.reloadConfigs(event.getServer());
 
         if (ModList.get().isLoaded("bluemap"))
             BluemapIntegration.reg(event.getServer());
