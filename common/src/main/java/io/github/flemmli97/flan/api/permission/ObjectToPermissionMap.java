@@ -29,6 +29,7 @@ import net.minecraft.world.level.block.ButtonBlock;
 import net.minecraft.world.level.block.CampfireBlock;
 import net.minecraft.world.level.block.ChorusFlowerBlock;
 import net.minecraft.world.level.block.DaylightDetectorBlock;
+import net.minecraft.world.level.block.DecoratedPotBlock;
 import net.minecraft.world.level.block.DiodeBlock;
 import net.minecraft.world.level.block.DoorBlock;
 import net.minecraft.world.level.block.EnchantingTableBlock;
@@ -181,7 +182,8 @@ public class ObjectToPermissionMap {
         registerBlockPredicateMap(block -> block instanceof TurtleEggBlock || block instanceof FarmBlock, () -> BuiltinPermission.TRAMPLE);
         registerBlockPredicateMap(block -> block instanceof TargetBlock, () -> BuiltinPermission.TARGETBLOCK);
         registerBlockPredicateMap(block -> block instanceof BellBlock || block instanceof CampfireBlock
-                || block instanceof TntBlock || block instanceof ChorusFlowerBlock, () -> BuiltinPermission.PROJECTILES);
+                || block instanceof TntBlock || block instanceof ChorusFlowerBlock
+                || block instanceof DecoratedPotBlock, () -> BuiltinPermission.PROJECTILES);
         registerBlockPredicateMap(block -> block instanceof EnderChestBlock, () -> BuiltinPermission.ENDERCHEST);
         registerBlockPredicateMap(block -> block instanceof EnchantingTableBlock, () -> BuiltinPermission.ENCHANTMENTTABLE);
         registerBlockPredicateMap(block -> block instanceof BrushableBlock, () -> BuiltinPermission.ARCHAEOLOGY);
