@@ -1,11 +1,11 @@
 {
   "defaultDescription": [
-    "Permission for frostwalker to activate"
+    "Permission to hurt named mobs"
   ],
   "defaultVal": false,
   "global": false,
   "guiItem": {
-    "id": "minecraft:leather_boots"
+    "id": "minecraft:name_tag"
   },
-  "order": 27
+  "order": 36
 }
