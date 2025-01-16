@@ -2,7 +2,7 @@ package io.github.flemmli97.flan.gui;
 
 import com.google.common.collect.Lists;
 import io.github.flemmli97.flan.claim.Claim;
-import io.github.flemmli97.flan.claim.PermHelper;
+import io.github.flemmli97.flan.claim.ClaimUtils;
 import io.github.flemmli97.flan.gui.inv.SeparateInv;
 import net.minecraft.ChatFormatting;
 import net.minecraft.core.Holder;
@@ -53,7 +53,7 @@ public class PotionEditScreenHandler extends ServerOnlyScreenHandler<Claim> {
 
             @Override
             public Component getDisplayName() {
-                return PermHelper.translatedText("flan.screenPotions");
+                return ClaimUtils.translatedText("flan.screenPotions");
             }
         };
         player.openMenu(fac);
@@ -85,7 +85,7 @@ public class PotionEditScreenHandler extends ServerOnlyScreenHandler<Claim> {
                 if (id < potions.size()) {
                     Holder<MobEffect> effect = key.get(id);
                     ItemStack effectStack = new ItemStack(Items.POTION);
-                    MutableComponent txt = Component.translatable(effect.value().getDescriptionId());
+                    MutableComponent txt = ClaimUtils.translatedText(effect.value().getDescriptionId());
                     Collection<MobEffectInstance> inst = Collections.singleton(new MobEffectInstance(effect, 0, potions.get(effect)));
                     effectStack.set(DataComponents.POTION_CONTENTS, new PotionContents(Optional.empty(), Optional.of(PotionContents.getColor(inst)), List.of()));
                     CustomData.update(DataComponents.CUSTOM_DATA, effectStack, tag -> tag.putString("FlanEffect", effect.getRegisteredName()));

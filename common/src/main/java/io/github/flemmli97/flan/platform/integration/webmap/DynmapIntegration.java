@@ -1,8 +1,8 @@
 package io.github.flemmli97.flan.platform.integration.webmap;
 
-import com.mojang.authlib.GameProfile;
 import io.github.flemmli97.flan.claim.Claim;
 import io.github.flemmli97.flan.claim.ClaimBox;
+import io.github.flemmli97.flan.claim.ClaimUtils;
 import net.minecraft.resources.ResourceKey;
 import net.minecraft.world.level.Level;
 import org.dynmap.DynmapCommonAPI;
@@ -93,8 +93,8 @@ public class DynmapIntegration {
         if (name == null || name.isEmpty()) {
             if (claim.isAdminClaim())
                 return "Admin Claim";
-            Optional<GameProfile> prof = claim.getLevel().getServer().getProfileCache().get(claim.getOwner());
-            return prof.map(GameProfile::getName).orElse("UNKOWN") + "'s Claim";
+            Optional<String> prof = ClaimUtils.fetchUsername(claim.getOwner(), claim.getLevel().getServer());
+            return prof.orElse("UNKOWN") + "'s Claim";
         }
         return name;
     }
