@@ -3,7 +3,7 @@ package io.github.flemmli97.flan.event;
 import com.google.common.collect.Sets;
 import io.github.flemmli97.flan.api.data.IPermissionContainer;
 import io.github.flemmli97.flan.api.permission.BuiltinPermission;
-import io.github.flemmli97.flan.api.permission.ObjectToPermissionMap;
+import io.github.flemmli97.flan.api.permission.InteractionOverrideManager;
 import io.github.flemmli97.flan.claim.Claim;
 import io.github.flemmli97.flan.claim.ClaimStorage;
 import io.github.flemmli97.flan.claim.ClaimUtils;
@@ -75,7 +75,7 @@ public class ItemInteractEvents {
             return InteractionResultHolder.pass(stack);
         if (claim instanceof Claim real && real.canUseItem(stack))
             return InteractionResultHolder.pass(stack);
-        ResourceLocation perm = ObjectToPermissionMap.getFromItem(stack);
+        ResourceLocation perm = InteractionOverrideManager.INSTANCE.getItemUse(stack.getItem());
         if (perm != null) {
             boolean success = claim.canInteract(player, perm, pos, true);
             if (success)
@@ -119,7 +119,7 @@ public class ItemInteractEvents {
             return InteractionResult.PASS;
         if (claim instanceof Claim real && real.canUseItem(stack))
             return InteractionResult.PASS;
-        ResourceLocation perm = ObjectToPermissionMap.getFromItem(stack);
+        ResourceLocation perm = InteractionOverrideManager.INSTANCE.getItemUse(stack.getItem());
         if (perm == null) {
             if (stack.has(DataComponents.JUKEBOX_PLAYABLE))
                 perm = BuiltinPermission.JUKEBOX;
