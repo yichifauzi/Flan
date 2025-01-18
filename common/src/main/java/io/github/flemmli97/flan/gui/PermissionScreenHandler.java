@@ -4,7 +4,6 @@ import io.github.flemmli97.flan.api.permission.ClaimPermission;
 import io.github.flemmli97.flan.api.permission.PermissionManager;
 import io.github.flemmli97.flan.claim.Claim;
 import io.github.flemmli97.flan.claim.PermHelper;
-import io.github.flemmli97.flan.config.ConfigHandler;
 import io.github.flemmli97.flan.gui.inv.SeparateInv;
 import net.minecraft.ChatFormatting;
 import net.minecraft.core.component.DataComponents;
@@ -30,6 +29,7 @@ public class PermissionScreenHandler extends ServerOnlyScreenHandler<ClaimGroup>
     private final String group;
     private int page, maxPages;
     private List<ClaimPermission> perms;
+    private final Player player;
 
     private PermissionScreenHandler(int syncId, Inventory playerInventory, Claim claim, String group) {
         super(syncId, playerInventory, 6, new ClaimGroup() {
@@ -45,6 +45,7 @@ public class PermissionScreenHandler extends ServerOnlyScreenHandler<ClaimGroup>
         });
         this.claim = claim;
         this.group = group;
+        this.player = playerInventory.player;
     }
 
     public static void openClaimMenu(Player player, Claim claim, String group) {
@@ -56,7 +57,7 @@ public class PermissionScreenHandler extends ServerOnlyScreenHandler<ClaimGroup>
 
             @Override
             public Component getDisplayName() {
-                return PermHelper.simpleColoredText(group == null ? ConfigHandler.LANG_MANAGER.get("screenGlobalPerms") : String.format(ConfigHandler.LANG_MANAGER.get("screenGroupPerms"), group));
+                return group == null ? PermHelper.translatedText("flan.screenGlobalPerms") : PermHelper.translatedText("flan.screenGroupPerms", group);
             }
         };
         player.openMenu(fac);
@@ -71,11 +72,11 @@ public class PermissionScreenHandler extends ServerOnlyScreenHandler<ClaimGroup>
         for (int i = 0; i < 54; i++) {
             if (i == 0) {
                 ItemStack close = new ItemStack(Items.TNT);
-                close.set(DataComponents.CUSTOM_NAME, ServerScreenHelper.coloredGuiText(ConfigHandler.LANG_MANAGER.get("screenBack"), ChatFormatting.DARK_RED));
+                close.set(DataComponents.CUSTOM_NAME, ServerScreenHelper.coloredGuiText("flan.screenBack", ChatFormatting.DARK_RED));
                 inv.updateStack(i, close);
             } else if (i == 51) {
                 ItemStack close = new ItemStack(Items.ARROW);
-                close.set(DataComponents.CUSTOM_NAME, ServerScreenHelper.coloredGuiText(ConfigHandler.LANG_MANAGER.get("screenNext"), ChatFormatting.WHITE));
+                close.set(DataComponents.CUSTOM_NAME, ServerScreenHelper.coloredGuiText("flan.screenNext", ChatFormatting.WHITE));
                 inv.updateStack(i, close);
             } else if (i < 9 || i > 44 || i % 9 == 0 || i % 9 == 8)
                 inv.updateStack(i, ServerScreenHelper.emptyFiller());
@@ -83,7 +84,7 @@ public class PermissionScreenHandler extends ServerOnlyScreenHandler<ClaimGroup>
                 int row = i / 9 - 1;
                 int id = (i % 9) + row * 7 - 1;
                 if (id < this.perms.size())
-                    inv.updateStack(i, ServerScreenHelper.fromPermission(additionalData.getClaim(), this.perms.get(id), additionalData.getGroup() == null ? null : additionalData.getGroup()));
+                    inv.updateStack(i, ServerScreenHelper.fromPermission(additionalData.getClaim(), (ServerPlayer) player, this.perms.get(id), additionalData.getGroup() == null ? null : additionalData.getGroup()));
             }
         }
     }
@@ -92,20 +93,20 @@ public class PermissionScreenHandler extends ServerOnlyScreenHandler<ClaimGroup>
         for (int i = 0; i < 54; i++) {
             if (i == 0) {
                 ItemStack close = new ItemStack(Items.TNT);
-                close.set(DataComponents.CUSTOM_NAME, ServerScreenHelper.coloredGuiText(ConfigHandler.LANG_MANAGER.get("screenBack"), ChatFormatting.DARK_RED));
+                close.set(DataComponents.CUSTOM_NAME, ServerScreenHelper.coloredGuiText("flan.screenBack", ChatFormatting.DARK_RED));
                 this.slots.get(i).set(close);
             } else if (i == 47) {
                 ItemStack stack = ServerScreenHelper.emptyFiller();
                 if (this.page >= 1) {
                     stack = new ItemStack(Items.ARROW);
-                    stack.set(DataComponents.CUSTOM_NAME, ServerScreenHelper.coloredGuiText(ConfigHandler.LANG_MANAGER.get("screenPrevious"), ChatFormatting.WHITE));
+                    stack.set(DataComponents.CUSTOM_NAME, ServerScreenHelper.coloredGuiText("flan.screenPrevious", ChatFormatting.WHITE));
                 }
                 this.slots.get(i).set(stack);
             } else if (i == 51) {
                 ItemStack stack = ServerScreenHelper.emptyFiller();
                 if (this.page < this.maxPages) {
                     stack = new ItemStack(Items.ARROW);
-                    stack.set(DataComponents.CUSTOM_NAME, ServerScreenHelper.coloredGuiText(ConfigHandler.LANG_MANAGER.get("screenNext"), ChatFormatting.WHITE));
+                    stack.set(DataComponents.CUSTOM_NAME, ServerScreenHelper.coloredGuiText("flan.screenNext", ChatFormatting.WHITE));
                 }
                 this.slots.get(i).set(stack);
             } else if (i < 9 || i > 44 || i % 9 == 0 || i % 9 == 8)
@@ -114,7 +115,7 @@ public class PermissionScreenHandler extends ServerOnlyScreenHandler<ClaimGroup>
                 int row = i / 9 - 1;
                 int id = (i % 9) + row * 7 - 1 + this.page * 28;
                 if (id < this.perms.size()) {
-                    this.slots.get(i).set(ServerScreenHelper.fromPermission(this.claim, this.perms.get(id), this.group));
+                    this.slots.get(i).set(ServerScreenHelper.fromPermission(this.claim, (ServerPlayer) this.player, this.perms.get(id), this.group));
                 } else
                     this.slots.get(i).set(ItemStack.EMPTY);
             }
@@ -165,7 +166,7 @@ public class PermissionScreenHandler extends ServerOnlyScreenHandler<ClaimGroup>
             success = this.claim.editGlobalPerms(player, perm.getId(), mode);
         } else
             success = this.claim.editPerms(player, this.group, perm.getId(), this.claim.groupHasPerm(this.group, perm.getId()) + 1);
-        slot.set(ServerScreenHelper.fromPermission(this.claim, perm, this.group));
+        slot.set(ServerScreenHelper.fromPermission(this.claim, (ServerPlayer) this.player, perm, this.group));
         if (success)
             ServerScreenHelper.playSongToPlayer(player, SoundEvents.NOTE_BLOCK_PLING, 1, 1.2f);
         else

@@ -1,5 +1,6 @@
 package io.github.flemmli97.flan.api.permission;
 
+import com.google.common.collect.ImmutableMap;
 import com.google.gson.JsonElement;
 import com.mojang.serialization.JsonOps;
 import net.minecraft.core.HolderLookup;
@@ -9,7 +10,7 @@ import net.minecraft.data.PackOutput;
 import net.minecraft.resources.ResourceLocation;
 
 import java.nio.file.Path;
-import java.util.HashMap;
+import java.util.LinkedHashMap;
 import java.util.Map;
 import java.util.concurrent.CompletableFuture;
 
@@ -18,7 +19,7 @@ import java.util.concurrent.CompletableFuture;
  */
 public abstract class ClaimPermissionProvider implements DataProvider {
 
-    private final Map<ResourceLocation, ClaimPermission.Builder> data = new HashMap<>();
+    private final Map<ResourceLocation, ClaimPermission.Builder> data = new LinkedHashMap<>();
 
     private final PackOutput output;
     private final CompletableFuture<HolderLookup.Provider> lookup;
@@ -50,6 +51,12 @@ public abstract class ClaimPermissionProvider implements DataProvider {
     }
 
     public void addPermission(ResourceLocation res, ClaimPermission.Builder permission) {
-        this.data.put(res, permission);
+        if (this.data.put(res, permission) != null) {
+            throw new IllegalStateException("Permission already registered for " + res);
+        }
+    }
+
+    public Map<ResourceLocation, ClaimPermission.Builder> getData() {
+        return ImmutableMap.copyOf(this.data);
     }
 }

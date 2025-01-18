@@ -3,7 +3,6 @@ package io.github.flemmli97.flan.gui;
 import com.mojang.authlib.properties.PropertyMap;
 import io.github.flemmli97.flan.claim.Claim;
 import io.github.flemmli97.flan.claim.PermHelper;
-import io.github.flemmli97.flan.config.ConfigHandler;
 import io.github.flemmli97.flan.gui.inv.SeparateInv;
 import net.minecraft.ChatFormatting;
 import net.minecraft.core.component.DataComponents;
@@ -54,7 +53,7 @@ public class GroupPlayerScreenHandler extends ServerOnlyScreenHandler<ClaimGroup
 
             @Override
             public Component getDisplayName() {
-                return PermHelper.simpleColoredText(String.format(ConfigHandler.LANG_MANAGER.get("screenGroupPlayers"), group));
+                return PermHelper.translatedText("flan.screenGroupPlayers", group);
             }
         };
         player.openMenu(fac);
@@ -67,15 +66,15 @@ public class GroupPlayerScreenHandler extends ServerOnlyScreenHandler<ClaimGroup
         for (int i = 0; i < 54; i++) {
             if (i == 0) {
                 ItemStack close = new ItemStack(Items.TNT);
-                close.set(DataComponents.CUSTOM_NAME, ServerScreenHelper.coloredGuiText(ConfigHandler.LANG_MANAGER.get("screenBack"), ChatFormatting.DARK_RED));
+                close.set(DataComponents.CUSTOM_NAME, ServerScreenHelper.coloredGuiText("flan.screenBack", ChatFormatting.DARK_RED));
                 inv.updateStack(i, close);
             } else if (i == 3) {
                 ItemStack stack = new ItemStack(Items.ANVIL);
-                stack.set(DataComponents.CUSTOM_NAME, ServerScreenHelper.coloredGuiText(ConfigHandler.LANG_MANAGER.get("screenAdd"), ChatFormatting.DARK_GREEN));
+                stack.set(DataComponents.CUSTOM_NAME, ServerScreenHelper.coloredGuiText("flan.screenAdd", ChatFormatting.DARK_GREEN));
                 inv.updateStack(i, stack);
             } else if (i == 4) {
                 ItemStack stack = new ItemStack(Items.REDSTONE_BLOCK);
-                stack.set(DataComponents.CUSTOM_NAME, ServerScreenHelper.coloredGuiText(String.format(ConfigHandler.LANG_MANAGER.get("screenRemoveMode"), this.removeMode ? ConfigHandler.LANG_MANAGER.get("screenTrue") : ConfigHandler.LANG_MANAGER.get("screenFalse")), ChatFormatting.DARK_RED));
+                stack.set(DataComponents.CUSTOM_NAME, ServerScreenHelper.coloredGuiText("flan.screenRemoveMode", this.removeMode ? ServerScreenHelper.coloredGuiText("flan.screenTrue") : ServerScreenHelper.coloredGuiText("flan.screenFalse"), ChatFormatting.DARK_RED));
                 inv.updateStack(i, stack);
             } else if (i < 9 || i > 44 || i % 9 == 0 || i % 9 == 8)
                 inv.updateStack(i, ServerScreenHelper.emptyFiller());
@@ -113,7 +112,7 @@ public class GroupPlayerScreenHandler extends ServerOnlyScreenHandler<ClaimGroup
                 if (fl)
                     ServerScreenHelper.playSongToPlayer(player, SoundEvents.ANVIL_USE, 1, 1f);
                 else {
-                    player.displayClientMessage(PermHelper.simpleColoredText(ConfigHandler.LANG_MANAGER.get("playerGroupAddFail"), ChatFormatting.RED), false);
+                    player.displayClientMessage(PermHelper.translatedText("flan.playerGroupAddFail", ChatFormatting.RED), false);
                     ServerScreenHelper.playSongToPlayer(player, SoundEvents.VILLAGER_NO, 1, 1f);
                 }
             }, () -> {
@@ -127,7 +126,7 @@ public class GroupPlayerScreenHandler extends ServerOnlyScreenHandler<ClaimGroup
         if (index == 4) {
             this.removeMode = !this.removeMode;
             ItemStack stack = new ItemStack(Items.REDSTONE_BLOCK);
-            stack.set(DataComponents.CUSTOM_NAME, ServerScreenHelper.coloredGuiText(String.format(ConfigHandler.LANG_MANAGER.get("screenRemoveMode"), this.removeMode ? ConfigHandler.LANG_MANAGER.get("screenTrue") : ConfigHandler.LANG_MANAGER.get("screenFalse")), ChatFormatting.DARK_RED));
+            stack.set(DataComponents.CUSTOM_NAME, ServerScreenHelper.coloredGuiText("flan.screenRemoveMode", this.removeMode ? ServerScreenHelper.coloredGuiText("flan.screenTrue") : ServerScreenHelper.coloredGuiText("flan.screenFalse"), ChatFormatting.DARK_RED));
             slot.set(stack);
             ServerScreenHelper.playSongToPlayer(player, SoundEvents.UI_BUTTON_CLICK, 1, 1f);
             return true;
