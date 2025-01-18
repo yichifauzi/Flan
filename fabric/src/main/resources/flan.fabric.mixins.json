@@ -8,6 +8,8 @@
     "FabricFireMixin",
     "LevelMixin",
     "LightningHitMixin",
+    "PatrolSpawnerMixin",
+    "PhantomSpawnerMixin",
     "PlayerDropMixin",
     "PlayerManagerMixin",
     "ProjectileMixin",

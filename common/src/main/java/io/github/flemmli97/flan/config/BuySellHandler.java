@@ -58,7 +58,8 @@ public class BuySellHandler {
                 float payed = 0;
                 List<Pair<ItemStack, Integer>> matching = new ArrayList<>();
                 // Check if player can pay the amount
-                check: for (BuyIngredient ing : this.buyIngredients) {
+                check:
+                for (BuyIngredient ing : this.buyIngredients) {
                     for (ItemStack stack : player.getInventory().items) {
                         if (ing.ingredient().test(stack)) {
                             if (stack.isDamageableItem()) {

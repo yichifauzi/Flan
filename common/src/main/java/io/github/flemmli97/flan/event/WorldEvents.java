@@ -81,10 +81,14 @@ public class WorldEvents {
     }
 
     public static boolean preventMobSpawn(ServerLevel world, Mob entity) {
-        IPermissionContainer claim = ClaimStorage.get(world).getForPermissionCheck(entity.blockPosition());
-        if (entity.getType().getCategory() == MobCategory.MONSTER)
-            return claim.canInteract(null, BuiltinPermission.MOBSPAWN, entity.blockPosition());
-        return claim.canInteract(null, BuiltinPermission.ANIMALSPAWN, entity.blockPosition());
+        return preventMobSpawn(world, entity.blockPosition(), entity.getType().getCategory());
+    }
+
+    public static boolean preventMobSpawn(ServerLevel world, BlockPos pos, MobCategory category) {
+        IPermissionContainer claim = ClaimStorage.get(world).getForPermissionCheck(pos);
+        if (category == MobCategory.MONSTER)
+            return claim.canInteract(null, BuiltinPermission.MOBSPAWN, pos);
+        return claim.canInteract(null, BuiltinPermission.ANIMALSPAWN, pos);
     }
 
     public static boolean lightningFire(LightningBolt lightning) {
