@@ -51,6 +51,8 @@ public class Config {
     public CompoundTag claimingNBT = new CompoundTag();
     public Item inspectionItem = Items.STICK;
     public CompoundTag inspectionNBT = new CompoundTag();
+    public boolean main3dClaims = true;
+    public int minHeight = 10;
 
     public int claimDisplayTime = 600;
     public boolean particleDisplay = false;
@@ -199,6 +201,9 @@ public class Config {
                 this.inspectionItem = BuiltInRegistries.ITEM.get(ResourceLocation.parse((obj.get("inspectionItem").getAsString())));
             this.inspectionNBT = CompoundTag.CODEC.parse(JsonOps.INSTANCE, GsonHelper.getAsJsonObject(obj, "inspectionNBT", new JsonObject()))
                     .getOrThrow();
+            this.main3dClaims = ConfigHandler.fromJson(obj, "main3dClaims", this.main3dClaims);
+            this.minHeight = ConfigHandler.fromJson(obj, "minHeight3d", this.minHeight);
+
             this.claimDisplayTime = ConfigHandler.fromJson(obj, "claimDisplayTime", this.claimDisplayTime);
             this.particleDisplay = ConfigHandler.fromJson(obj, "particleDisplay", this.particleDisplay);
             this.claimDisplayActionBar = ConfigHandler.fromJson(obj, "claimDisplayActionBar", this.claimDisplayActionBar);
@@ -315,6 +320,9 @@ public class Config {
         obj.addProperty("inspectionItem", BuiltInRegistries.ITEM.getKey(this.inspectionItem).toString());
         obj.add("inspectionNBT", CompoundTag.CODEC.encodeStart(JsonOps.INSTANCE, this.inspectionNBT)
                 .getOrThrow());
+        obj.addProperty("main3dClaims", this.main3dClaims);
+        obj.addProperty("minHeight3d", this.minHeight);
+
         obj.addProperty("claimDisplayTime", this.claimDisplayTime);
         obj.addProperty("particleDisplay", this.particleDisplay);
         obj.addProperty("claimDisplayActionBar", this.claimDisplayActionBar);

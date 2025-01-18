@@ -4,10 +4,12 @@ import com.jamieswhiteshirt.rtree3i.Box;
 import draylar.goml.api.ClaimUtils;
 import io.github.flemmli97.flan.Flan;
 import io.github.flemmli97.flan.claim.Claim;
+import io.github.flemmli97.flan.claim.ClaimBox;
 import io.github.flemmli97.flan.config.ConfigHandler;
 import io.github.flemmli97.flan.platform.integration.claiming.FTBChunks;
 import io.github.flemmli97.flan.platform.integration.claiming.OtherClaimingModCheck;
 import io.github.flemmli97.flan.player.display.DisplayBox;
+import net.minecraft.core.BlockPos;
 
 import java.util.Set;
 
@@ -17,10 +19,10 @@ public class OtherClaimingModCheckImpl implements OtherClaimingModCheck {
     public void findConflicts(Claim claim, Set<DisplayBox> set) {
         FTBChunks.findConflicts(claim, set);
         if (Flan.gomlServer && ConfigHandler.CONFIG.gomlReservedCheck) {
-            int[] dim = claim.getDimensions();
-            ClaimUtils.getClaimsInBox(claim.getLevel(), ClaimUtils.createBox(dim[0] - 1, dim[4], dim[2] - 1, dim[1] + 1, claim.getLevel().getMaxBuildHeight(), dim[3] + 1))
+            ClaimBox dim = claim.getDimensions();
+            ClaimUtils.getClaimsInBox(claim.getLevel(), new BlockPos(dim.minX() - 1, dim.minY(), dim.minZ() - 1), new BlockPos(dim.maxX() + 1, dim.maxY(), dim.maxZ() + 1))
                     .forEach(e -> {
-                        if (!e.getValue().hasPermission(claim.getOwner()))
+                        if (!e.getValue().getOwners().contains(claim.getOwner()) && !e.getValue().getTrusted().contains(claim.getOwner()))
                             set.add(convertBox(e.getValue()));
                     });
         }
